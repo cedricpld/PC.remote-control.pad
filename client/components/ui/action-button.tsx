@@ -2,6 +2,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 import { Button } from "./button";
+import { ActionButtonConfig } from "@/types/stream-deck";
 
 
 
