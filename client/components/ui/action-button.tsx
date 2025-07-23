@@ -43,16 +43,16 @@ export const ActionButton = React.forwardRef<
       {...props}
     >
       {IconComponent && (
-        <IconComponent 
-          className="h-6 w-6" 
+        <IconComponent
+          className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6"
           style={{ color: config.color || "currentColor" }}
         />
       )}
-      <span className="text-xs font-medium text-center leading-tight">
+      <span className="text-[10px] sm:text-xs font-medium text-center leading-tight px-1">
         {config.label}
       </span>
       {config.shortcut && (
-        <span className="absolute top-1 right-1 text-[10px] opacity-60 bg-background/80 px-1 rounded">
+        <span className="absolute top-0.5 sm:top-1 right-0.5 sm:right-1 text-[8px] sm:text-[10px] opacity-60 bg-background/80 px-0.5 sm:px-1 rounded">
           {config.shortcut}
         </span>
       )}
