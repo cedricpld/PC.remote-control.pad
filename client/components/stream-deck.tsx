@@ -128,10 +128,10 @@ export function StreamDeck({ className }: StreamDeckProps) {
   return (
     <div className={cn("flex flex-col h-full", className)}>
       {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b border-border/50">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-6 border-b border-border/50 gap-4 sm:gap-0">
         <div>
-          <h1 className="text-2xl font-bold">Stream Deck</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-xl sm:text-2xl font-bold">Stream Deck</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Remote control your PC with customizable action buttons
           </p>
         </div>
@@ -140,23 +140,25 @@ export function StreamDeck({ className }: StreamDeckProps) {
             variant={isEditing ? "default" : "outline"}
             size="sm"
             onClick={() => setIsEditing(!isEditing)}
-            className="gap-2"
+            className="gap-2 text-xs sm:text-sm"
           >
             {isEditing ? (
               <>
-                <Eye className="h-4 w-4" />
-                View Mode
+                <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">View Mode</span>
+                <span className="sm:hidden">View</span>
               </>
             ) : (
               <>
-                <Edit3 className="h-4 w-4" />
-                Edit Mode
+                <Edit3 className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Edit Mode</span>
+                <span className="sm:hidden">Edit</span>
               </>
             )}
           </Button>
-          <Button variant="outline" size="sm" className="gap-2">
-            <Settings className="h-4 w-4" />
-            Settings
+          <Button variant="outline" size="sm" className="gap-2 text-xs sm:text-sm">
+            <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Settings</span>
           </Button>
         </div>
       </div>
