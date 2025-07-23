@@ -301,7 +301,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-6 border-b border-border/50 gap-4 sm:gap-0">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold">Stream Deck</h1>
+          <h1 className="text-xl sm:text-2xl font-bold">CONTROL PAD</h1>
           <p className="text-xs sm:text-sm text-muted-foreground">
             Remote control your PC with customizable action buttons
           </p>
