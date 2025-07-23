@@ -4,6 +4,7 @@ import { AddButton } from "@/components/ui/add-button";
 import { ActionButtonDialog } from "@/components/ui/action-button-dialog";
 import { PageTabs } from "@/components/ui/page-tabs";
 import { PageDialog } from "@/components/ui/page-dialog";
+import { SettingsDialog } from "@/components/ui/settings-dialog";
 import { Button } from "@/components/ui/button";
 import { Settings, Edit3, Eye, Mic, Camera, Gamepad2, Volume2, Monitor, Headphones } from "lucide-react";
 import * as Icons from "lucide-react";
