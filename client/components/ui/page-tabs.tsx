@@ -31,6 +31,7 @@ export function PageTabs({
   onAddPage,
   onEditPage,
   onDeletePage,
+  isEditing = false,
   className,
 }: PageTabsProps) {
   const getIcon = (iconName?: string) => {
