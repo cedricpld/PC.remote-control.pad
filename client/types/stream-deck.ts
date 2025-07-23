@@ -9,7 +9,7 @@ export interface StreamDeckPage {
 export interface ActionButtonConfig {
   id: string;
   label: string;
-  icon?: any;
+  icon?: string; // Store icon as string name instead of component
   color?: string;
   command?: string;
   shortcut?: string;
