@@ -85,11 +85,17 @@ export function PageTabs({
                     className={cn(
                       "gap-2 min-w-0 max-w-32 h-8",
                       isActive && "bg-secondary",
-                      isEditing && "cursor-move ring-1 ring-primary/30"
+                      isEditing && "cursor-move ring-1 ring-primary/30",
+                      draggedPageId === page.id && "opacity-50"
                     )}
                     style={{
                       borderBottom: isActive ? `2px solid ${page.color || "#3b82f6"}` : "2px solid transparent",
                     }}
+                    draggable={isEditing}
+                    onDragStart={(e) => handlePageDragStart(e, page.id)}
+                    onDragEnd={handlePageDragEnd}
+                    onDragOver={handlePageDragOver}
+                    onDrop={(e) => handlePageDrop(e, page.id)}
                   >
                     <IconComponent 
                       className="h-3 w-3 flex-shrink-0" 
