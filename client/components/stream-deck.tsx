@@ -6,7 +6,17 @@ import { PageTabs } from "@/components/ui/page-tabs";
 import { PageDialog } from "@/components/ui/page-dialog";
 import { SettingsDialog } from "@/components/ui/settings-dialog";
 import { Button } from "@/components/ui/button";
-import { Settings, Edit3, Eye, Mic, Camera, Gamepad2, Volume2, Monitor, Headphones } from "lucide-react";
+import {
+  Settings,
+  Edit3,
+  Eye,
+  Mic,
+  Camera,
+  Gamepad2,
+  Volume2,
+  Monitor,
+  Headphones,
+} from "lucide-react";
 import * as Icons from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StreamDeckPage, ActionButtonConfig } from "@/types/stream-deck";
@@ -22,12 +32,16 @@ export function StreamDeck({ className }: StreamDeckProps) {
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [pageDialogOpen, setPageDialogOpen] = React.useState(false);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
-  const [editingButton, setEditingButton] = React.useState<ActionButtonConfig | undefined>();
-  const [editingPage, setEditingPage] = React.useState<StreamDeckPage | undefined>();
+  const [editingButton, setEditingButton] = React.useState<
+    ActionButtonConfig | undefined
+  >();
+  const [editingPage, setEditingPage] = React.useState<
+    StreamDeckPage | undefined
+  >();
   const [draggedButton, setDraggedButton] = React.useState<string | null>(null);
   const [draggedPage, setDraggedPage] = React.useState<string | null>(null);
 
-  const currentPage = pages.find(page => page.id === currentPageId);
+  const currentPage = pages.find((page) => page.id === currentPageId);
   const buttons = currentPage?.buttons || [];
 
   // Load pages from localStorage on mount
@@ -81,7 +95,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
             command: "enable-gaming-mode",
             shortcut: "F6",
           },
-        ]
+        ],
       },
       {
         id: "media",
@@ -110,7 +124,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
             color: "#8b5cf6",
             command: "start discord.exe",
           },
-        ]
+        ],
       },
     ];
     setPages(defaultPages);
@@ -135,37 +149,45 @@ export function StreamDeck({ className }: StreamDeckProps) {
   };
 
   const handleSaveButton = (config: ActionButtonConfig) => {
-    setPages(prev => prev.map(page => {
-      if (page.id === currentPageId) {
-        if (editingButton) {
-          // Update existing button
-          return {
-            ...page,
-            buttons: page.buttons.map(btn => btn.id === config.id ? config : btn)
-          };
-        } else {
-          // Add new button
-          return {
-            ...page,
-            buttons: [...page.buttons, config]
-          };
+    setPages((prev) =>
+      prev.map((page) => {
+        if (page.id === currentPageId) {
+          if (editingButton) {
+            // Update existing button
+            return {
+              ...page,
+              buttons: page.buttons.map((btn) =>
+                btn.id === config.id ? config : btn,
+              ),
+            };
+          } else {
+            // Add new button
+            return {
+              ...page,
+              buttons: [...page.buttons, config],
+            };
+          }
         }
-      }
-      return page;
-    }));
+        return page;
+      }),
+    );
   };
 
   const handleDeleteButton = () => {
     if (editingButton) {
-      setPages(prev => prev.map(page => {
-        if (page.id === currentPageId) {
-          return {
-            ...page,
-            buttons: page.buttons.filter(btn => btn.id !== editingButton.id)
-          };
-        }
-        return page;
-      }));
+      setPages((prev) =>
+        prev.map((page) => {
+          if (page.id === currentPageId) {
+            return {
+              ...page,
+              buttons: page.buttons.filter(
+                (btn) => btn.id !== editingButton.id,
+              ),
+            };
+          }
+          return page;
+        }),
+      );
     }
   };
 
@@ -182,18 +204,20 @@ export function StreamDeck({ className }: StreamDeckProps) {
   const handleSavePage = (pageData: StreamDeckPage) => {
     if (editingPage) {
       // Update existing page
-      setPages(prev => prev.map(page => page.id === pageData.id ? pageData : page));
+      setPages((prev) =>
+        prev.map((page) => (page.id === pageData.id ? pageData : page)),
+      );
     } else {
       // Add new page
-      setPages(prev => [...prev, pageData]);
+      setPages((prev) => [...prev, pageData]);
       setCurrentPageId(pageData.id);
     }
   };
 
   const handleDeletePage = () => {
     if (editingPage && pages.length > 1) {
-      setPages(prev => {
-        const newPages = prev.filter(page => page.id !== editingPage.id);
+      setPages((prev) => {
+        const newPages = prev.filter((page) => page.id !== editingPage.id);
         if (currentPageId === editingPage.id) {
           setCurrentPageId(newPages[0].id);
         }
@@ -221,30 +245,36 @@ export function StreamDeck({ className }: StreamDeckProps) {
     e.preventDefault();
     if (!draggedButton || draggedButton === targetButtonId) return;
 
-    setPages(prev => prev.map(page => {
-      if (page.id === currentPageId) {
-        const buttons = [...page.buttons];
-        const draggedIndex = buttons.findIndex(btn => btn.id === draggedButton);
-        const targetIndex = buttons.findIndex(btn => btn.id === targetButtonId);
+    setPages((prev) =>
+      prev.map((page) => {
+        if (page.id === currentPageId) {
+          const buttons = [...page.buttons];
+          const draggedIndex = buttons.findIndex(
+            (btn) => btn.id === draggedButton,
+          );
+          const targetIndex = buttons.findIndex(
+            (btn) => btn.id === targetButtonId,
+          );
 
-        if (draggedIndex !== -1 && targetIndex !== -1) {
-          const [draggedItem] = buttons.splice(draggedIndex, 1);
-          buttons.splice(targetIndex, 0, draggedItem);
+          if (draggedIndex !== -1 && targetIndex !== -1) {
+            const [draggedItem] = buttons.splice(draggedIndex, 1);
+            buttons.splice(targetIndex, 0, draggedItem);
+          }
+
+          return { ...page, buttons };
         }
-
-        return { ...page, buttons };
-      }
-      return page;
-    }));
+        return page;
+      }),
+    );
     setDraggedButton(null);
   };
 
   // Page reordering handler
   const handlePageReorder = (sourceId: string, targetId: string) => {
-    setPages(prev => {
+    setPages((prev) => {
       const pages = [...prev];
-      const sourceIndex = pages.findIndex(page => page.id === sourceId);
-      const targetIndex = pages.findIndex(page => page.id === targetId);
+      const sourceIndex = pages.findIndex((page) => page.id === sourceId);
+      const targetIndex = pages.findIndex((page) => page.id === targetId);
 
       if (sourceIndex !== -1 && targetIndex !== -1) {
         const [draggedPage] = pages.splice(sourceIndex, 1);
@@ -265,31 +295,48 @@ export function StreamDeck({ className }: StreamDeckProps) {
   };
 
   // Calculate grid dimensions based on button count and screen size
-  const [screenSize, setScreenSize] = React.useState<'mobile' | 'tablet' | 'desktop'>('desktop');
+  const [screenSize, setScreenSize] = React.useState<
+    "mobile" | "tablet" | "desktop"
+  >("desktop");
 
   React.useEffect(() => {
     const checkScreenSize = () => {
       const width = window.innerWidth;
-      if (width < 640) setScreenSize('mobile');
-      else if (width < 1024) setScreenSize('tablet');
-      else setScreenSize('desktop');
+      if (width < 640) setScreenSize("mobile");
+      else if (width < 1024) setScreenSize("tablet");
+      else setScreenSize("desktop");
     };
 
     checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
   const getGridDimensions = () => {
     const buttonCount = buttons.length + (isEditing ? 1 : 0);
 
     switch (screenSize) {
-      case 'mobile':
-        return { cols: Math.min(3, Math.max(2, Math.ceil(Math.sqrt(buttonCount)))), maxCols: 3 };
-      case 'tablet':
-        return { cols: Math.min(4, Math.max(3, Math.ceil(Math.sqrt(buttonCount * 0.8)))), maxCols: 4 };
+      case "mobile":
+        return {
+          cols: Math.min(3, Math.max(2, Math.ceil(Math.sqrt(buttonCount)))),
+          maxCols: 3,
+        };
+      case "tablet":
+        return {
+          cols: Math.min(
+            4,
+            Math.max(3, Math.ceil(Math.sqrt(buttonCount * 0.8))),
+          ),
+          maxCols: 4,
+        };
       default:
-        return { cols: Math.min(6, Math.max(4, Math.ceil(Math.sqrt(buttonCount * 0.7)))), maxCols: 6 };
+        return {
+          cols: Math.min(
+            6,
+            Math.max(4, Math.ceil(Math.sqrt(buttonCount * 0.7))),
+          ),
+          maxCols: 6,
+        };
     }
   };
 
@@ -348,8 +395,8 @@ export function StreamDeck({ className }: StreamDeckProps) {
         onEditPage={handleEditPage}
         onDeletePage={(pageId) => {
           if (pages.length > 1) {
-            setPages(prev => {
-              const newPages = prev.filter(page => page.id !== pageId);
+            setPages((prev) => {
+              const newPages = prev.filter((page) => page.id !== pageId);
               if (currentPageId === pageId) {
                 setCurrentPageId(newPages[0].id);
               }
@@ -365,18 +412,20 @@ export function StreamDeck({ className }: StreamDeckProps) {
       <div className="flex-1 p-3 sm:p-6 overflow-auto">
         {isEditing && (
           <div className="text-center text-sm text-muted-foreground mb-4 p-2 bg-primary/10 rounded-lg border border-primary/20">
-            🎛️ Edit Mode Active - Drag to rearrange buttons and pages, click buttons to edit them
+            🎛️ Edit Mode Active - Drag to rearrange buttons and pages, click
+            buttons to edit them
           </div>
         )}
         <div
           className="grid gap-2 sm:gap-4 justify-center"
           style={{
             gridTemplateColumns: `repeat(${cols}, 1fr)`,
-            maxWidth: screenSize === 'mobile'
-              ? `${cols * 80}px`  // Smaller buttons on mobile
-              : screenSize === 'tablet'
-              ? `${cols * 96}px`  // Medium buttons on tablet
-              : `${cols * 112}px`, // Full size on desktop
+            maxWidth:
+              screenSize === "mobile"
+                ? `${cols * 80}px` // Smaller buttons on mobile
+                : screenSize === "tablet"
+                  ? `${cols * 96}px` // Medium buttons on tablet
+                  : `${cols * 112}px`, // Full size on desktop
             margin: "0 auto",
           }}
         >
@@ -393,13 +442,16 @@ export function StreamDeck({ className }: StreamDeckProps) {
               onDrop={(e) => handleButtonDrop(e, config.id)}
             />
           ))}
-          
-          {isEditing && (
-            <AddButton onClick={handleAddButton} />
-          )}
-          
+
+          {isEditing && <AddButton onClick={handleAddButton} />}
+
           {/* Fill remaining grid slots for visual consistency */}
-          {Array.from({ length: Math.max(0, totalSlots - buttons.length - (isEditing ? 1 : 0)) }).map((_, i) => (
+          {Array.from({
+            length: Math.max(
+              0,
+              totalSlots - buttons.length - (isEditing ? 1 : 0),
+            ),
+          }).map((_, i) => (
             <div key={`empty-${i}`} className="h-24 w-24" />
           ))}
         </div>
@@ -410,7 +462,9 @@ export function StreamDeck({ className }: StreamDeckProps) {
             <div className="text-muted-foreground mb-4">
               <Settings className="h-12 w-12 mx-auto mb-2 opacity-50" />
               <p className="text-lg font-medium">No actions configured</p>
-              <p className="text-sm">Add your first action button to get started</p>
+              <p className="text-sm">
+                Add your first action button to get started
+              </p>
             </div>
             <Button onClick={handleAddButton} className="mt-4">
               Add First Action
@@ -438,10 +492,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
       />
 
       {/* Settings Dialog */}
-      <SettingsDialog
-        open={settingsOpen}
-        onOpenChange={setSettingsOpen}
-      />
+      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
     </div>
   );
 }

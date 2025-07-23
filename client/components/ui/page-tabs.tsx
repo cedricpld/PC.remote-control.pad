@@ -61,7 +61,13 @@ export function PageTabs({
 
   const handlePageDrop = (e: React.DragEvent, targetPageId: string) => {
     e.preventDefault();
-    if (!isEditing || !draggedPageId || draggedPageId === targetPageId || !onReorderPages) return;
+    if (
+      !isEditing ||
+      !draggedPageId ||
+      draggedPageId === targetPageId ||
+      !onReorderPages
+    )
+      return;
 
     onReorderPages(draggedPageId, targetPageId);
     setDraggedPageId(null);
@@ -75,7 +81,7 @@ export function PageTabs({
             {pages.map((page) => {
               const IconComponent = getIcon(page.icon);
               const isActive = page.id === currentPageId;
-              
+
               return (
                 <div key={page.id} className="relative group">
                   <Button
@@ -86,10 +92,12 @@ export function PageTabs({
                       "gap-2 min-w-0 max-w-32 h-8",
                       isActive && "bg-secondary",
                       isEditing && "cursor-move ring-1 ring-primary/30",
-                      draggedPageId === page.id && "opacity-50"
+                      draggedPageId === page.id && "opacity-50",
                     )}
                     style={{
-                      borderBottom: isActive ? `2px solid ${page.color || "#3b82f6"}` : "2px solid transparent",
+                      borderBottom: isActive
+                        ? `2px solid ${page.color || "#3b82f6"}`
+                        : "2px solid transparent",
                     }}
                     draggable={isEditing}
                     onDragStart={(e) => handlePageDragStart(e, page.id)}
@@ -97,15 +105,13 @@ export function PageTabs({
                     onDragOver={handlePageDragOver}
                     onDrop={(e) => handlePageDrop(e, page.id)}
                   >
-                    <IconComponent 
-                      className="h-3 w-3 flex-shrink-0" 
+                    <IconComponent
+                      className="h-3 w-3 flex-shrink-0"
                       style={{ color: page.color || "currentColor" }}
                     />
-                    <span className="truncate text-xs">
-                      {page.name}
-                    </span>
+                    <span className="truncate text-xs">{page.name}</span>
                   </Button>
-                  
+
                   {/* Edit button that appears on hover - only when not in editing mode */}
                   {!isEditing && (
                     <DropdownMenu>
@@ -143,7 +149,7 @@ export function PageTabs({
           </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
-        
+
         {isEditing && (
           <Button
             variant="outline"

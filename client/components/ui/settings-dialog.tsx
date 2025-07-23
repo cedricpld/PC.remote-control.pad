@@ -15,10 +15,7 @@ interface SettingsDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function SettingsDialog({
-  open,
-  onOpenChange,
-}: SettingsDialogProps) {
+export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const [isRestarting, setIsRestarting] = React.useState(false);
 
   const handleRestartServer = async () => {
@@ -26,8 +23,10 @@ export function SettingsDialog({
     try {
       // In a real application, this would call an API endpoint to restart the server
       // For demo purposes, we'll simulate a restart
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      alert("Server restart simulated (this would restart your PC remote service)");
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      alert(
+        "Server restart simulated (this would restart your PC remote service)",
+      );
     } catch (error) {
       console.error("Failed to restart server:", error);
       alert("Failed to restart server");
@@ -48,13 +47,14 @@ export function SettingsDialog({
             Configure your Stream Deck application settings.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="grid gap-6 py-4">
           <div className="space-y-4">
             <h4 className="text-sm font-medium">Server Management</h4>
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">
-                Restart the remote control server if you're experiencing connection issues.
+                Restart the remote control server if you're experiencing
+                connection issues.
               </p>
               <Button
                 onClick={handleRestartServer}
@@ -62,7 +62,9 @@ export function SettingsDialog({
                 className="w-full gap-2"
                 variant="outline"
               >
-                <RotateCcw className={`h-4 w-4 ${isRestarting ? 'animate-spin' : ''}`} />
+                <RotateCcw
+                  className={`h-4 w-4 ${isRestarting ? "animate-spin" : ""}`}
+                />
                 {isRestarting ? "Restarting..." : "Restart Server"}
               </Button>
             </div>

@@ -82,7 +82,7 @@ export function PageDialog({
 
   const handleSave = () => {
     if (!formData.name) return;
-    
+
     const newPage: StreamDeckPage = {
       id: page?.id || crypto.randomUUID(),
       name: formData.name!,
@@ -90,7 +90,7 @@ export function PageDialog({
       icon: formData.icon,
       buttons: page?.buttons || [],
     };
-    
+
     onSave(newPage);
     onOpenChange(false);
   };
@@ -102,15 +102,13 @@ export function PageDialog({
     }
   };
 
-  const selectedIcon = iconOptions.find(opt => opt.value === formData.icon);
+  const selectedIcon = iconOptions.find((opt) => opt.value === formData.icon);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>
-            {page ? "Edit Page" : "Create New Page"}
-          </DialogTitle>
+          <DialogTitle>{page ? "Edit Page" : "Create New Page"}</DialogTitle>
           <DialogDescription>
             Configure your page with a name, icon, and color theme.
           </DialogDescription>
@@ -123,19 +121,23 @@ export function PageDialog({
             <Input
               id="name"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               className="col-span-3"
               placeholder="Page name"
             />
           </div>
-          
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="icon" className="text-right">
               Icon
             </Label>
             <Select
               value={formData.icon}
-              onValueChange={(value) => setFormData({ ...formData, icon: value })}
+              onValueChange={(value) =>
+                setFormData({ ...formData, icon: value })
+              }
             >
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="Select an icon">
@@ -166,16 +168,21 @@ export function PageDialog({
             </Label>
             <Select
               value={formData.color}
-              onValueChange={(value) => setFormData({ ...formData, color: value })}
+              onValueChange={(value) =>
+                setFormData({ ...formData, color: value })
+              }
             >
               <SelectTrigger className="col-span-3">
                 <SelectValue>
                   <div className="flex items-center gap-2">
-                    <div 
-                      className="h-4 w-4 rounded border" 
+                    <div
+                      className="h-4 w-4 rounded border"
                       style={{ backgroundColor: formData.color }}
                     />
-                    {colorOptions.find(opt => opt.value === formData.color)?.label}
+                    {
+                      colorOptions.find((opt) => opt.value === formData.color)
+                        ?.label
+                    }
                   </div>
                 </SelectValue>
               </SelectTrigger>
@@ -183,8 +190,8 @@ export function PageDialog({
                 {colorOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     <div className="flex items-center gap-2">
-                      <div 
-                        className="h-4 w-4 rounded border" 
+                      <div
+                        className="h-4 w-4 rounded border"
                         style={{ backgroundColor: option.value }}
                       />
                       {option.label}

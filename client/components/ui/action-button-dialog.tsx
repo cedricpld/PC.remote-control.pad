@@ -112,15 +112,13 @@ export function ActionButtonDialog({
     }
   };
 
-  const selectedIcon = iconOptions.find(opt => opt.value === formData.icon);
+  const selectedIcon = iconOptions.find((opt) => opt.value === formData.icon);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>
-            {config ? "Edit Action" : "Add New Action"}
-          </DialogTitle>
+          <DialogTitle>{config ? "Edit Action" : "Add New Action"}</DialogTitle>
           <DialogDescription>
             Configure your action button with a label, icon, and command.
           </DialogDescription>
@@ -133,19 +131,23 @@ export function ActionButtonDialog({
             <Input
               id="label"
               value={formData.label}
-              onChange={(e) => setFormData({ ...formData, label: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, label: e.target.value })
+              }
               className="col-span-3"
               placeholder="Action name"
             />
           </div>
-          
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="icon" className="text-right">
               Icon
             </Label>
             <Select
               value={formData.icon}
-              onValueChange={(value) => setFormData({ ...formData, icon: value })}
+              onValueChange={(value) =>
+                setFormData({ ...formData, icon: value })
+              }
             >
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="Select an icon">
@@ -176,16 +178,21 @@ export function ActionButtonDialog({
             </Label>
             <Select
               value={formData.color}
-              onValueChange={(value) => setFormData({ ...formData, color: value })}
+              onValueChange={(value) =>
+                setFormData({ ...formData, color: value })
+              }
             >
               <SelectTrigger className="col-span-3">
                 <SelectValue>
                   <div className="flex items-center gap-2">
-                    <div 
-                      className="h-4 w-4 rounded border" 
+                    <div
+                      className="h-4 w-4 rounded border"
                       style={{ backgroundColor: formData.color }}
                     />
-                    {colorOptions.find(opt => opt.value === formData.color)?.label}
+                    {
+                      colorOptions.find((opt) => opt.value === formData.color)
+                        ?.label
+                    }
                   </div>
                 </SelectValue>
               </SelectTrigger>
@@ -193,8 +200,8 @@ export function ActionButtonDialog({
                 {colorOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     <div className="flex items-center gap-2">
-                      <div 
-                        className="h-4 w-4 rounded border" 
+                      <div
+                        className="h-4 w-4 rounded border"
                         style={{ backgroundColor: option.value }}
                       />
                       {option.label}
@@ -212,7 +219,9 @@ export function ActionButtonDialog({
             <Input
               id="shortcut"
               value={formData.shortcut}
-              onChange={(e) => setFormData({ ...formData, shortcut: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, shortcut: e.target.value })
+              }
               className="col-span-3"
               placeholder="Ctrl+Shift+A"
             />
@@ -225,7 +234,9 @@ export function ActionButtonDialog({
             <Textarea
               id="command"
               value={formData.command}
-              onChange={(e) => setFormData({ ...formData, command: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, command: e.target.value })
+              }
               className="col-span-3"
               placeholder="Enter command or URL to execute..."
               rows={3}
