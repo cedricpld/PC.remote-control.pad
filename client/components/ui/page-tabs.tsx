@@ -72,35 +72,37 @@ export function PageTabs({
                     </span>
                   </Button>
                   
-                  {/* Edit button that appears on hover */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="absolute -top-1 -right-1 h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity bg-background border border-border rounded-full"
-                      >
-                        <MoreHorizontal className="h-3 w-3" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onEditPage(page)}>
-                        Edit Page
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        className="text-destructive"
-                        disabled={pages.length <= 1}
-                        onClick={() => {
-                          if (pages.length > 1 && onDeletePage) {
-                            onDeletePage(page.id);
-                          }
-                        }}
-                      >
-                        Delete Page
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  {/* Edit button that appears on hover - only when not in editing mode */}
+                  {!isEditing && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="absolute -top-1 -right-1 h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity bg-background border border-border rounded-full"
+                        >
+                          <MoreHorizontal className="h-3 w-3" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => onEditPage(page)}>
+                          Edit Page
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          disabled={pages.length <= 1}
+                          onClick={() => {
+                            if (pages.length > 1 && onDeletePage) {
+                              onDeletePage(page.id);
+                            }
+                          }}
+                        >
+                          Delete Page
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                 </div>
               );
             })}
