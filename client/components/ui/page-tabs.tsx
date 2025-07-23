@@ -32,6 +32,7 @@ export function PageTabs({
   onAddPage,
   onEditPage,
   onDeletePage,
+  onReorderPages,
   isEditing = false,
   className,
 }: PageTabsProps) {
