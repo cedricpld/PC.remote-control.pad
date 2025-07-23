@@ -24,6 +24,8 @@ export function StreamDeck({ className }: StreamDeckProps) {
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [editingButton, setEditingButton] = React.useState<ActionButtonConfig | undefined>();
   const [editingPage, setEditingPage] = React.useState<StreamDeckPage | undefined>();
+  const [draggedButton, setDraggedButton] = React.useState<string | null>(null);
+  const [draggedPage, setDraggedPage] = React.useState<string | null>(null);
 
   const currentPage = pages.find(page => page.id === currentPageId);
   const buttons = currentPage?.buttons || [];
