@@ -371,6 +371,12 @@ export function StreamDeck({ className }: StreamDeckProps) {
         onSave={handleSavePage}
         onDelete={editingPage ? handleDeletePage : undefined}
       />
+
+      {/* Settings Dialog */}
+      <SettingsDialog
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+      />
     </div>
   );
 }
