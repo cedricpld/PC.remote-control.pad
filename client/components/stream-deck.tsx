@@ -277,6 +277,26 @@ export function StreamDeck({ className }: StreamDeckProps) {
         </div>
       </div>
 
+      {/* Page Navigation */}
+      <PageTabs
+        pages={pages}
+        currentPageId={currentPageId}
+        onPageChange={setCurrentPageId}
+        onAddPage={handleAddPage}
+        onEditPage={handleEditPage}
+        onDeletePage={(pageId) => {
+          if (pages.length > 1) {
+            setPages(prev => {
+              const newPages = prev.filter(page => page.id !== pageId);
+              if (currentPageId === pageId) {
+                setCurrentPageId(newPages[0].id);
+              }
+              return newPages;
+            });
+          }
+        }}
+      />
+
       {/* Button Grid */}
       <div className="flex-1 p-3 sm:p-6 overflow-auto">
         <div
