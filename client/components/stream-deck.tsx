@@ -271,6 +271,34 @@ export function StreamDeck({ className }: StreamDeckProps) {
         }}
       />
 
+      {/* Action Buttons */}
+      <div className="flex items-center gap-3 justify-end pt-2 mx-4 ml-auto">
+        <Button
+          variant={isEditing ? "default" : "outline"}
+          size="sm"
+          onClick={() => setIsEditing(!isEditing)}
+          className="gap-2 text-xs sm:text-sm"
+        >
+          {isEditing ? (
+            <>
+              <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">View Mode</span>
+              <span className="sm:hidden">View</span>
+            </>
+          ) : (
+            <>
+              <Edit3 className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Edit Mode</span>
+              <span className="sm:hidden">Edit</span>
+            </>
+          )}
+        </Button>
+        <Button variant="outline" size="sm" className="gap-2 text-xs sm:text-sm">
+          <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
+          <span className="hidden sm:inline">Settings</span>
+        </Button>
+      </div>
+
       {/* Button Grid */}
       <div className="flex-1 p-3 sm:p-6 overflow-auto">
         <div
