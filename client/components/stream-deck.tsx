@@ -239,6 +239,22 @@ export function StreamDeck({ className }: StreamDeckProps) {
     setDraggedButton(null);
   };
 
+  // Page reordering handler
+  const handlePageReorder = (sourceId: string, targetId: string) => {
+    setPages(prev => {
+      const pages = [...prev];
+      const sourceIndex = pages.findIndex(page => page.id === sourceId);
+      const targetIndex = pages.findIndex(page => page.id === targetId);
+
+      if (sourceIndex !== -1 && targetIndex !== -1) {
+        const [draggedPage] = pages.splice(sourceIndex, 1);
+        pages.splice(targetIndex, 0, draggedPage);
+      }
+
+      return pages;
+    });
+  };
+
   const handleExecuteAction = (config: ActionButtonConfig) => {
     if (config.command) {
       // In a real app, this would send the command to your PC via WebSocket, API, etc.
