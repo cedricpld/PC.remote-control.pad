@@ -1,89 +1,124 @@
 import * as React from "react";
-import { ActionButton, ActionButtonConfig } from "@/components/ui/action-button";
+import { ActionButton } from "@/components/ui/action-button";
 import { AddButton } from "@/components/ui/add-button";
 import { ActionButtonDialog } from "@/components/ui/action-button-dialog";
+import { PageTabs } from "@/components/ui/page-tabs";
+import { PageDialog } from "@/components/ui/page-dialog";
 import { Button } from "@/components/ui/button";
 import { Settings, Edit3, Eye, Mic, Camera, Gamepad2, Volume2, Monitor, Headphones } from "lucide-react";
 import * as Icons from "lucide-react";
 import { cn } from "@/lib/utils";
+import { StreamDeckPage, ActionButtonConfig } from "@/types/stream-deck";
 
 interface StreamDeckProps {
   className?: string;
 }
 
 export function StreamDeck({ className }: StreamDeckProps) {
-  const [buttons, setButtons] = React.useState<ActionButtonConfig[]>([]);
+  const [pages, setPages] = React.useState<StreamDeckPage[]>([]);
+  const [currentPageId, setCurrentPageId] = React.useState<string>("");
   const [isEditing, setIsEditing] = React.useState(false);
   const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [pageDialogOpen, setPageDialogOpen] = React.useState(false);
   const [editingButton, setEditingButton] = React.useState<ActionButtonConfig | undefined>();
+  const [editingPage, setEditingPage] = React.useState<StreamDeckPage | undefined>();
 
-  // Load buttons from localStorage on mount
+  const currentPage = pages.find(page => page.id === currentPageId);
+  const buttons = currentPage?.buttons || [];
+
+  // Load pages from localStorage on mount
   React.useEffect(() => {
-    const saved = localStorage.getItem("streamdeck-buttons");
+    const saved = localStorage.getItem("streamdeck-pages");
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        setButtons(parsed);
+        setPages(parsed);
+        if (parsed.length > 0) {
+          setCurrentPageId(parsed[0].id);
+        }
       } catch (error) {
-        console.error("Failed to load buttons:", error);
+        console.error("Failed to load pages:", error);
+        createDefaultPages();
       }
     } else {
-      // Add demo buttons for first-time users
-      const demoButtons: ActionButtonConfig[] = [
-        {
-          id: "demo-1",
-          label: "Mute Mic",
-          icon: Icons.Mic,
-          color: "#ef4444",
-          command: "toggle-microphone",
-          shortcut: "F4",
-        },
-        {
-          id: "demo-2",
-          label: "Start Stream",
-          icon: Icons.Camera,
-          color: "#8b5cf6",
-          command: "obs-start-stream",
-          shortcut: "F5",
-        },
-        {
-          id: "demo-3",
-          label: "Gaming Mode",
-          icon: Icons.Gamepad2,
-          color: "#22c55e",
-          command: "enable-gaming-mode",
-          shortcut: "F6",
-        },
-        {
-          id: "demo-4",
-          label: "Volume Up",
-          icon: Icons.Volume2,
-          color: "#3b82f6",
-          command: "volume-up",
-        },
-        {
-          id: "demo-5",
-          label: "Open OBS",
-          icon: Icons.Monitor,
-          color: "#f97316",
-          command: "start obs64.exe",
-        },
-        {
-          id: "demo-6",
-          label: "Discord",
-          icon: Icons.Headphones,
-          color: "#8b5cf6",
-          command: "start discord.exe",
-        },
-      ];
-      setButtons(demoButtons);
+      createDefaultPages();
     }
   }, []);
 
-  // Save buttons to localStorage when they change
+  const createDefaultPages = () => {
+    const defaultPages: StreamDeckPage[] = [
+      {
+        id: "main",
+        name: "Main",
+        color: "#3b82f6",
+        icon: "Home",
+        buttons: [
+          {
+            id: "demo-1",
+            label: "Mute Mic",
+            icon: Icons.Mic,
+            color: "#ef4444",
+            command: "toggle-microphone",
+            shortcut: "F4",
+          },
+          {
+            id: "demo-2",
+            label: "Start Stream",
+            icon: Icons.Camera,
+            color: "#8b5cf6",
+            command: "obs-start-stream",
+            shortcut: "F5",
+          },
+          {
+            id: "demo-3",
+            label: "Gaming Mode",
+            icon: Icons.Gamepad2,
+            color: "#22c55e",
+            command: "enable-gaming-mode",
+            shortcut: "F6",
+          },
+        ]
+      },
+      {
+        id: "media",
+        name: "Media",
+        color: "#f97316",
+        icon: "Monitor",
+        buttons: [
+          {
+            id: "demo-4",
+            label: "Volume Up",
+            icon: Icons.Volume2,
+            color: "#3b82f6",
+            command: "volume-up",
+          },
+          {
+            id: "demo-5",
+            label: "Open OBS",
+            icon: Icons.Monitor,
+            color: "#f97316",
+            command: "start obs64.exe",
+          },
+          {
+            id: "demo-6",
+            label: "Discord",
+            icon: Icons.Headphones,
+            color: "#8b5cf6",
+            command: "start discord.exe",
+          },
+        ]
+      },
+    ];
+    setPages(defaultPages);
+    setCurrentPageId(defaultPages[0].id);
+  };
+
+  // Save pages to localStorage when they change
   React.useEffect(() => {
-    localStorage.setItem("streamdeck-buttons", JSON.stringify(buttons));
-  }, [buttons]);
+    if (pages.length > 0) {
+      localStorage.setItem("streamdeck-pages", JSON.stringify(pages));
+    }
+  }, [pages]);
 
   const handleAddButton = () => {
     setEditingButton(undefined);
@@ -96,18 +131,70 @@ export function StreamDeck({ className }: StreamDeckProps) {
   };
 
   const handleSaveButton = (config: ActionButtonConfig) => {
-    if (editingButton) {
-      // Update existing button
-      setButtons(prev => prev.map(btn => btn.id === config.id ? config : btn));
-    } else {
-      // Add new button
-      setButtons(prev => [...prev, config]);
-    }
+    setPages(prev => prev.map(page => {
+      if (page.id === currentPageId) {
+        if (editingButton) {
+          // Update existing button
+          return {
+            ...page,
+            buttons: page.buttons.map(btn => btn.id === config.id ? config : btn)
+          };
+        } else {
+          // Add new button
+          return {
+            ...page,
+            buttons: [...page.buttons, config]
+          };
+        }
+      }
+      return page;
+    }));
   };
 
   const handleDeleteButton = () => {
     if (editingButton) {
-      setButtons(prev => prev.filter(btn => btn.id !== editingButton.id));
+      setPages(prev => prev.map(page => {
+        if (page.id === currentPageId) {
+          return {
+            ...page,
+            buttons: page.buttons.filter(btn => btn.id !== editingButton.id)
+          };
+        }
+        return page;
+      }));
+    }
+  };
+
+  const handleAddPage = () => {
+    setEditingPage(undefined);
+    setPageDialogOpen(true);
+  };
+
+  const handleEditPage = (page: StreamDeckPage) => {
+    setEditingPage(page);
+    setPageDialogOpen(true);
+  };
+
+  const handleSavePage = (pageData: StreamDeckPage) => {
+    if (editingPage) {
+      // Update existing page
+      setPages(prev => prev.map(page => page.id === pageData.id ? pageData : page));
+    } else {
+      // Add new page
+      setPages(prev => [...prev, pageData]);
+      setCurrentPageId(pageData.id);
+    }
+  };
+
+  const handleDeletePage = () => {
+    if (editingPage && pages.length > 1) {
+      setPages(prev => {
+        const newPages = prev.filter(page => page.id !== editingPage.id);
+        if (currentPageId === editingPage.id) {
+          setCurrentPageId(newPages[0].id);
+        }
+        return newPages;
+      });
     }
   };
 
