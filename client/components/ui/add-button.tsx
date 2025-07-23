@@ -23,8 +23,8 @@ export const AddButton = React.forwardRef<
       onClick={onClick}
       {...props}
     >
-      <Plus className="h-6 w-6 text-muted-foreground" />
-      <span className="text-xs font-medium text-muted-foreground">
+      <Plus className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-muted-foreground" />
+      <span className="text-[10px] sm:text-xs font-medium text-muted-foreground text-center">
         Add Action
       </span>
     </Button>
