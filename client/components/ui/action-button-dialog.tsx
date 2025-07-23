@@ -69,7 +69,7 @@ export function ActionButtonDialog({
 }: ActionButtonDialogProps) {
   const [formData, setFormData] = React.useState<Partial<ActionButtonConfig>>({
     label: "",
-    icon: undefined,
+    icon: "Monitor",
     color: "#3b82f6",
     command: "",
     shortcut: "",
