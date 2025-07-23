@@ -26,6 +26,56 @@ export function StreamDeck({ className }: StreamDeckProps) {
       } catch (error) {
         console.error("Failed to load buttons:", error);
       }
+    } else {
+      // Add demo buttons for first-time users
+      const demoButtons: ActionButtonConfig[] = [
+        {
+          id: "demo-1",
+          label: "Mute Mic",
+          icon: Icons.Mic,
+          color: "#ef4444",
+          command: "toggle-microphone",
+          shortcut: "F4",
+        },
+        {
+          id: "demo-2",
+          label: "Start Stream",
+          icon: Icons.Camera,
+          color: "#8b5cf6",
+          command: "obs-start-stream",
+          shortcut: "F5",
+        },
+        {
+          id: "demo-3",
+          label: "Gaming Mode",
+          icon: Icons.Gamepad2,
+          color: "#22c55e",
+          command: "enable-gaming-mode",
+          shortcut: "F6",
+        },
+        {
+          id: "demo-4",
+          label: "Volume Up",
+          icon: Icons.Volume2,
+          color: "#3b82f6",
+          command: "volume-up",
+        },
+        {
+          id: "demo-5",
+          label: "Open OBS",
+          icon: Icons.Monitor,
+          color: "#f97316",
+          command: "start obs64.exe",
+        },
+        {
+          id: "demo-6",
+          label: "Discord",
+          icon: Icons.Headphones,
+          color: "#8b5cf6",
+          command: "start discord.exe",
+        },
+      ];
+      setButtons(demoButtons);
     }
   }, []);
 
