@@ -363,6 +363,11 @@ export function StreamDeck({ className }: StreamDeckProps) {
 
       {/* Button Grid */}
       <div className="flex-1 p-3 sm:p-6 overflow-auto">
+        {isEditing && (
+          <div className="text-center text-sm text-muted-foreground mb-4 p-2 bg-primary/10 rounded-lg border border-primary/20">
+            🎛️ Edit Mode Active - Drag to rearrange buttons and pages, click buttons to edit them
+          </div>
+        )}
         <div
           className="grid gap-2 sm:gap-4 justify-center"
           style={{
