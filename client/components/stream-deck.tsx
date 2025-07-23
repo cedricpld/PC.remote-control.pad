@@ -365,6 +365,10 @@ export function StreamDeck({ className }: StreamDeckProps) {
               isEditing={isEditing}
               onEdit={() => handleEditButton(config)}
               onExecute={() => handleExecuteAction(config)}
+              onDragStart={(e) => handleButtonDragStart(e, config.id)}
+              onDragEnd={handleButtonDragEnd}
+              onDragOver={handleButtonDragOver}
+              onDrop={(e) => handleButtonDrop(e, config.id)}
             />
           ))}
           
