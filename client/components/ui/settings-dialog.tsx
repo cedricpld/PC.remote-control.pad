@@ -42,7 +42,7 @@ export function SettingsDialog({ open, onOpenChange, onRestartServer }: Settings
             Paramètres
           </DialogTitle>
           <DialogDescription>
-            Configurez les paramètres de votre application Stream Deck.
+            Configurez les paramètres de votre CONTROL PAD.
           </DialogDescription>
         </DialogHeader>
 
@@ -70,8 +70,9 @@ export function SettingsDialog({ open, onOpenChange, onRestartServer }: Settings
           <div className="space-y-4">
             <h4 className="text-sm font-medium">Informations sur l'application</h4>
             <div className="text-sm text-muted-foreground space-y-1">
-              <p>Stream Deck Client Web v1.0.0</p>
-              <p>Construit avec React + TypeScript</p>
+              <p>CONTROL PAD Client Web v1.1.0</p>
+              <p>by Cédric PALADJIAN</p>
+              <p>Nodes.js + Builder.io</p>
             </div>
           </div>
         </div>

@@ -2,8 +2,15 @@ import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
 import { exec } from "child_process";
-import fs from "fs/promises"; // Importez le module fs/promises pour les opérations asynchrones sur les fichiers
-import path from "path"; // Importez le module path pour gérer les chemins de fichiers
+import fs from "fs/promises";
+import path from "path";
+
+// NOUVELLES IMPORTATIONS et DÉFINITION pour __dirname en ES Modules
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const CONFIG_FILE = path.join(__dirname, 'config.json'); // Chemin vers le fichier de configuration
 
@@ -47,7 +54,7 @@ export function createServer() {
 
   app.get("/api/demo", handleDemo);
 
-  // NOUVELLE ROUTE: Récupérer la configuration
+  // Route: Récupérer la configuration
   app.get("/api/config", async (_req, res) => {
     try {
       const config = await readConfig();
@@ -57,7 +64,7 @@ export function createServer() {
     }
   });
 
-  // NOUVELLE ROUTE: Sauvegarder la configuration
+  // Route: Sauvegarder la configuration
   app.post("/api/config", async (req, res) => {
     try {
       const newConfig = req.body;
