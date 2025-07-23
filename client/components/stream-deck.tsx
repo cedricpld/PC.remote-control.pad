@@ -249,6 +249,37 @@ export function StreamDeck({ className }: StreamDeckProps) {
             Remote control your PC with customizable action buttons
           </p>
         </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant={isEditing ? "default" : "outline"}
+            size="sm"
+            onClick={() => setIsEditing(!isEditing)}
+            className="gap-2 text-xs sm:text-sm"
+          >
+            {isEditing ? (
+              <>
+                <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">View Mode</span>
+                <span className="sm:hidden">View</span>
+              </>
+            ) : (
+              <>
+                <Edit3 className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Edit Mode</span>
+                <span className="sm:hidden">Edit</span>
+              </>
+            )}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 text-xs sm:text-sm"
+            onClick={() => setSettingsOpen(true)}
+          >
+            <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Settings</span>
+          </Button>
+        </div>
       </div>
 
       {/* Page Navigation */}
