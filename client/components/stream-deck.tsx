@@ -56,7 +56,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
           {
             id: "demo-1",
             label: "Mute Mic",
-            icon: Icons.Mic,
+            icon: "Mic",
             color: "#ef4444",
             command: "toggle-microphone",
             shortcut: "F4",
@@ -64,7 +64,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
           {
             id: "demo-2",
             label: "Start Stream",
-            icon: Icons.Camera,
+            icon: "Camera",
             color: "#8b5cf6",
             command: "obs-start-stream",
             shortcut: "F5",
@@ -72,7 +72,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
           {
             id: "demo-3",
             label: "Gaming Mode",
-            icon: Icons.Gamepad2,
+            icon: "Gamepad2",
             color: "#22c55e",
             command: "enable-gaming-mode",
             shortcut: "F6",
