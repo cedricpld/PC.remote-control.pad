@@ -357,6 +357,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
             });
           }
         }}
+        onReorderPages={handlePageReorder}
         isEditing={isEditing}
       />
 
