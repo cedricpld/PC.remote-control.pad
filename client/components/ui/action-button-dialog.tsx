@@ -47,6 +47,23 @@ const iconOptions = [
   { value: "Home", label: "Home", icon: Icons.Home },
   { value: "Folder", label: "Folder", icon: Icons.Folder },
   { value: "Terminal", label: "Terminal", icon: Icons.Terminal },
+  { value: "Laptop", label: "Laptop", icon: Icons.Laptop },
+  { value: "Cloud", label: "Cloud", icon: Icons.Cloud },
+  { value: "Download", label: "Download", icon: Icons.Download },
+  { value: "Upload", label: "Upload", icon: Icons.Upload },
+  { value: "Code", label: "Code", icon: Icons.Code },
+  { value: "GitBranch", label: "Git Branch", icon: Icons.GitBranch },
+  { value: "Zap", label: "Zap", icon: Icons.Zap },
+  { value: "Coffee", label: "Coffee", icon: Icons.Coffee },
+  { value: "Calendar", label: "Calendar", icon: Icons.Calendar },
+  { value: "Mail", label: "Mail", icon: Icons.Mail },
+  { value: "Briefcase", label: "Briefcase", icon: Icons.Briefcase },
+  { value: "Heart", label: "Heart", icon: Icons.Heart },
+  { value: "Star", label: "Star", icon: Icons.Star },
+  { value: "MessageSquare", label: "Message", icon: Icons.MessageSquare },
+  { value: "User", label: "User", icon: Icons.User },
+  { value: "Key", label: "Key", icon: Icons.Key },
+  { value: "Power", label: "Power", icon: Icons.Power },
 ];
 
 const colorOptions = [

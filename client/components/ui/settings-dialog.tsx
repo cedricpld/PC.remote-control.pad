@@ -72,7 +72,7 @@ export function SettingsDialog({ open, onOpenChange, onRestartServer }: Settings
             <div className="text-sm text-muted-foreground space-y-1">
               <p>CONTROL PAD Client Web v1.1.0</p>
               <p>by Cédric PALADJIAN</p>
-              <p>Nodes.js + Builder.io</p>
+              <p>JavaScript/TypeScript  -  Node.js</p>
             </div>
           </div>
         </div>

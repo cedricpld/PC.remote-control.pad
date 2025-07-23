@@ -1,6 +1,8 @@
 import path from "path";
 import { createServer } from "./index";
-import * as express from "express";
+// MODIFICATION ICI: Importez Express de manière robuste
+import express_namespace from "express"; // Importez le module Express
+const express = express_namespace.default || express_namespace; // Prenez l'export par défaut ou le namespace complet
 
 const app = createServer();
 const port = process.env.PORT || 3467;

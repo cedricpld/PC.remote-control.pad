@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guide des Commandes Control Pad</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+            margin-top: 20px;
+        }
+        code {
+            background-color: #e6e6e6;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #c7254e;
+        }
+        ul {
+            list-style-type: disc;
+            margin-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .note {
+            background-color: #e0f7fa;
+            border-left: 5px solid #00bcd4;
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Guide des Commandes pour Control Pad</h1>
+        <p>Ce guide vous aide à configurer les boutons de votre Control Pad pour contrôler votre PC.</p>
+
+        <div class="note">
+            <strong>Important :</strong> Pour que les commandes fonctionnent, l'outil <code>nircmd.exe</code> doit être placé dans le <code>PATH</code> de Windows sur le PC que vous contrôlez. Si vous n'êtes pas sûr, demandez à l'administrateur du PC.
+        </div>
+
+        <h2>Types d'actions :</h2>
+
+        <h3>1. Contrôle du Volume (NirCmd)</h3>
+        <p>Ces commandes utilisent <code>nircmd.exe</code> pour ajuster le volume global du PC.</p>
+        <ul>
+            <li><strong>Augmenter le Volume :</strong>
+                <code>nircmd.exe changesysvolume 2000</code>
+                (Augmente le volume de 2%. Adaptez le nombre pour plus ou moins.)
+            </li>
+            <li><strong>Diminuer le Volume :</strong>
+                <code>nircmd.exe changesysvolume -2000</code>
+                (Diminue le volume de 2%.)
+            </li>
+            <li><strong>Couper/Rétablir le Son (Toggle Mute) :</strong>
+                <code>nircmd.exe mutesysvolume 2</code>
+                (Bascule l'état du son : le coupe s'il est activé, le rétablit s'il est coupé.)
+            </li>
+        </ul>
+
+        <h3>2. Contrôle de la Lecture Média (NirCmd)</h3>
+        <p>Ces commandes simulent les touches multimédia du clavier pour contrôler les lecteurs actifs.</p>
+        <ul>
+            <li><strong>Lire / Pause :</strong>
+                <code>nircmd.exe sendkeypress media_play_pause</code>
+            </li>
+            <li><strong>Piste Suivante :</strong>
+                <code>nircmd.exe sendkeypress media_next_track</code>
+            </li>
+            <li><strong>Piste Précédente :</strong>
+                <code>nircmd.exe sendkeypress media_prev_track</code>
+            </li>
+            <li><strong>Arrêter la Lecture :</strong>
+                <code>nircmd.exe sendkeypress media_stop</code>
+            </li>
+        </ul>
+
+        <h3>3. Lancer des Applications / Fichiers (Commande Windows `start`)</h3>
+        <p>La commande <code>start</code> de Windows permet de lancer des programmes ou d'ouvrir des fichiers.</p>
+        <ul>
+            <li><strong>Lancer Bloc-notes :</strong>
+                <code>notepad.exe</code> ou <code>start notepad.exe</code>
+            </li>
+            <li><strong>Lancer Calculatrice :</strong>
+                <code>calc.exe</code> ou <code>start calc.exe</code>
+            </li>
+            <li><strong>Lancer OBS Studio :</strong>
+                <code>start obs64.exe</code> (Si OBS est dans le PATH)
+                <br>OU, si besoin, avec le chemin complet (adaptez le chemin !):
+                <code>start "" "C:\Program Files\obs-studio\bin\64bit\obs64.exe"</code>
+                (Les "" après start sont pour le titre de la fenêtre, importants si le chemin est entre guillemets.)
+            </li>
+            <li><strong>Lancer Discord :</strong>
+                <code>start discord.exe</code> (Si Discord est dans le PATH ou installé via le Store)
+                <br>OU (adaptez le chemin !):
+                <code>start "" "C:\Users\VotreNomUtilisateur\AppData\Local\Discord\app-1.0.9004\Discord.exe"</code>
+            </li>
+            <li><strong>Ouvrir un Dossier :</strong>
+                <code>start C:\Users\VotreNomUtilisateur\Documents\MesProjets</code>
+            </li>
+            <li><strong>Ouvrir une Page Web :</strong>
+                <code>start chrome.exe https://www.google.com</code> (Lance dans Chrome si installé)
+                <br>OU simplement : <code>start https://www.google.com</code> (Ouvre avec le navigateur par défaut)
+            </li>
+        </ul>
+
+        <h3>4. Raccourcis Clavier (Avancé, nécessite RobotJS sur le serveur)</h3>
+        <p>Ces commandes simulent des frappes de touches (ex: F5, Ctrl+C). Le champ "Shortcut" est prévu pour ça.</p>
+        <div class="note">
+            <strong>Attention :</strong> Pour que les raccourcis fonctionnent, la bibliothèque <code>robotjs</code> doit être installée et configurée sur le serveur Node.js. Cela a des pré-requis système (Python, Visual Studio Build Tools). Si ce n'est pas fait, ils ne fonctionneront pas. Pour le moment, utilisez le champ "Command" si possible.
+        </div>
+        <ul>
+            <li><strong>Simuler F5 :</strong>
+                Entrez <code>F5</code> dans le champ "Shortcut".
+            </li>
+            <li><strong>Simuler Ctrl+C (Copier) :</strong>
+                Entrez <code>Ctrl+C</code> dans le champ "Shortcut".
+            </li>
+            <li><strong>Simuler Win+D (Afficher Bureau) :</strong>
+                Entrez <code>Win+D</code> dans le champ "Shortcut".
+            </li>
+        </ul>
+
+        <p>N'hésitez pas à expérimenter avec d'autres commandes Windows ou les commandes de <code>nircmd.exe</code> pour des actions plus spécifiques. Référez-vous à la documentation officielle de NirCmd pour toutes les options.</p>
+        <p>
+            <a href="https://www.nirsoft.net/utils/nircmd.html" target="_blank">Documentation officielle de NirCmd</a>
+        </p>
+    </div>
+</body>
+</html>
