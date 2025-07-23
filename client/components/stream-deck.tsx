@@ -44,99 +44,129 @@ export function StreamDeck({ className }: StreamDeckProps) {
   const currentPage = pages.find((page) => page.id === currentPageId);
   const buttons = currentPage?.buttons || [];
 
-  // Load pages from localStorage on mount
+  // NOUVEAU: Charger les pages depuis le serveur au montage du composant
   React.useEffect(() => {
-    const saved = localStorage.getItem("streamdeck-pages");
-    if (saved) {
+    const loadConfig = async () => {
       try {
-        const parsed = JSON.parse(saved);
-        setPages(parsed);
-        if (parsed.length > 0) {
-          setCurrentPageId(parsed[0].id);
+        const response = await fetch("/api/config");
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data: StreamDeckPage[] = await response.json();
+        if (data.length > 0) {
+          setPages(data);
+          setCurrentPageId(data[0].id);
+        } else {
+          createDefaultPages(); // Crée des pages par défaut si le serveur renvoie vide
         }
       } catch (error) {
-        console.error("Failed to load pages:", error);
-        createDefaultPages();
+        console.error("Échec du chargement de la configuration depuis le serveur :", error);
+        createDefaultPages(); // Utilise les pages par défaut en cas d'erreur
       }
-    } else {
-      createDefaultPages();
+    };
+    loadConfig();
+  }, []);
+
+  // NOUVEAU: Sauvegarder les pages sur le serveur quand elles changent
+  const saveConfigToServer = React.useCallback(async (currentPages: StreamDeckPage[]) => {
+    try {
+      const response = await fetch("/api/config", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(currentPages),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      console.log("Configuration sauvegardée sur le serveur.");
+    } catch (error) {
+      console.error("Échec de la sauvegarde de la configuration sur le serveur :", error);
     }
   }, []);
 
-  const createDefaultPages = () => {
+  // Définit des pages par défaut si aucune n'est trouvée (utilisé au premier lancement ou si le fichier config.json est vide)
+  const createDefaultPages = React.useCallback(() => {
     const defaultPages: StreamDeckPage[] = [
       {
         id: "main",
-        name: "Main",
+        name: "Principal",
         color: "#3b82f6",
         icon: "Home",
         buttons: [
           {
             id: "demo-1",
-            label: "Mute Mic",
+            label: "Couper Micro",
             icon: "Mic",
             color: "#ef4444",
-            command: "toggle-microphone",
-            shortcut: "F4",
+            command: "nircmd.exe mutesysvolume 2", // Exemple: nécessite NirCmd installé
+            shortcut: "",
           },
           {
             id: "demo-2",
-            label: "Start Stream",
+            label: "Lancer OBS",
             icon: "Camera",
             color: "#8b5cf6",
-            command: "obs-start-stream",
-            shortcut: "F5",
+            command: "start obs64.exe", // Exemple: lance OBS
+            shortcut: "",
           },
           {
             id: "demo-3",
-            label: "Gaming Mode",
+            label: "Mode Jeu (F6)",
             icon: "Gamepad2",
             color: "#22c55e",
-            command: "enable-gaming-mode",
-            shortcut: "F6",
+            command: "",
+            shortcut: "F6", // Exemple: envoie la touche F6 (nécessite robotjs sur le serveur)
           },
         ],
       },
       {
         id: "media",
-        name: "Media",
+        name: "Média",
         color: "#f97316",
         icon: "Monitor",
         buttons: [
           {
             id: "demo-4",
-            label: "Volume Up",
+            label: "Volume +",
             icon: "Volume2",
             color: "#3b82f6",
-            command: "volume-up",
+            command: "nircmd.exe changesysvolume 1000", // Exemple: nécessite NirCmd
+            shortcut: "",
           },
           {
             id: "demo-5",
-            label: "Open OBS",
+            label: "VLC",
             icon: "Monitor",
             color: "#f97316",
-            command: "start obs64.exe",
+            command: "start vlc.exe", // Exemple: lance VLC
+            shortcut: "",
           },
           {
             id: "demo-6",
             label: "Discord",
             icon: "Headphones",
             color: "#8b5cf6",
-            command: "start discord.exe",
+            command: "start discord.exe", // Exemple: lance Discord
+            shortcut: "",
           },
         ],
       },
     ];
     setPages(defaultPages);
     setCurrentPageId(defaultPages[0].id);
-  };
+    saveConfigToServer(defaultPages); // Sauvegarde les pages par défaut sur le serveur
+  }, [saveConfigToServer]);
 
-  // Save pages to localStorage when they change
+
+  // NOUVEAU: Appelle saveConfigToServer chaque fois que 'pages' change
   React.useEffect(() => {
     if (pages.length > 0) {
-      localStorage.setItem("streamdeck-pages", JSON.stringify(pages));
+      saveConfigToServer(pages);
     }
-  }, [pages]);
+  }, [pages, saveConfigToServer]);
+
 
   const handleAddButton = () => {
     setEditingButton(undefined);
@@ -149,11 +179,10 @@ export function StreamDeck({ className }: StreamDeckProps) {
   };
 
   const handleSaveButton = (config: ActionButtonConfig) => {
-    setPages((prev) =>
-      prev.map((page) => {
+    setPages((prev) => {
+      const newPages = prev.map((page) => {
         if (page.id === currentPageId) {
           if (editingButton) {
-            // Update existing button
             return {
               ...page,
               buttons: page.buttons.map((btn) =>
@@ -161,7 +190,6 @@ export function StreamDeck({ className }: StreamDeckProps) {
               ),
             };
           } else {
-            // Add new button
             return {
               ...page,
               buttons: [...page.buttons, config],
@@ -169,14 +197,16 @@ export function StreamDeck({ className }: StreamDeckProps) {
           }
         }
         return page;
-      }),
-    );
+      });
+      return newPages;
+    });
+    setDialogOpen(false); // NOUVEAU: Ferme le dialogue après la sauvegarde
   };
 
   const handleDeleteButton = () => {
     if (editingButton) {
-      setPages((prev) =>
-        prev.map((page) => {
+      setPages((prev) => {
+        const newPages = prev.map((page) => {
           if (page.id === currentPageId) {
             return {
               ...page,
@@ -186,8 +216,10 @@ export function StreamDeck({ className }: StreamDeckProps) {
             };
           }
           return page;
-        }),
-      );
+        });
+        return newPages;
+      });
+      setDialogOpen(false); // NOUVEAU: Ferme le dialogue après la suppression
     }
   };
 
@@ -202,16 +234,18 @@ export function StreamDeck({ className }: StreamDeckProps) {
   };
 
   const handleSavePage = (pageData: StreamDeckPage) => {
-    if (editingPage) {
-      // Update existing page
-      setPages((prev) =>
-        prev.map((page) => (page.id === pageData.id ? pageData : page)),
-      );
-    } else {
-      // Add new page
-      setPages((prev) => [...prev, pageData]);
-      setCurrentPageId(pageData.id);
-    }
+    setPages((prev) => {
+      if (editingPage) {
+        // Met à jour une page existante
+        return prev.map((page) => (page.id === pageData.id ? pageData : page));
+      } else {
+        // Ajoute une nouvelle page
+        const newPages = [...prev, pageData];
+        setCurrentPageId(pageData.id);
+        return newPages;
+      }
+    });
+    setPageDialogOpen(false); // NOUVEAU: Ferme le dialogue après la sauvegarde
   };
 
   const handleDeletePage = () => {
@@ -223,10 +257,11 @@ export function StreamDeck({ className }: StreamDeckProps) {
         }
         return newPages;
       });
+      setPageDialogOpen(false); // NOUVEAU: Ferme le dialogue après la suppression
     }
   };
 
-  // Drag and drop handlers for buttons
+  // Gestionnaires de glisser-déposer pour les boutons
   const handleButtonDragStart = (e: React.DragEvent, buttonId: string) => {
     setDraggedButton(buttonId);
     e.dataTransfer.effectAllowed = "move";
@@ -245,8 +280,8 @@ export function StreamDeck({ className }: StreamDeckProps) {
     e.preventDefault();
     if (!draggedButton || draggedButton === targetButtonId) return;
 
-    setPages((prev) =>
-      prev.map((page) => {
+    setPages((prev) => {
+      const newPages = prev.map((page) => {
         if (page.id === currentPageId) {
           const buttons = [...page.buttons];
           const draggedIndex = buttons.findIndex(
@@ -260,16 +295,16 @@ export function StreamDeck({ className }: StreamDeckProps) {
             const [draggedItem] = buttons.splice(draggedIndex, 1);
             buttons.splice(targetIndex, 0, draggedItem);
           }
-
           return { ...page, buttons };
         }
         return page;
-      }),
-    );
+      });
+      return newPages;
+    });
     setDraggedButton(null);
   };
 
-  // Page reordering handler
+  // Gestionnaire de réorganisation des pages
   const handlePageReorder = (sourceId: string, targetId: string) => {
     setPages((prev) => {
       const pages = [...prev];
@@ -280,21 +315,64 @@ export function StreamDeck({ className }: StreamDeckProps) {
         const [draggedPage] = pages.splice(sourceIndex, 1);
         pages.splice(targetIndex, 0, draggedPage);
       }
-
       return pages;
     });
   };
 
-  const handleExecuteAction = (config: ActionButtonConfig) => {
-    if (config.command) {
-      // In a real app, this would send the command to your PC via WebSocket, API, etc.
-      console.log("Executing command:", config.command);
-      // For demo purposes, show a notification
-      alert(`Executing: ${config.command}`);
+  // Fonction pour exécuter l'action via l'API du serveur
+  const handleExecuteAction = async (config: ActionButtonConfig) => {
+    if (!config.command && !config.shortcut) {
+      alert("Aucune commande ou raccourci configuré pour ce bouton.");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/execute-action", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          command: config.command,
+          shortcut: config.shortcut,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error("Erreur serveur :", data.error);
+        alert(`Erreur lors de l'exécution de l'action : ${data.error}. Stderr: ${data.stderr || 'N/A'}`);
+      } else {
+        console.log("Action exécutée :", data.message);
+        alert(`Exécuté : ${config.label} - ${data.message}`);
+      }
+    } catch (error: any) {
+      console.error("Erreur réseau ou client :", error);
+      alert(`Impossible de se connecter au serveur ou erreur client : ${error.message}`);
     }
   };
 
-  // Calculate grid dimensions based on button count and screen size
+  // Fonction pour redémarrer le serveur via un appel API
+  const handleRestartServer = async () => {
+    try {
+      const response = await fetch("/api/restart-server", {
+        method: "POST",
+      });
+      const data = await response.json();
+      if (response.ok) {
+        alert(data.message);
+      } else {
+        alert(`Échec du redémarrage du serveur : ${data.error}`);
+      }
+    } catch (error: any) {
+      console.error("Erreur lors du redémarrage du serveur :", error);
+      alert(`Impossible de se connecter au serveur pour le redémarrage : ${error.message}`);
+    }
+  };
+
+
+  // Calcule les dimensions de la grille en fonction du nombre de boutons et de la taille de l'écran
   const [screenSize, setScreenSize] = React.useState<
     "mobile" | "tablet" | "desktop"
   >("desktop");
@@ -341,16 +419,16 @@ export function StreamDeck({ className }: StreamDeckProps) {
   };
 
   const { cols, maxCols } = getGridDimensions();
-  const totalSlots = Math.max(cols * 3, buttons.length + (isEditing ? 1 : 0)); // Minimum 3 rows
+  const totalSlots = Math.max(cols * 3, buttons.length + (isEditing ? 1 : 0)); // Minimum 3 rangées
 
   return (
     <div className={cn("flex flex-col h-full", className)}>
-      {/* Header */}
+      {/* En-tête */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-6 border-b border-border/50 gap-4 sm:gap-0">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold">CONTROL PAD</h1>
           <p className="text-xs sm:text-sm text-muted-foreground">
-            Remote control your PC with customizable action buttons
+            Contrôlez votre PC à distance avec des boutons d'action personnalisables
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -363,14 +441,14 @@ export function StreamDeck({ className }: StreamDeckProps) {
             {isEditing ? (
               <>
                 <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">View Mode</span>
-                <span className="sm:hidden">View</span>
+                <span className="hidden sm:inline">Mode Affichage</span>
+                <span className="sm:hidden">Voir</span>
               </>
             ) : (
               <>
                 <Edit3 className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Edit Mode</span>
-                <span className="sm:hidden">Edit</span>
+                <span className="hidden sm:inline">Mode Édition</span>
+                <span className="sm:hidden">Éditer</span>
               </>
             )}
           </Button>
@@ -381,12 +459,12 @@ export function StreamDeck({ className }: StreamDeckProps) {
             onClick={() => setSettingsOpen(true)}
           >
             <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="hidden sm:inline">Settings</span>
+            <span className="hidden sm:inline">Paramètres</span>
           </Button>
         </div>
       </div>
 
-      {/* Page Navigation */}
+      {/* Navigation entre les pages */}
       <PageTabs
         pages={pages}
         currentPageId={currentPageId}
@@ -408,12 +486,11 @@ export function StreamDeck({ className }: StreamDeckProps) {
         isEditing={isEditing}
       />
 
-      {/* Button Grid */}
+      {/* Grille des boutons */}
       <div className="flex-1 p-3 sm:p-6 overflow-auto">
         {isEditing && (
           <div className="text-center text-sm text-muted-foreground mb-4 p-2 bg-primary/10 rounded-lg border border-primary/20">
-            🎛️ Edit Mode Active - Drag to rearrange buttons and pages, click
-            buttons to edit them
+            🎛️ Mode Édition Actif - Faites glisser pour réorganiser les boutons et les pages, cliquez sur les boutons pour les modifier.
           </div>
         )}
         <div
@@ -422,10 +499,10 @@ export function StreamDeck({ className }: StreamDeckProps) {
             gridTemplateColumns: `repeat(${cols}, 1fr)`,
             maxWidth:
               screenSize === "mobile"
-                ? `${cols * 80}px` // Smaller buttons on mobile
+                ? `${cols * 80}px`
                 : screenSize === "tablet"
-                  ? `${cols * 96}px` // Medium buttons on tablet
-                  : `${cols * 112}px`, // Full size on desktop
+                  ? `${cols * 96}px`
+                  : `${cols * 112}px`,
             margin: "0 auto",
           }}
         >
@@ -445,7 +522,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
 
           {isEditing && <AddButton onClick={handleAddButton} />}
 
-          {/* Fill remaining grid slots for visual consistency */}
+          {/* Remplir les emplacements de grille restants pour une cohérence visuelle */}
           {Array.from({
             length: Math.max(
               0,
@@ -456,24 +533,24 @@ export function StreamDeck({ className }: StreamDeckProps) {
           ))}
         </div>
 
-        {/* Empty state */}
+        {/* État vide */}
         {buttons.length === 0 && (
           <div className="text-center py-12">
             <div className="text-muted-foreground mb-4">
               <Settings className="h-12 w-12 mx-auto mb-2 opacity-50" />
-              <p className="text-lg font-medium">No actions configured</p>
+              <p className="text-lg font-medium">Aucune action configurée</p>
               <p className="text-sm">
-                Add your first action button to get started
+                Ajoutez votre premier bouton d'action pour commencer
               </p>
             </div>
             <Button onClick={handleAddButton} className="mt-4">
-              Add First Action
+              Ajouter une première action
             </Button>
           </div>
         )}
       </div>
 
-      {/* Action Dialog */}
+      {/* Dialogue d'action */}
       <ActionButtonDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
@@ -482,7 +559,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
         onDelete={editingButton ? handleDeleteButton : undefined}
       />
 
-      {/* Page Dialog */}
+      {/* Dialogue de page */}
       <PageDialog
         open={pageDialogOpen}
         onOpenChange={setPageDialogOpen}
@@ -491,8 +568,8 @@ export function StreamDeck({ className }: StreamDeckProps) {
         onDelete={editingPage ? handleDeletePage : undefined}
       />
 
-      {/* Settings Dialog */}
-      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
+      {/* Dialogue des paramètres */}
+      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} onRestartServer={handleRestartServer} />
     </div>
   );
 }
