@@ -202,6 +202,43 @@ export function StreamDeck({ className }: StreamDeckProps) {
     }
   };
 
+  // Drag and drop handlers for buttons
+  const handleButtonDragStart = (e: React.DragEvent, buttonId: string) => {
+    setDraggedButton(buttonId);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleButtonDragEnd = () => {
+    setDraggedButton(null);
+  };
+
+  const handleButtonDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleButtonDrop = (e: React.DragEvent, targetButtonId: string) => {
+    e.preventDefault();
+    if (!draggedButton || draggedButton === targetButtonId) return;
+
+    setPages(prev => prev.map(page => {
+      if (page.id === currentPageId) {
+        const buttons = [...page.buttons];
+        const draggedIndex = buttons.findIndex(btn => btn.id === draggedButton);
+        const targetIndex = buttons.findIndex(btn => btn.id === targetButtonId);
+
+        if (draggedIndex !== -1 && targetIndex !== -1) {
+          const [draggedItem] = buttons.splice(draggedIndex, 1);
+          buttons.splice(targetIndex, 0, draggedItem);
+        }
+
+        return { ...page, buttons };
+      }
+      return page;
+    }));
+    setDraggedButton(null);
+  };
+
   const handleExecuteAction = (config: ActionButtonConfig) => {
     if (config.command) {
       // In a real app, this would send the command to your PC via WebSocket, API, etc.
