@@ -248,6 +248,17 @@ export function StreamDeck({ className }: StreamDeckProps) {
         onPageChange={setCurrentPageId}
         onAddPage={handleAddPage}
         onEditPage={handleEditPage}
+        onDeletePage={(pageId) => {
+          if (pages.length > 1) {
+            setPages(prev => {
+              const newPages = prev.filter(page => page.id !== pageId);
+              if (currentPageId === pageId) {
+                setCurrentPageId(newPages[0].id);
+              }
+              return newPages;
+            });
+          }
+        }}
       />
 
       {/* Header */}
