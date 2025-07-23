@@ -17,7 +17,7 @@ export const AddButton = React.forwardRef<
       ref={ref}
       variant="outline"
       className={cn(
-        "h-24 w-24 flex-col gap-2 rounded-xl border-2 border-dashed border-border/30 bg-transparent transition-all duration-200 hover:border-primary/50 hover:bg-primary/5 hover:scale-105 active:scale-95",
+        "h-16 w-16 sm:h-20 sm:w-20 lg:h-24 lg:w-24 flex-col gap-1 sm:gap-2 rounded-lg sm:rounded-xl border-2 border-dashed border-border/30 bg-transparent transition-all duration-200 hover:border-primary/50 hover:bg-primary/5 hover:scale-105 active:scale-95",
         className
       )}
       onClick={onClick}
