@@ -83,9 +83,15 @@ export function PageTabs({
                         Edit Page
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         className="text-destructive"
                         disabled={pages.length <= 1}
+                        onClick={() => {
+                          if (pages.length > 1) {
+                            // This would need to be passed as a prop
+                            console.log('Delete page:', page.id);
+                          }
+                        }}
                       >
                         Delete Page
                       </DropdownMenuItem>
