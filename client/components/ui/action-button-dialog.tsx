@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ActionButtonConfig } from "./action-button";
+import { ActionButtonConfig } from "@/types/stream-deck";
 import * as Icons from "lucide-react";
 import { Trash2 } from "lucide-react";
 
