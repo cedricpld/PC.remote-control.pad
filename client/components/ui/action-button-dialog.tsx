@@ -91,7 +91,7 @@ export function ActionButtonDialog({
 
   const handleSave = () => {
     if (!formData.label) return;
-    
+
     const newConfig: ActionButtonConfig = {
       id: config?.id || crypto.randomUUID(),
       label: formData.label!,
@@ -100,7 +100,7 @@ export function ActionButtonDialog({
       command: formData.command,
       shortcut: formData.shortcut,
     };
-    
+
     onSave(newConfig);
     onOpenChange(false);
   };
