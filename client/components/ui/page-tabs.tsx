@@ -56,7 +56,8 @@ export function PageTabs({
                     onClick={() => onPageChange(page.id)}
                     className={cn(
                       "gap-2 min-w-0 max-w-32 h-8",
-                      isActive && "bg-secondary"
+                      isActive && "bg-secondary",
+                      isEditing && "cursor-move ring-1 ring-primary/30"
                     )}
                     style={{
                       borderBottom: isActive ? `2px solid ${page.color || "#3b82f6"}` : "2px solid transparent",
