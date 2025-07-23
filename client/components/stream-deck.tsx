@@ -241,6 +241,15 @@ export function StreamDeck({ className }: StreamDeckProps) {
 
   return (
     <div className={cn("flex flex-col h-full", className)}>
+      {/* Page Navigation */}
+      <PageTabs
+        pages={pages}
+        currentPageId={currentPageId}
+        onPageChange={setCurrentPageId}
+        onAddPage={handleAddPage}
+        onEditPage={handleEditPage}
+      />
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-6 border-b border-border/50 gap-4 sm:gap-0">
         <div>
