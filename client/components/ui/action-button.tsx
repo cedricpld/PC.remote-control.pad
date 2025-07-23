@@ -3,14 +3,7 @@ import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 import { Button } from "./button";
 
-export interface ActionButtonConfig {
-  id: string;
-  label: string;
-  icon?: LucideIcon;
-  color?: string;
-  command?: string;
-  shortcut?: string;
-}
+
 
 interface ActionButtonProps {
   config: ActionButtonConfig;
