@@ -81,7 +81,7 @@ export function ActionButtonDialog({
     } else {
       setFormData({
         label: "",
-        icon: undefined,
+        icon: "Monitor",
         color: "#3b82f6",
         command: "",
         shortcut: "",
