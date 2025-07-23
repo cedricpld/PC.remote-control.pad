@@ -145,7 +145,7 @@ export function ActionButtonDialog({
             </Label>
             <Select
               value={formData.icon}
-              onValueChange={(value) => setFormData({ ...formData, icon: iconOptions.find(opt => opt.value === value)?.icon })}
+              onValueChange={(value) => setFormData({ ...formData, icon: value })}
             >
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="Select an icon">
