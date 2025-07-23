@@ -21,6 +21,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
   const [isEditing, setIsEditing] = React.useState(false);
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [pageDialogOpen, setPageDialogOpen] = React.useState(false);
+  const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [editingButton, setEditingButton] = React.useState<ActionButtonConfig | undefined>();
   const [editingPage, setEditingPage] = React.useState<StreamDeckPage | undefined>();
 
