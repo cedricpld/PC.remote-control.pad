@@ -13,6 +13,10 @@ interface ActionButtonProps {
   onExecute?: () => void;
   className?: string;
   isEditing?: boolean;
+  onDragStart?: (e: React.DragEvent) => void;
+  onDragEnd?: (e: React.DragEvent) => void;
+  onDragOver?: (e: React.DragEvent) => void;
+  onDrop?: (e: React.DragEvent) => void;
 }
 
 export const ActionButton = React.forwardRef<
