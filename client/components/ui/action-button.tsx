@@ -19,7 +19,7 @@ export const ActionButton = React.forwardRef<
   HTMLButtonElement,
   ActionButtonProps
 >(({ config, onEdit, onExecute, className, isEditing = false, ...props }, ref) => {
-  const IconComponent = config.icon;
+  const IconComponent = config.icon ? (Icons as any)[config.icon] : null;
 
   return (
     <Button
