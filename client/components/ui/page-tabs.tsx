@@ -144,15 +144,17 @@ export function PageTabs({
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
         
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onAddPage}
-          className="gap-2 flex-shrink-0 h-8"
-        >
-          <Plus className="h-3 w-3" />
-          <span className="hidden sm:inline">Add Page</span>
-        </Button>
+        {isEditing && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onAddPage}
+            className="gap-2 flex-shrink-0 h-8"
+          >
+            <Plus className="h-3 w-3" />
+            <span className="hidden sm:inline">Add Page</span>
+          </Button>
+        )}
       </div>
     </div>
   );
