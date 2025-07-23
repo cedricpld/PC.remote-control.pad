@@ -31,7 +31,7 @@ export const ActionButton = React.forwardRef<
       ref={ref}
       variant="outline"
       className={cn(
-        "relative h-24 w-24 flex-col gap-2 rounded-xl border-2 border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-200 hover:border-primary/50 hover:bg-card/80 hover:scale-105 active:scale-95",
+        "relative h-16 w-16 sm:h-20 sm:w-20 lg:h-24 lg:w-24 flex-col gap-1 sm:gap-2 rounded-lg sm:rounded-xl border-2 border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-200 hover:border-primary/50 hover:bg-card/80 hover:scale-105 active:scale-95",
         isEditing && "ring-2 ring-primary/50",
         className
       )}
