@@ -19,6 +19,7 @@ interface PageTabsProps {
   onPageChange: (pageId: string) => void;
   onAddPage: () => void;
   onEditPage: (page: StreamDeckPage) => void;
+  onDeletePage?: (pageId: string) => void;
   className?: string;
 }
 
