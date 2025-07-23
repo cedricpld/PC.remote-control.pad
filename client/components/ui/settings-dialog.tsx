@@ -13,23 +13,21 @@ import { RotateCcw, Server } from "lucide-react";
 interface SettingsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onRestartServer: () => void; // Ajout de la prop pour la fonction de redémarrage
 }
 
-export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
+export function SettingsDialog({ open, onOpenChange, onRestartServer }: SettingsDialogProps) {
   const [isRestarting, setIsRestarting] = React.useState(false);
 
-  const handleRestartServer = async () => {
+  // Fonction appelée lorsque l'utilisateur clique sur le bouton "Restart Server"
+  const handleRestartServerClick = async () => {
     setIsRestarting(true);
     try {
-      // In a real application, this would call an API endpoint to restart the server
-      // For demo purposes, we'll simulate a restart
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      alert(
-        "Server restart simulated (this would restart your PC remote service)",
-      );
+      await onRestartServer(); // Appelle la fonction passée par la prop
+      // L'alerte de succès ou d'échec sera gérée par la fonction dans stream-deck.tsx
     } catch (error) {
-      console.error("Failed to restart server:", error);
-      alert("Failed to restart server");
+      console.error("Échec du déclenchement du redémarrage du serveur :", error);
+      alert("Échec du déclenchement du redémarrage du serveur.");
     } finally {
       setIsRestarting(false);
     }
@@ -41,23 +39,22 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Server className="h-5 w-5" />
-            Settings
+            Paramètres
           </DialogTitle>
           <DialogDescription>
-            Configure your Stream Deck application settings.
+            Configurez les paramètres de votre CONTROL PAD.
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-6 py-4">
           <div className="space-y-4">
-            <h4 className="text-sm font-medium">Server Management</h4>
+            <h4 className="text-sm font-medium">Gestion du Serveur</h4>
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">
-                Restart the remote control server if you're experiencing
-                connection issues.
+                Redémarrez le serveur de contrôle à distance si vous rencontrez des problèmes de connexion.
               </p>
               <Button
-                onClick={handleRestartServer}
+                onClick={handleRestartServerClick} // Utilise la nouvelle fonction
                 disabled={isRestarting}
                 className="w-full gap-2"
                 variant="outline"
@@ -65,23 +62,24 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                 <RotateCcw
                   className={`h-4 w-4 ${isRestarting ? "animate-spin" : ""}`}
                 />
-                {isRestarting ? "Restarting..." : "Restart Server"}
+                {isRestarting ? "Redémarrage..." : "Redémarrer le Serveur"}
               </Button>
             </div>
           </div>
 
           <div className="space-y-4">
-            <h4 className="text-sm font-medium">Application Info</h4>
+            <h4 className="text-sm font-medium">Informations sur l'application</h4>
             <div className="text-sm text-muted-foreground space-y-1">
-              <p>Stream Deck Web Client v1.0.0</p>
-              <p>Built with React + TypeScript</p>
+              <p>CONTROL PAD Client Web v1.1.0</p>
+              <p>by Cédric PALADJIAN</p>
+              <p>Nodes.js + Builder.io</p>
             </div>
           </div>
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Close
+            Fermer
           </Button>
         </DialogFooter>
       </DialogContent>

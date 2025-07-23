@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Textarea } from "@/components/ui/textarea"; // <-- AJOUTEZ CETTE LIGNE
 import {
   Select,
   SelectContent,
@@ -60,6 +60,15 @@ const colorOptions = [
   { value: "#6b7280", label: "Gray" },
 ];
 
+// Fonction d'aide pour générer un ID unique simple
+// C'est une solution de secours si crypto.randomUUID n'est pas disponible
+function generateSimpleUniqueId() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 export function ActionButtonDialog({
   open,
   onOpenChange,
@@ -93,7 +102,7 @@ export function ActionButtonDialog({
     if (!formData.label) return;
 
     const newConfig: ActionButtonConfig = {
-      id: config?.id || crypto.randomUUID(),
+      id: config?.id || generateSimpleUniqueId(),
       label: formData.label!,
       icon: formData.icon,
       color: formData.color,
@@ -256,11 +265,11 @@ export function ActionButtonDialog({
             </Button>
           )}
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
             <Button onClick={handleSave} disabled={!formData.label}>
               {config ? "Update" : "Create"}
+            </Button>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
             </Button>
           </div>
         </DialogFooter>

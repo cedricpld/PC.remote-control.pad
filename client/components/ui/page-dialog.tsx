@@ -55,6 +55,15 @@ const colorOptions = [
   { value: "#6b7280", label: "Gray" },
 ];
 
+// Fonction d'aide pour générer un ID unique simple
+// C'est une solution de secours si crypto.randomUUID n'est pas disponible
+function generateSimpleUniqueId() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 export function PageDialog({
   open,
   onOpenChange,
@@ -84,7 +93,7 @@ export function PageDialog({
     if (!formData.name) return;
 
     const newPage: StreamDeckPage = {
-      id: page?.id || crypto.randomUUID(),
+      id: page?.id || generateSimpleUniqueId(), // Utilise la fonction de secours
       name: formData.name!,
       color: formData.color,
       icon: formData.icon,
@@ -215,11 +224,11 @@ export function PageDialog({
             </Button>
           )}
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
             <Button onClick={handleSave} disabled={!formData.name}>
               {page ? "Update" : "Create"}
+            </Button>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
             </Button>
           </div>
         </DialogFooter>
