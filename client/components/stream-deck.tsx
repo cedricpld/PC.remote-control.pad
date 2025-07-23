@@ -191,12 +191,16 @@ export function StreamDeck({ className }: StreamDeckProps) {
       </div>
 
       {/* Button Grid */}
-      <div className="flex-1 p-6 overflow-auto">
+      <div className="flex-1 p-3 sm:p-6 overflow-auto">
         <div
-          className="grid gap-4 justify-center"
+          className="grid gap-2 sm:gap-4 justify-center"
           style={{
             gridTemplateColumns: `repeat(${cols}, 1fr)`,
-            maxWidth: `${cols * 112}px`, // 96px button + 16px gap
+            maxWidth: screenSize === 'mobile'
+              ? `${cols * 80}px`  // Smaller buttons on mobile
+              : screenSize === 'tablet'
+              ? `${cols * 96}px`  // Medium buttons on tablet
+              : `${cols * 112}px`, // Full size on desktop
             margin: "0 auto",
           }}
         >
