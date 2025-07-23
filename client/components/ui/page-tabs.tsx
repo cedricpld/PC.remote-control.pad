@@ -36,9 +36,35 @@ export function PageTabs({
   isEditing = false,
   className,
 }: PageTabsProps) {
+  const [draggedPageId, setDraggedPageId] = React.useState<string | null>(null);
+
   const getIcon = (iconName?: string) => {
     if (!iconName) return Icons.Home;
     return (Icons as any)[iconName] || Icons.Home;
+  };
+
+  const handlePageDragStart = (e: React.DragEvent, pageId: string) => {
+    if (!isEditing) return;
+    setDraggedPageId(pageId);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handlePageDragEnd = () => {
+    setDraggedPageId(null);
+  };
+
+  const handlePageDragOver = (e: React.DragEvent) => {
+    if (!isEditing) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handlePageDrop = (e: React.DragEvent, targetPageId: string) => {
+    e.preventDefault();
+    if (!isEditing || !draggedPageId || draggedPageId === targetPageId || !onReorderPages) return;
+
+    onReorderPages(draggedPageId, targetPageId);
+    setDraggedPageId(null);
   };
 
   return (
