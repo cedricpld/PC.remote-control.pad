@@ -120,10 +120,37 @@ export function StreamDeck({ className }: StreamDeckProps) {
     }
   };
 
-  // Calculate grid dimensions based on button count
-  const totalSlots = Math.max(15, buttons.length + 1); // Minimum 15 slots (3x5)
-  const cols = Math.min(6, Math.ceil(Math.sqrt(totalSlots * 1.2))); // Prefer wider layouts
-  const rows = Math.ceil(totalSlots / cols);
+  // Calculate grid dimensions based on button count and screen size
+  const [screenSize, setScreenSize] = React.useState<'mobile' | 'tablet' | 'desktop'>('desktop');
+
+  React.useEffect(() => {
+    const checkScreenSize = () => {
+      const width = window.innerWidth;
+      if (width < 640) setScreenSize('mobile');
+      else if (width < 1024) setScreenSize('tablet');
+      else setScreenSize('desktop');
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
+  const getGridDimensions = () => {
+    const buttonCount = buttons.length + (isEditing ? 1 : 0);
+
+    switch (screenSize) {
+      case 'mobile':
+        return { cols: Math.min(3, Math.max(2, Math.ceil(Math.sqrt(buttonCount)))), maxCols: 3 };
+      case 'tablet':
+        return { cols: Math.min(4, Math.max(3, Math.ceil(Math.sqrt(buttonCount * 0.8)))), maxCols: 4 };
+      default:
+        return { cols: Math.min(6, Math.max(4, Math.ceil(Math.sqrt(buttonCount * 0.7)))), maxCols: 6 };
+    }
+  };
+
+  const { cols, maxCols } = getGridDimensions();
+  const totalSlots = Math.max(cols * 3, buttons.length + (isEditing ? 1 : 0)); // Minimum 3 rows
 
   return (
     <div className={cn("flex flex-col h-full", className)}>
