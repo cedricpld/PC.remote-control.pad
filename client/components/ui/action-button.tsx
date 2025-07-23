@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 import { Button } from "./button";
 import { ActionButtonConfig } from "@/types/stream-deck";
+import * as Icons from "lucide-react";
 
 
 
