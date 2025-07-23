@@ -302,6 +302,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
             });
           }
         }}
+        isEditing={isEditing}
       />
 
       {/* Button Grid */}
