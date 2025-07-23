@@ -343,6 +343,15 @@ export function StreamDeck({ className }: StreamDeckProps) {
         onSave={handleSaveButton}
         onDelete={editingButton ? handleDeleteButton : undefined}
       />
+
+      {/* Page Dialog */}
+      <PageDialog
+        open={pageDialogOpen}
+        onOpenChange={setPageDialogOpen}
+        page={editingPage}
+        onSave={handleSavePage}
+        onDelete={editingPage ? handleDeletePage : undefined}
+      />
     </div>
   );
 }
