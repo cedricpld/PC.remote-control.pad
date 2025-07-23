@@ -41,10 +41,23 @@ export function StreamDeck({ className }: StreamDeckProps) {
   const [draggedButton, setDraggedButton] = React.useState<string | null>(null);
   const [draggedPage, setDraggedPage] = React.useState<string | null>(null);
 
+  // Initialisation de l'objet Audio une seule fois
+  const clickSound = React.useMemo(() => {
+    try {
+      const audio = new Audio('/button.wav'); // Assurez-vous que 'button.wav' existe dans votre dossier public/
+      audio.volume = 0.2; // Règle le volume à un niveau bas (0.0 à 1.0)
+      return audio;
+    } catch (e) {
+      console.warn("Impossible de créer l'objet Audio :", e);
+      return null;
+    }
+  }, []);
+
+
   const currentPage = pages.find((page) => page.id === currentPageId);
   const buttons = currentPage?.buttons || [];
 
-  // NOUVEAU: Charger les pages depuis le serveur au montage du composant
+  // Charge les pages depuis le serveur au montage du composant
   React.useEffect(() => {
     const loadConfig = async () => {
       try {
@@ -67,7 +80,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
     loadConfig();
   }, []);
 
-  // NOUVEAU: Sauvegarder les pages sur le serveur quand elles changent
+  // Sauvegarde les pages sur le serveur quand elles changent
   const saveConfigToServer = React.useCallback(async (currentPages: StreamDeckPage[]) => {
     try {
       const response = await fetch("/api/config", {
@@ -81,7 +94,9 @@ export function StreamDeck({ className }: StreamDeckProps) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       console.log("Configuration sauvegardée sur le serveur.");
-    } catch (error) {
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    catch (error: any) { // Utilisez 'any' ou définissez un type plus spécifique pour l'erreur
       console.error("Échec de la sauvegarde de la configuration sur le serveur :", error);
     }
   }, []);
@@ -160,7 +175,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
   }, [saveConfigToServer]);
 
 
-  // NOUVEAU: Appelle saveConfigToServer chaque fois que 'pages' change
+  // Appelle saveConfigToServer chaque fois que 'pages' change
   React.useEffect(() => {
     if (pages.length > 0) {
       saveConfigToServer(pages);
@@ -200,7 +215,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
       });
       return newPages;
     });
-    setDialogOpen(false); // NOUVEAU: Ferme le dialogue après la sauvegarde
+    setDialogOpen(false);
   };
 
   const handleDeleteButton = () => {
@@ -219,7 +234,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
         });
         return newPages;
       });
-      setDialogOpen(false); // NOUVEAU: Ferme le dialogue après la suppression
+      setDialogOpen(false);
     }
   };
 
@@ -245,7 +260,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
         return newPages;
       }
     });
-    setPageDialogOpen(false); // NOUVEAU: Ferme le dialogue après la sauvegarde
+    setPageDialogOpen(false);
   };
 
   const handleDeletePage = () => {
@@ -257,7 +272,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
         }
         return newPages;
       });
-      setPageDialogOpen(false); // NOUVEAU: Ferme le dialogue après la suppression
+      setPageDialogOpen(false);
     }
   };
 
@@ -288,6 +303,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
             (btn) => btn.id === draggedButton,
           );
           const targetIndex = buttons.findIndex(
+            // eslint-disable-next-line @typescript-eslint/no-shadow
             (btn) => btn.id === targetButtonId,
           );
 
@@ -322,7 +338,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
   // Fonction pour exécuter l'action via l'API du serveur
   const handleExecuteAction = async (config: ActionButtonConfig) => {
     if (!config.command && !config.shortcut) {
-      alert("Aucune commande ou raccourci configuré pour ce bouton.");
+      if (clickSound) clickSound.play(); // Joue le son même s'il n'y a pas de commande
       return;
     }
 
@@ -342,14 +358,16 @@ export function StreamDeck({ className }: StreamDeckProps) {
 
       if (!response.ok) {
         console.error("Erreur serveur :", data.error);
-        alert(`Erreur lors de l'exécution de l'action : ${data.error}. Stderr: ${data.stderr || 'N/A'}`);
+        if (clickSound) clickSound.play(); // Joue le son pour l'erreur
       } else {
         console.log("Action exécutée :", data.message);
-        alert(`Exécuté : ${config.label} - ${data.message}`);
+        if (clickSound) clickSound.play(); // Joue le son pour le succès
       }
-    } catch (error: any) {
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    catch (error: any) {
       console.error("Erreur réseau ou client :", error);
-      alert(`Impossible de se connecter au serveur ou erreur client : ${error.message}`);
+      if (clickSound) clickSound.play(); // Joue le son pour l'erreur réseau
     }
   };
 
@@ -361,13 +379,17 @@ export function StreamDeck({ className }: StreamDeckProps) {
       });
       const data = await response.json();
       if (response.ok) {
-        alert(data.message);
+        console.log("Redémarrage serveur :", data.message);
+        if (clickSound) clickSound.play(); // Joue le son pour le succès
       } else {
-        alert(`Échec du redémarrage du serveur : ${data.error}`);
+        console.error("Échec du redémarrage du serveur :", data.error);
+        if (clickSound) clickSound.play(); // Joue le son pour l'erreur
       }
-    } catch (error: any) {
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    catch (error: any) {
       console.error("Erreur lors du redémarrage du serveur :", error);
-      alert(`Impossible de se connecter au serveur pour le redémarrage : ${error.message}`);
+      if (clickSound) clickSound.play(); // Joue le son pour l'erreur réseau
     }
   };
 
