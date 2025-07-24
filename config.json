@@ -7,8 +7,8 @@
     "buttons": [
       {
         "id": "demo-1",
-        "label": "Couper Micro",
-        "icon": "Mic",
+        "label": "Couper Son",
+        "icon": "Volume2",
         "color": "#ef4444",
         "command": "nircmd.exe mutesysvolume 2",
         "shortcut": ""
@@ -17,17 +17,13 @@
         "id": "demo-2",
         "label": "Lancer OBS",
         "icon": "Camera",
-        "color": "#8b5cf6",
-        "command": "start obs64.exe",
-        "shortcut": ""
+        "color": "#8b5cf6"
       },
       {
         "id": "demo-3",
         "label": "Mode Jeu (F6)",
         "icon": "Gamepad2",
-        "color": "#22c55e",
-        "command": "",
-        "shortcut": "F6"
+        "color": "#22c55e"
       },
       {
         "id": "c5e1556a-f228-4860-871e-c05062a9162a",
@@ -36,6 +32,30 @@
         "color": "#22c55e",
         "command": "",
         "shortcut": "Win+D"
+      },
+      {
+        "id": "321f998d-a2b8-4570-8342-8990849c163d",
+        "label": "Mute Discord",
+        "icon": "Mic",
+        "color": "#8b5cf6",
+        "command": "",
+        "shortcut": "Ctrl+Shift+M"
+      },
+      {
+        "id": "b5a6d93e-2e48-4110-9d0f-2d3851ac3dd2",
+        "label": "Salon +",
+        "icon": "Upload",
+        "color": "#8b5cf6",
+        "command": "",
+        "shortcut": "Ctrl+Alt+Up"
+      },
+      {
+        "id": "ef31be17-4f89-4651-acc2-1a51bcc9057c",
+        "label": "stes",
+        "icon": "Monitor",
+        "color": "#3b82f6",
+        "actionType": "command",
+        "command": ""
       }
     ]
   },

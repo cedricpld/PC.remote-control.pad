@@ -16,10 +16,11 @@ import {
   Volume2,
   Monitor,
   Headphones,
+  Lightbulb
 } from "lucide-react";
 import * as Icons from "lucide-react";
 import { cn } from "@/lib/utils";
-import { StreamDeckPage, ActionButtonConfig } from "@/types/stream-deck";
+import { StreamDeckPage, ActionButtonConfig } from "@/types/stream-deck"; // Assurez-vous que ActionButtonConfig est importé
 
 interface StreamDeckProps {
   className?: string;
@@ -41,11 +42,10 @@ export function StreamDeck({ className }: StreamDeckProps) {
   const [draggedButton, setDraggedButton] = React.useState<string | null>(null);
   const [draggedPage, setDraggedPage] = React.useState<string | null>(null);
 
-  // Initialisation de l'objet Audio une seule fois
   const clickSound = React.useMemo(() => {
     try {
-      const audio = new Audio('/button.wav'); // Assurez-vous que 'button.wav' existe dans votre dossier public/
-      audio.volume = 0.2; // Règle le volume à un niveau bas (0.0 à 1.0)
+      const audio = new Audio('/click.mp3');
+      audio.volume = 0.2;
       return audio;
     } catch (e) {
       console.warn("Impossible de créer l'objet Audio :", e);
@@ -70,11 +70,11 @@ export function StreamDeck({ className }: StreamDeckProps) {
           setPages(data);
           setCurrentPageId(data[0].id);
         } else {
-          createDefaultPages(); // Crée des pages par défaut si le serveur renvoie vide
+          createDefaultPages();
         }
       } catch (error) {
         console.error("Échec du chargement de la configuration depuis le serveur :", error);
-        createDefaultPages(); // Utilise les pages par défaut en cas d'erreur
+        createDefaultPages();
       }
     };
     loadConfig();
@@ -96,12 +96,12 @@ export function StreamDeck({ className }: StreamDeckProps) {
       console.log("Configuration sauvegardée sur le serveur.");
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    catch (error: any) { // Utilisez 'any' ou définissez un type plus spécifique pour l'erreur
+    catch (error: any) {
       console.error("Échec de la sauvegarde de la configuration sur le serveur :", error);
     }
   }, []);
 
-  // Définit des pages par défaut si aucune n'est trouvée (utilisé au premier lancement ou si le fichier config.json est vide)
+  // Définit des pages par défaut si aucune n'est trouvée
   const createDefaultPages = React.useCallback(() => {
     const defaultPages: StreamDeckPage[] = [
       {
@@ -115,7 +115,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
             label: "Couper Micro",
             icon: "Mic",
             color: "#ef4444",
-            command: "nircmd.exe mutesysvolume 2", // Exemple: nécessite NirCmd installé
+            command: "nircmd.exe mutesysvolume 2",
             shortcut: "",
           },
           {
@@ -123,7 +123,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
             label: "Lancer OBS",
             icon: "Camera",
             color: "#8b5cf6",
-            command: "start obs64.exe", // Exemple: lance OBS
+            command: "start obs64.exe",
             shortcut: "",
           },
           {
@@ -132,7 +132,17 @@ export function StreamDeck({ className }: StreamDeckProps) {
             icon: "Gamepad2",
             color: "#22c55e",
             command: "",
-            shortcut: "F6", // Exemple: envoie la touche F6 (nécessite robotjs sur le serveur)
+            shortcut: "F6",
+          },
+          // NOUVEAU BOUTON : Contrôle Ampoule Yeelight avec IP configurable
+          {
+            id: "yeelight-toggle",
+            label: "Ampoule Salon",
+            icon: "Lightbulb",
+            color: "#FFD700",
+            command: "YEELIGHT_TOGGLE",
+            shortcut: "",
+            yeelightIp: "192.168.1.XXX", // NOUVEAU: IP par défaut pour l'exemple
           },
         ],
       },
@@ -147,7 +157,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
             label: "Volume +",
             icon: "Volume2",
             color: "#3b82f6",
-            command: "nircmd.exe changesysvolume 1000", // Exemple: nécessite NirCmd
+            command: "nircmd.exe changesysvolume 1000",
             shortcut: "",
           },
           {
@@ -155,7 +165,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
             label: "VLC",
             icon: "Monitor",
             color: "#f97316",
-            command: "start vlc.exe", // Exemple: lance VLC
+            command: "start vlc.exe",
             shortcut: "",
           },
           {
@@ -163,7 +173,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
             label: "Discord",
             icon: "Headphones",
             color: "#8b5cf6",
-            command: "start discord.exe", // Exemple: lance Discord
+            command: "start discord.exe",
             shortcut: "",
           },
         ],
@@ -171,11 +181,10 @@ export function StreamDeck({ className }: StreamDeckProps) {
     ];
     setPages(defaultPages);
     setCurrentPageId(defaultPages[0].id);
-    saveConfigToServer(defaultPages); // Sauvegarde les pages par défaut sur le serveur
+    saveConfigToServer(defaultPages);
   }, [saveConfigToServer]);
 
 
-  // Appelle saveConfigToServer chaque fois que 'pages' change
   React.useEffect(() => {
     if (pages.length > 0) {
       saveConfigToServer(pages);
@@ -251,10 +260,8 @@ export function StreamDeck({ className }: StreamDeckProps) {
   const handleSavePage = (pageData: StreamDeckPage) => {
     setPages((prev) => {
       if (editingPage) {
-        // Met à jour une page existante
         return prev.map((page) => (page.id === pageData.id ? pageData : page));
       } else {
-        // Ajoute une nouvelle page
         const newPages = [...prev, pageData];
         setCurrentPageId(pageData.id);
         return newPages;
@@ -268,6 +275,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
       setPages((prev) => {
         const newPages = prev.filter((page) => page.id !== editingPage.id);
         if (currentPageId === editingPage.id) {
+                  // eslint-disable-next-line @typescript-eslint/no-shadow
           setCurrentPageId(newPages[0].id);
         }
         return newPages;
@@ -276,7 +284,6 @@ export function StreamDeck({ className }: StreamDeckProps) {
     }
   };
 
-  // Gestionnaires de glisser-déposer pour les boutons
   const handleButtonDragStart = (e: React.DragEvent, buttonId: string) => {
     setDraggedButton(buttonId);
     e.dataTransfer.effectAllowed = "move";
@@ -303,7 +310,6 @@ export function StreamDeck({ className }: StreamDeckProps) {
             (btn) => btn.id === draggedButton,
           );
           const targetIndex = buttons.findIndex(
-            // eslint-disable-next-line @typescript-eslint/no-shadow
             (btn) => btn.id === targetButtonId,
           );
 
@@ -320,7 +326,6 @@ export function StreamDeck({ className }: StreamDeckProps) {
     setDraggedButton(null);
   };
 
-  // Gestionnaire de réorganisation des pages
   const handlePageReorder = (sourceId: string, targetId: string) => {
     setPages((prev) => {
       const pages = [...prev];
@@ -335,10 +340,43 @@ export function StreamDeck({ className }: StreamDeckProps) {
     });
   };
 
-  // Fonction pour exécuter l'action via l'API du serveur
+  // MODIFICATION ICI: Gérer la commande spéciale pour Yeelight
   const handleExecuteAction = async (config: ActionButtonConfig) => {
+    if (config.command === "YEELIGHT_TOGGLE") {
+      if (!config.yeelightIp) {
+        alert("Erreur : L'adresse IP de l'ampoule Yeelight n'est pas configurée pour ce bouton.");
+        if (clickSound) clickSound.play();
+        return;
+      }
+      try {
+        const response = await fetch("/api/yeelight-toggle", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ action: "toggle", yeelightIp: config.yeelightIp }), // NOUVEAU: Envoie l'IP de l'ampoule
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          console.error("Erreur Yeelight :", data.error);
+          if (clickSound) clickSound.play();
+          alert(`Erreur contrôle ampoule : ${data.error}`);
+        } else {
+          console.log("Contrôle ampoule exécuté :", data.message);
+          if (clickSound) clickSound.play();
+        }
+      } catch (error: any) {
+        console.error("Erreur réseau ou client (Yeelight) :", error);
+        if (clickSound) clickSound.play();
+        alert(`Impossible de contrôler l'ampoule : ${error.message}`);
+      }
+      return;
+    }
+
+
+    // Logique existante pour les commandes PC et raccourcis
     if (!config.command && !config.shortcut) {
-      if (clickSound) clickSound.play(); // Joue le son même s'il n'y a pas de commande
+      if (clickSound) clickSound.play();
       return;
     }
 
@@ -358,20 +396,21 @@ export function StreamDeck({ className }: StreamDeckProps) {
 
       if (!response.ok) {
         console.error("Erreur serveur :", data.error);
-        if (clickSound) clickSound.play(); // Joue le son pour l'erreur
+        if (clickSound) clickSound.play();
+        alert(`Erreur exécution : ${data.error}. Stderr: ${data.stderr || 'N/A'}`);
       } else {
         console.log("Action exécutée :", data.message);
-        if (clickSound) clickSound.play(); // Joue le son pour le succès
+        if (clickSound) clickSound.play();
       }
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     catch (error: any) {
       console.error("Erreur réseau ou client :", error);
-      if (clickSound) clickSound.play(); // Joue le son pour l'erreur réseau
+      if (clickSound) clickSound.play();
+      alert(`Impossible de se connecter au serveur : ${error.message}`);
     }
   };
 
-  // Fonction pour redémarrer le serveur via un appel API
   const handleRestartServer = async () => {
     try {
       const response = await fetch("/api/restart-server", {
@@ -380,21 +419,20 @@ export function StreamDeck({ className }: StreamDeckProps) {
       const data = await response.json();
       if (response.ok) {
         console.log("Redémarrage serveur :", data.message);
-        if (clickSound) clickSound.play(); // Joue le son pour le succès
+        if (clickSound) clickSound.play();
       } else {
         console.error("Échec du redémarrage du serveur :", data.error);
-        if (clickSound) clickSound.play(); // Joue le son pour l'erreur
+        if (clickSound) clickSound.play();
       }
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     catch (error: any) {
       console.error("Erreur lors du redémarrage du serveur :", error);
-      if (clickSound) clickSound.play(); // Joue le son pour l'erreur réseau
+      if (clickSound) clickSound.play();
     }
   };
 
 
-  // Calcule les dimensions de la grille en fonction du nombre de boutons et de la taille de l'écran
   const [screenSize, setScreenSize] = React.useState<
     "mobile" | "tablet" | "desktop"
   >("desktop");
@@ -441,11 +479,11 @@ export function StreamDeck({ className }: StreamDeckProps) {
   };
 
   const { cols, maxCols } = getGridDimensions();
-  const totalSlots = Math.max(cols * 3, buttons.length + (isEditing ? 1 : 0)); // Minimum 3 rangées
+  const totalSlots = Math.max(cols * 3, buttons.length + (isEditing ? 1 : 0));
 
   return (
     <div className={cn("flex flex-col h-full", className)}>
-      {/* En-tête */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-6 border-b border-border/50 gap-4 sm:gap-0">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold">CONTROL PAD</h1>
@@ -486,7 +524,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
         </div>
       </div>
 
-      {/* Navigation entre les pages */}
+      {/* Page Navigation */}
       <PageTabs
         pages={pages}
         currentPageId={currentPageId}
@@ -508,7 +546,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
         isEditing={isEditing}
       />
 
-      {/* Grille des boutons */}
+      {/* Button Grid */}
       <div className="flex-1 p-3 sm:p-6 overflow-auto">
         {isEditing && (
           <div className="text-center text-sm text-muted-foreground mb-4 p-2 bg-primary/10 rounded-lg border border-primary/20">
@@ -544,7 +582,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
 
           {isEditing && <AddButton onClick={handleAddButton} />}
 
-          {/* Remplir les emplacements de grille restants pour une cohérence visuelle */}
+          {/* Fill remaining grid slots for visual consistency */}
           {Array.from({
             length: Math.max(
               0,
@@ -555,7 +593,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
           ))}
         </div>
 
-        {/* État vide */}
+        {/* Empty state */}
         {buttons.length === 0 && (
           <div className="text-center py-12">
             <div className="text-muted-foreground mb-4">
@@ -572,7 +610,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
         )}
       </div>
 
-      {/* Dialogue d'action */}
+      {/* Action Dialog */}
       <ActionButtonDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
@@ -581,7 +619,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
         onDelete={editingButton ? handleDeleteButton : undefined}
       />
 
-      {/* Dialogue de page */}
+      {/* Page Dialog */}
       <PageDialog
         open={pageDialogOpen}
         onOpenChange={setPageDialogOpen}
@@ -590,7 +628,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
         onDelete={editingPage ? handleDeletePage : undefined}
       />
 
-      {/* Dialogue des paramètres */}
+      {/* Settings Dialog */}
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} onRestartServer={handleRestartServer} />
     </div>
   );

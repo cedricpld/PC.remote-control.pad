@@ -5,6 +5,7 @@ import { handleDemo } from "./routes/demo";
 import { exec } from "child_process";
 import fs from "fs/promises";
 import path from "path";
+// SUPPRIMÉ : import bodyParser from "body-parser"; // Cette ligne est supprimée
 
 // Importations et définitions pour __dirname en ES Modules
 import { fileURLToPath } from 'url';
@@ -13,15 +14,10 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// NOUVEAU: Import pour robotjs
-// Attention: Assurez-vous que robotjs est bien installé (npm install robotjs)
-// et que ses prérequis système sont en place (Python, Visual Studio Build Tools sous Windows).
-import robot from 'robotjs';
+// Import de la bibliothèque Yeelight
+import { Yeelight } from 'node-yeelight-wifi';
 
 // Chemin de configuration: utilise process.cwd() pour la compatibilité avec le .exe packagé.
-// En mode dev, process.cwd() est la racine du projet.
-// En mode prod avec le .exe, process.cwd() est le dossier d'où est lancé le .exe.
-// Cela permet à config.json d'être modifiable et persistant en dehors du .exe.
 const CONFIG_FILE = path.join(process.cwd(), 'config.json');
 
 // Fonction pour lire la configuration depuis config.json
@@ -50,11 +46,10 @@ async function writeConfig(config: any) {
   }
 }
 
-// Fonction d'aide pour parser les raccourcis clavier pour robotjs
-// Supporte les modificateurs courants (Ctrl, Alt, Shift, Win) et une seule touche.
+// Fonction d'aide pour parser les raccourcis clavier pour le script PowerShell
 function parseShortcut(shortcut: string): { key: string, modifiers: string[] } | null {
     const parts = shortcut.split('+').map(p => p.trim());
-    let rawKey = parts[parts.length - 1]; // Ex: 'S', 'F5', 'space'
+    let rawKey = parts[parts.length - 1];
 
     const modifiers: string[] = [];
     for (let i = 0; i < parts.length - 1; i++) {
@@ -62,52 +57,107 @@ function parseShortcut(shortcut: string): { key: string, modifiers: string[] } |
         if (mod === 'ctrl') modifiers.push('control');
         else if (mod === 'alt') modifiers.push('alt');
         else if (mod === 'shift') modifiers.push('shift');
-        else if (mod === 'win' || mod === 'windows') modifiers.push('meta'); // 'meta' pour la touche Windows dans robotjs
+        else if (mod === 'win' || mod === 'windows') modifiers.push('meta');
     }
 
     let key: string;
-    // Gérer les touches spéciales (robotjs attend des chaînes spécifiques en minuscules)
     const specialKeys = [
         'backspace', 'delete', 'enter', 'escape', 'space', 'tab',
         'up', 'down', 'left', 'right', 'home', 'end', 'pageup', 'pagedown',
         'capslock', 'numlock', 'scrolllock', 'printscreen', 'pause', 'insert',
-        'menu', // Touche de menu contextuel
-        'leftmouse', 'rightmouse', 'middlemouse', 'doubleclick', 'rightclick', 'leftclick' // Clics de souris si utilisés comme "touches"
+        'menu',
+        'leftmouse', 'rightmouse', 'middlemouse', 'doubleclick', 'rightclick', 'leftclick'
     ];
 
     if (specialKeys.includes(rawKey.toLowerCase())) {
-        key = rawKey.toLowerCase(); // Convertir en minuscule si c'est une touche spéciale
+        key = rawKey.toLowerCase();
     }
-    // Gérer les touches de fonction (F1-F24)
     else if (rawKey.toLowerCase().startsWith('f') && rawKey.length > 1 && !isNaN(parseInt(rawKey.substring(1)))) {
-        key = rawKey.toUpperCase(); // robotjs attend 'F1', 'F2', etc. en majuscules
+        key = rawKey.toUpperCase();
     }
-    // Gérer les touches de caractères uniques (lettres, chiffres, symboles). robotjs attend généralement les minuscules pour les lettres.
     else if (rawKey.length === 1) {
-        key = rawKey.toLowerCase(); // 'a', 's', '1', '!', etc.
+        key = rawKey.toLowerCase();
     }
-    // Si c'est une clé multi-caractères non listée comme spéciale, ou une faute de frappe
     else {
         console.warn(`Touche non reconnue ou format de raccourci invalide: "${rawKey}"`);
-        return null; // Considérer comme un format de clé invalide
+        return null;
     }
 
-    // Validation finale: vérifier si la clé est dans un format que robotjs supporte généralement
     if (key.length === 1 || key.startsWith('F') || specialKeys.includes(key)) {
         return { key, modifiers };
     }
 
-    return null; // Retourne null si la clé n'est pas supportée après toutes les vérifications
+    return null;
+}
+
+// Fonction pour contrôler l'ampoule Yeelight
+async function controlYeelight(action: 'toggle' | 'on' | 'off', ip: string) {
+  if (!ip || !/^(\d{1,3}\.){3}\d{1,3}$/.test(ip)) {
+    throw new Error('Adresse IP de l\'ampoule Yeelight invalide ou manquante.');
+  }
+
+  return new Promise((resolve, reject) => {
+    const yeelight = new Yeelight({ ip: ip, port: 55443 });
+
+    let connected = false;
+    let timeoutId: NodeJS.Timeout;
+
+    const cleanup = () => {
+      clearTimeout(timeoutId);
+      yeelight.removeAllListeners();
+      yeelight.disconnect();
+    };
+
+    yeelight.on('connected', () => {
+      connected = true;
+      console.log(`Yeelight: Connecté à ${ip}. Exécution de l'action: ${action}`);
+      yeelight.setPower(action)
+        .then(() => {
+          console.log(`Yeelight: Ampoule ${action} avec succès.`);
+          cleanup();
+          resolve(`Ampoule Yeelight ${action} avec succès.`);
+        })
+        .catch((err: any) => {
+          console.error(`Yeelight: Échec de l'action ${action}:`, err);
+          cleanup();
+          reject(`Contrôle Yeelight échoué: ${err.message}`);
+        });
+    });
+
+    yeelight.on('disconnected', () => {
+      console.log('Yeelight: Déconnecté.');
+      if (!connected) {
+        cleanup();
+        reject('Contrôle Yeelight échoué: Déconnecté avant que la commande ne puisse être envoyée. L\'ampoule est-elle en ligne et le mode développeur activé ?');
+      }
+    });
+
+    yeelight.on('error', (err: any) => {
+      console.error('Yeelight: Erreur lors du contrôle:', err);
+      cleanup();
+      reject(`Contrôle Yeelight échoué: ${err.message}`);
+    });
+
+    timeoutId = setTimeout(() => {
+      if (!connected) {
+        console.warn('Yeelight: Connexion expirée.');
+        cleanup();
+        reject('Contrôle Yeelight échoué: Connexion expirée. L\'ampoule est-elle en ligne et le mode développeur activé ?');
+      }
+    }, 5000);
+
+    yeelight.connect();
+  });
 }
 
 
 export function createServer() {
   const app = express();
 
-  // Middlewares
+  // Middlewares : REVENIR AUX MIDDLEWARES EXPRESS INTÉGRÉS
   app.use(cors());
-  app.use(express.json()); // Pour analyser le corps des requêtes JSON
-  app.use(express.urlencoded({ extended: true })); // Pour analyser le corps des requêtes URL encodées
+  app.use(express.json()); // Utilise express.json()
+  app.use(express.urlencoded({ extended: true })); // Utilise express.urlencoded()
 
   // Exemple de routes API (démos)
   app.get("/api/ping", (_req, res) => {
@@ -146,7 +196,6 @@ export function createServer() {
     }
 
     if (command) {
-        // Exécution de commande shell standard (comme 'start chrome.exe' ou 'nircmd.exe')
         console.log(`Tentative d'exécution de la commande : ${command}`);
         exec(command, (error, stdout, stderr) => {
             if (error) {
@@ -160,31 +209,49 @@ export function createServer() {
             res.status(200).json({ message: `Commande "${command}" exécutée avec succès`, stdout: stdout, stderr: stderr });
         });
     } else if (shortcut) {
-        // Exécution de raccourci clavier via robotjs
-        const parsed = parseShortcut(shortcut);
-        if (parsed) {
-            try {
-                // Log ce qui est passé à robotjs pour le débogage
-                console.log(`Appel de robot.keyTap avec clé: '${parsed.key}', modificateurs: [${parsed.modifiers.map(m => `'${m}'`).join(', ')}]`);
-                robot.keyTap(parsed.key, parsed.modifiers);
-                console.log(`Raccourci "${shortcut}" exécuté via robotjs.`);
-                res.status(200).json({ message: `Raccourci "${shortcut}" exécuté avec succès.` });
-            } catch (e: any) {
-                console.error(`Erreur lors de l'exécution du raccourci avec robotjs : ${e.message}`);
-                // Retourner une erreur plus détaillée si robotjs échoue
-                return res.status(500).json({ error: `Échec de l'exécution du raccourci "${shortcut}" : ${e.message}. Veuillez vérifier que les prérequis de robotjs sont installés (Python, Build Tools).` });
+        const scriptPath = path.join(__dirname, 'scripts', 'simulate-shortcut.ps1');
+        const psCommand = `powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}" -Shortcut "${shortcut}"`;
+
+        console.log(`Tentative de simuler le raccourci via PowerShell: ${psCommand}`);
+        exec(psCommand, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`Erreur d'exécution du script PowerShell: ${error.message}`);
+                return res.status(500).json({ error: `Échec de la simulation du raccourci "${shortcut}" via PowerShell.`, details: error.message, stderr: stderr });
             }
-        } else {
-            console.warn(`Format de raccourci invalide : ${shortcut}`);
-            return res.status(400).json({ error: `Format de raccourci invalide : "${shortcut}". Vérifiez la syntaxe (ex: Ctrl+Shift+S) ou la touche n'est pas supportée.` });
-        }
+            if (stderr) {
+                console.warn(`Stderr PowerShell: ${stderr}`);
+            }
+            console.log(`Stdout PowerShell: ${stdout}`);
+            res.status(200).json({ message: `Raccourci "${shortcut}" simulé avec succès via PowerShell.` });
+        });
     }
   });
 
-  // Route API pour redémarrer le serveur (nécessite PM2 pour un vrai redémarrage)
+  // Route API pour contrôler l'ampoule Yeelight
+  app.post("/api/yeelight-toggle", async (req, res) => {
+    const { action, yeelightIp } = req.body;
+
+    if (!['toggle', 'on', 'off'].includes(action)) {
+      return res.status(400).json({ error: "Action Yeelight invalide. Doit être 'toggle', 'on', ou 'off'." });
+    }
+    if (!yeelightIp) {
+      return res.status(400).json({ error: "L'adresse IP de l'ampoule Yeelight est manquante." });
+    }
+
+    try {
+      const message = await controlYeelight(action, yeelightIp);
+      res.status(200).json({ message });
+    } catch (error: any) {
+      console.error("Erreur API Yeelight:", error);
+      res.status(500).json({ error: `Contrôle Yeelight échoué: ${error.message}` });
+    }
+  });
+
+
+  // Route API pour redémarrer le serveur
   app.post("/api/restart-server", (req, res) => {
     console.log("Requête de redémarrage du serveur reçue.");
-    const appName = "stream-deck-server"; // Nom de votre application PM2 (utilisé avec pm2 start --name)
+    const appName = "stream-deck-server";
 
     exec(`pm2 restart ${appName}`, (error, stdout, stderr) => {
       if (error) {
