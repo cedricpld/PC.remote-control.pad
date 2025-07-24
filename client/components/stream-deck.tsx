@@ -1,5 +1,6 @@
 import * as React from "react";
-import { ActionButton } from "@/components/ui/action-button";
+// Supprimez l'importation de ActionButton car ControlRenderer va la gérer
+// import { ActionButton } from "@/components/ui/action-button";
 import { AddButton } from "@/components/ui/add-button";
 import { ActionButtonDialog } from "@/components/ui/action-button-dialog";
 import { PageTabs } from "@/components/ui/page-tabs";
@@ -16,11 +17,13 @@ import {
   Volume2,
   Monitor,
   Headphones,
-  Lightbulb
+  Lightbulb,
 } from "lucide-react";
 import * as Icons from "lucide-react";
 import { cn } from "@/lib/utils";
-import { StreamDeckPage, ActionButtonConfig } from "@/types/stream-deck"; // Assurez-vous que ActionButtonConfig est importé
+import { StreamDeckPage, ControlBlockConfig } from "@/types/stream-deck"; // NOUVEAU: Import de ControlBlockConfig
+import { ControlRenderer } from "@/client/components/ui/control-renderer"; // NOUVEAU: Import du ControlRenderer
+
 
 interface StreamDeckProps {
   className?: string;
@@ -34,8 +37,8 @@ export function StreamDeck({ className }: StreamDeckProps) {
   const [pageDialogOpen, setPageDialogOpen] = React.useState(false);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [editingButton, setEditingButton] = React.useState<
-    ActionButtonConfig | undefined
-  >();
+    ControlBlockConfig | undefined
+  >(); // NOUVEAU: Utilise ControlBlockConfig
   const [editingPage, setEditingPage] = React.useState<
     StreamDeckPage | undefined
   >();
@@ -55,7 +58,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
 
 
   const currentPage = pages.find((page) => page.id === currentPageId);
-  const buttons = currentPage?.buttons || [];
+  const blocks = currentPage?.blocks || []; // NOUVEAU: 'blocks' au lieu de 'buttons'
 
   // Charge les pages depuis le serveur au montage du composant
   React.useEffect(() => {
@@ -68,7 +71,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
         const data: StreamDeckPage[] = await response.json();
         if (data.length > 0) {
           setPages(data);
-          setCurrentPageId(data[0].id);
+          setCurrentPageId(parsed[0].id); // Utilisez 'parsed' ici après un potentiel JSON.parse
         } else {
           createDefaultPages();
         }
@@ -78,7 +81,8 @@ export function StreamDeck({ className }: StreamDeckProps) {
       }
     };
     loadConfig();
-  }, []);
+  }, [createDefaultPages]); // Ajout de createDefaultPages aux dépendances pour éviter un avertissement
+
 
   // Sauvegarde les pages sur le serveur quand elles changent
   const saveConfigToServer = React.useCallback(async (currentPages: StreamDeckPage[]) => {
@@ -109,40 +113,77 @@ export function StreamDeck({ className }: StreamDeckProps) {
         name: "Principal",
         color: "#3b82f6",
         icon: "Home",
-        buttons: [
+        blocks: [ // NOUVEAU: 'blocks' au lieu de 'buttons'
           {
-            id: "demo-1",
+            id: "cmd-mic",
             label: "Couper Micro",
             icon: "Mic",
             color: "#ef4444",
+            width: 1, height: 1, // Taille par défaut
+            actionType: "command",
             command: "nircmd.exe mutesysvolume 2",
-            shortcut: "",
           },
           {
-            id: "demo-2",
+            id: "cmd-obs",
             label: "Lancer OBS",
             icon: "Camera",
             color: "#8b5cf6",
+            width: 1, height: 1,
+            actionType: "command",
             command: "start obs64.exe",
-            shortcut: "",
           },
           {
-            id: "demo-3",
-            label: "Mode Jeu (F6)",
+            id: "sh-game",
+            label: "Mode Jeu",
             icon: "Gamepad2",
             color: "#22c55e",
-            command: "",
+            width: 1, height: 1,
+            actionType: "shortcut",
             shortcut: "F6",
           },
           // NOUVEAU BOUTON : Contrôle Ampoule Yeelight avec IP configurable
           {
-            id: "yeelight-toggle",
+            id: "yl-toggle",
             label: "Ampoule Salon",
             icon: "Lightbulb",
             color: "#FFD700",
-            command: "YEELIGHT_TOGGLE",
-            shortcut: "",
-            yeelightIp: "192.168.1.XXX", // NOUVEAU: IP par défaut pour l'exemple
+            width: 1, height: 1,
+            actionType: "yeelight",
+            yeelightConfig: {
+              ip: "192.168.1.XXX", // REMPLACEZ CETTE IP PAR CELLE DE VOTRE AMPOULE !
+              action: "toggle",
+            },
+          },
+          // NOUVEAU BLOC : Slider de volume
+          {
+            id: "slider-volume",
+            label: "Volume PC",
+            icon: "Volume2",
+            color: "#3b82f6",
+            width: 2, height: 1, // Prend 2 colonnes, 1 ligne
+            actionType: "slider",
+            sliderConfig: {
+              apiEndpoint: "/api/set-master-volume", // NOUVEAU API à créer
+              min: 0,
+              max: 65535, // Volume max pour NirCmd
+              initialValue: 32767, // ~50%
+              unit: "", // Unité peut être vide ou "%" si vous traduisez la valeur
+            },
+          },
+          // NOUVEAU BLOC : Afficheur CPU
+          {
+            id: "status-cpu",
+            label: "CPU Usage",
+            icon: "Cpu",
+            color: "#ef4444",
+            width: 1, height: 1,
+            actionType: "statusDisplay",
+            statusDisplayConfig: {
+              apiEndpoint: "/api/get-cpu-usage", // NOUVEAU API à créer
+              dataType: "cpu",
+              updateIntervalMs: 2000, // Mise à jour toutes les 2s
+              labelUnit: "%",
+            },
           },
         ],
       },
@@ -151,30 +192,48 @@ export function StreamDeck({ className }: StreamDeckProps) {
         name: "Média",
         color: "#f97316",
         icon: "Monitor",
-        buttons: [
+        blocks: [ // NOUVEAU: 'blocks' au lieu de 'buttons'
           {
-            id: "demo-4",
+            id: "cmd-vol+",
             label: "Volume +",
             icon: "Volume2",
             color: "#3b82f6",
+            width: 1, height: 1,
+            actionType: "command",
             command: "nircmd.exe changesysvolume 1000",
-            shortcut: "",
           },
           {
-            id: "demo-5",
+            id: "cmd-vlc",
             label: "VLC",
             icon: "Monitor",
             color: "#f97316",
+            width: 1, height: 1,
+            actionType: "command",
             command: "start vlc.exe",
-            shortcut: "",
           },
           {
-            id: "demo-6",
+            id: "cmd-discord",
             label: "Discord",
             icon: "Headphones",
             color: "#8b5cf6",
+            width: 1, height: 1,
+            actionType: "command",
             command: "start discord.exe",
-            shortcut: "",
+          },
+          // NOUVEAU BLOC: Afficheur RAM
+          {
+            id: "status-ram",
+            label: "RAM Usage",
+            icon: "MemoryStick",
+            color: "#22c55e",
+            width: 1, height: 1,
+            actionType: "statusDisplay",
+            statusDisplayConfig: {
+              apiEndpoint: "/api/get-ram-usage", // NOUVEAU API à créer
+              dataType: "ram",
+              updateIntervalMs: 3000,
+              labelUnit: "GB",
+            },
           },
         ],
       },
@@ -192,31 +251,31 @@ export function StreamDeck({ className }: StreamDeckProps) {
   }, [pages, saveConfigToServer]);
 
 
-  const handleAddButton = () => {
+  const handleAddButton = () => { // Renommer `Button` en `Block` est plus précis maintenant
     setEditingButton(undefined);
     setDialogOpen(true);
   };
 
-  const handleEditButton = (config: ActionButtonConfig) => {
+  const handleEditButton = (config: ControlBlockConfig) => { // NOUVEAU: Utilise ControlBlockConfig
     setEditingButton(config);
     setDialogOpen(true);
   };
 
-  const handleSaveButton = (config: ActionButtonConfig) => {
+  const handleSaveButton = (config: ControlBlockConfig) => { // NOUVEAU: Utilise ControlBlockConfig
     setPages((prev) => {
       const newPages = prev.map((page) => {
         if (page.id === currentPageId) {
           if (editingButton) {
             return {
               ...page,
-              buttons: page.buttons.map((btn) =>
+              blocks: page.blocks.map((btn) => // NOUVEAU: 'blocks'
                 btn.id === config.id ? config : btn,
               ),
             };
           } else {
             return {
               ...page,
-              buttons: [...page.buttons, config],
+              blocks: [...page.blocks, config], // NOUVEAU: 'blocks'
             };
           }
         }
@@ -227,14 +286,14 @@ export function StreamDeck({ className }: StreamDeckProps) {
     setDialogOpen(false);
   };
 
-  const handleDeleteButton = () => {
+  const handleDeleteButton = () => { // Renommer `Button` en `Block` est plus précis
     if (editingButton) {
       setPages((prev) => {
         const newPages = prev.map((page) => {
           if (page.id === currentPageId) {
             return {
               ...page,
-              buttons: page.buttons.filter(
+              blocks: page.blocks.filter( // NOUVEAU: 'blocks'
                 (btn) => btn.id !== editingButton.id,
               ),
             };
@@ -284,40 +343,41 @@ export function StreamDeck({ className }: StreamDeckProps) {
     }
   };
 
-  const handleButtonDragStart = (e: React.DragEvent, buttonId: string) => {
-    setDraggedButton(buttonId);
+  // NOUVEAU: Gestionnaires de glisser-déposer pour les blocs
+  const handleBlockDragStart = (e: React.DragEvent, blockId: string) => {
+    setDraggedButton(blockId); // Réutilise l'état draggedButton
     e.dataTransfer.effectAllowed = "move";
   };
 
-  const handleButtonDragEnd = () => {
+  const handleBlockDragEnd = () => {
     setDraggedButton(null);
   };
 
-  const handleButtonDragOver = (e: React.DragEvent) => {
+  const handleBlockDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
   };
 
-  const handleButtonDrop = (e: React.DragEvent, targetButtonId: string) => {
+  const handleBlockDrop = (e: React.DragEvent, targetBlockId: string) => {
     e.preventDefault();
-    if (!draggedButton || draggedButton === targetButtonId) return;
+    if (!draggedButton || draggedButton === targetBlockId) return;
 
     setPages((prev) => {
       const newPages = prev.map((page) => {
         if (page.id === currentPageId) {
-          const buttons = [...page.buttons];
-          const draggedIndex = buttons.findIndex(
-            (btn) => btn.id === draggedButton,
+          const blocks = [...page.blocks]; // NOUVEAU: 'blocks'
+          const draggedIndex = blocks.findIndex(
+            (block) => block.id === draggedButton,
           );
-          const targetIndex = buttons.findIndex(
-            (btn) => btn.id === targetButtonId,
+          const targetIndex = blocks.findIndex(
+            (block) => block.id === targetBlockId,
           );
 
           if (draggedIndex !== -1 && targetIndex !== -1) {
-            const [draggedItem] = buttons.splice(draggedIndex, 1);
-            buttons.splice(targetIndex, 0, draggedItem);
+            const [draggedItem] = blocks.splice(draggedIndex, 1);
+            blocks.splice(targetIndex, 0, draggedItem);
           }
-          return { ...page, buttons };
+          return { ...page, blocks };
         }
         return page;
       });
@@ -340,95 +400,135 @@ export function StreamDeck({ className }: StreamDeckProps) {
     });
   };
 
-  // MODIFICATION ICI: Gérer la commande spéciale pour Yeelight
-  const handleExecuteAction = async (config: ActionButtonConfig) => {
-    if (config.command === "YEELIGHT_TOGGLE") {
-      if (!config.yeelightIp) {
-        alert("Erreur : L'adresse IP de l'ampoule Yeelight n'est pas configurée pour ce bouton.");
-        if (clickSound) clickSound.play();
+  // MODIFICATION ICI: Gérer les différents types d'action et les nouvelles APIs
+  const handleExecuteAction = async (config: ControlBlockConfig) => { // NOUVEAU: Utilise ControlBlockConfig
+    if (clickSound) clickSound.play(); // Joue le son au début de l'action
+
+    let apiUrl = '';
+    let body: any = {}; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+    switch (config.actionType) {
+      case 'command':
+        if (!config.command) {
+          alert("Commande système non configurée.");
+          return;
+        }
+        apiUrl = "/api/execute-action";
+        body = { command: config.command };
+        break;
+      case 'shortcut':
+        if (!config.shortcut) {
+          alert("Raccourci clavier non configuré.");
+          return;
+        }
+        apiUrl = "/api/execute-action";
+        body = { shortcut: config.shortcut };
+        break;
+      case 'yeelight':
+        if (!config.yeelightConfig?.ip || !config.yeelightConfig?.action) {
+          alert("Configuration Ampoule Yeelight incomplète (IP ou action manquante).");
+          return;
+        }
+        apiUrl = "/api/yeelight-toggle";
+        body = { ip: config.yeelightConfig.ip, action: config.yeelightConfig.action };
+        break;
+      case 'slider': // NOUVEAU: Logique pour les sliders (envoi de la valeur actuelle)
+        if (!config.sliderConfig?.apiEndpoint) {
+          alert("Endpoint API du slider non configuré.");
+          return;
+        }
+        // Pour les sliders, nous enverrons la valeur actuelle si elle est définie
+        // Vous devrez implémenter la logique pour obtenir la valeur actuelle du slider
+        // ou la passer via un autre mécanisme si le clic déclenche l'envoi de valeur.
+        // Pour l'instant, on suppose que le `onValueChange` du ControlSlider gère ça
+        // et que handleExecuteAction n'est pas appelé sur un simple clic pour les sliders.
+        // Cette branche devrait être pour les actions "bouton" liées au slider si elles existent.
+        // Pour un slider, l'action est déclenchée par son onValueCommit directement.
+        console.log(`Slider clické, mais l'action sera gérée par le slider lui-même.`);
+        return; // Les sliders ne déclenchent pas cette partie normalement.
+      case 'statusDisplay': // NOUVEAU: Les afficheurs de statut ne sont pas "exécutables"
+        console.log(`Afficheur de statut cliqué. Pas d'action à exécuter.`);
         return;
-      }
+      default:
+        alert("Type d'action non reconnu.");
+        return;
+    }
+
+    // Effectuer la requête API pour les types d'action qui en ont besoin
+    if (apiUrl) {
       try {
-        const response = await fetch("/api/yeelight-toggle", {
+        const response = await fetch(apiUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ action: "toggle", yeelightIp: config.yeelightIp }), // NOUVEAU: Envoie l'IP de l'ampoule
+          body: JSON.stringify(body),
         });
+
         const data = await response.json();
+
         if (!response.ok) {
-          console.error("Erreur Yeelight :", data.error);
-          if (clickSound) clickSound.play();
-          alert(`Erreur contrôle ampoule : ${data.error}`);
+          console.error("Erreur serveur :", data.error);
+          alert(`Erreur d'exécution (${config.actionType}) : ${data.error}. ${data.details || ''} ${data.stderr || ''}`);
         } else {
-          console.log("Contrôle ampoule exécuté :", data.message);
-          if (clickSound) clickSound.play();
+          console.log("Action exécutée :", data.message);
         }
       } catch (error: any) {
-        console.error("Erreur réseau ou client (Yeelight) :", error);
-        if (clickSound) clickSound.play();
-        alert(`Impossible de contrôler l'ampoule : ${error.message}`);
+        console.error("Erreur réseau ou client :", error);
+        alert(`Impossible de se connecter au serveur ou erreur client : ${error.message}`);
       }
-      return;
     }
+  };
 
+  // NOUVEAU: Gérer spécifiquement le changement de valeur d'un slider
+  const handleSliderValueChange = React.useCallback(async (config: ControlBlockConfig, value: number) => {
+    if (clickSound) clickSound.play(); // Joue le son
 
-    // Logique existante pour les commandes PC et raccourcis
-    if (!config.command && !config.shortcut) {
-      if (clickSound) clickSound.play();
+    if (!config.sliderConfig?.apiEndpoint) {
+      console.error(`Slider sans endpoint API configuré: ${config.label}`);
+      alert(`Erreur : Endpoint API du slider non configuré pour ${config.label}.`);
       return;
     }
 
     try {
-      const response = await fetch("/api/execute-action", {
+      const response = await fetch(config.sliderConfig.apiEndpoint, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          command: config.command,
-          shortcut: config.shortcut,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value: value }), // Envoie la valeur du slider
       });
-
       const data = await response.json();
-
       if (!response.ok) {
-        console.error("Erreur serveur :", data.error);
-        if (clickSound) clickSound.play();
-        alert(`Erreur exécution : ${data.error}. Stderr: ${data.stderr || 'N/A'}`);
+        console.error(`Erreur serveur slider (${config.label}):`, data.error);
+        alert(`Erreur slider (${config.label}) : ${data.error}`);
       } else {
-        console.log("Action exécutée :", data.message);
-        if (clickSound) clickSound.play();
+        console.log(`Slider ${config.label} mis à jour : ${value}`);
       }
+    } catch (error: any) {
+      console.error(`Erreur réseau slider (${config.label}):`, error);
+      alert(`Erreur réseau slider (${config.label}) : ${error.message}`);
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    catch (error: any) {
-      console.error("Erreur réseau ou client :", error);
-      if (clickSound) clickSound.play();
-      alert(`Impossible de se connecter au serveur : ${error.message}`);
-    }
-  };
+  }, [clickSound]);
+
 
   const handleRestartServer = async () => {
+    if (clickSound) clickSound.play();
+
     try {
       const response = await fetch("/api/restart-server", {
         method: "POST",
       });
       const data = await response.json();
-      if (response.ok) {
-        console.log("Redémarrage serveur :", data.message);
-        if (clickSound) clickSound.play();
-      } else {
+      if (!response.ok) {
         console.error("Échec du redémarrage du serveur :", data.error);
-        if (clickSound) clickSound.play();
+        alert(`Échec du redémarrage du serveur : ${data.error}`);
+      } else {
+        console.log("Redémarrage serveur :", data.message);
       }
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     catch (error: any) {
       console.error("Erreur lors du redémarrage du serveur :", error);
-      if (clickSound) clickSound.play();
+      alert(`Impossible de se connecter au serveur pour le redémarrage : ${error.message}`);
     }
   };
 
@@ -450,36 +550,33 @@ export function StreamDeck({ className }: StreamDeckProps) {
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
+  // MODIFIÉ: Ajustement des dimensions de la grille
   const getGridDimensions = () => {
-    const buttonCount = buttons.length + (isEditing ? 1 : 0);
+    // Calcule la taille totale de la grille nécessaire basée sur la somme des largeurs et hauteurs des blocs
+    // plutot que juste le compte des blocs. Ceci est une simplification et peut nécessiter un layout plus sophistiqué
+    // si les blocs ont des tailles variables et un agencement complexe.
+    // Pour l'affichage initial, on peut toujours tenter de trouver le nombre max de colonnes.
+    const maxColsPerScreen = {
+      mobile: 3,
+      tablet: 4,
+      desktop: 6
+    };
+    const currentMaxCols = maxColsPerScreen[screenSize];
+    const maxRows = Math.ceil((blocks.length + (isEditing ? 1 : 0)) / currentMaxCols);
 
-    switch (screenSize) {
-      case "mobile":
-        return {
-          cols: Math.min(3, Math.max(2, Math.ceil(Math.sqrt(buttonCount)))),
-          maxCols: 3,
-        };
-      case "tablet":
-        return {
-          cols: Math.min(
-            4,
-            Math.max(3, Math.ceil(Math.sqrt(buttonCount * 0.8))),
-          ),
-          maxCols: 4,
-        };
-      default:
-        return {
-          cols: Math.min(
-            6,
-            Math.max(4, Math.ceil(Math.sqrt(buttonCount * 0.7))),
-          ),
-          maxCols: 6,
-        };
-    }
+    // Une approche plus précise si les largeurs/hauteurs sont vraiment variables
+    // nécessiterait un algorithme de "packing" ou de calcul de grille plus intelligent.
+    // Pour l'instant, nous nous basons sur un nombre fixe de colonnes.
+    return {
+      cols: currentMaxCols,
+      maxCols: currentMaxCols, // maxCols utilisé pour le style du conteneur
+    };
   };
 
   const { cols, maxCols } = getGridDimensions();
-  const totalSlots = Math.max(cols * 3, buttons.length + (isEditing ? 1 : 0));
+  // La variable totalSlots n'est plus pertinente si on utilise un placement par grille CSS
+  // const totalSlots = Math.max(cols * 3, blocks.length + (isEditing ? 1 : 0));
+
 
   return (
     <div className={cn("flex flex-col h-full", className)}>
@@ -488,7 +585,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
         <div>
           <h1 className="text-xl sm:text-2xl font-bold">CONTROL PAD</h1>
           <p className="text-xs sm:text-sm text-muted-foreground">
-            Contrôlez votre PC à distance avec des boutons d'action personnalisables
+            Contrôlez votre PC à distance avec des blocs d'action personnalisables
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -546,17 +643,18 @@ export function StreamDeck({ className }: StreamDeckProps) {
         isEditing={isEditing}
       />
 
-      {/* Button Grid */}
+      {/* Grille des blocs */}
       <div className="flex-1 p-3 sm:p-6 overflow-auto">
         {isEditing && (
           <div className="text-center text-sm text-muted-foreground mb-4 p-2 bg-primary/10 rounded-lg border border-primary/20">
-            🎛️ Mode Édition Actif - Faites glisser pour réorganiser les boutons et les pages, cliquez sur les boutons pour les modifier.
+            🎛️ Mode Édition Actif - Faites glisser pour réorganiser les blocs, cliquez sur les blocs pour les modifier.
           </div>
         )}
         <div
           className="grid gap-2 sm:gap-4 justify-center"
           style={{
             gridTemplateColumns: `repeat(${cols}, 1fr)`,
+            // La largeur maximale du conteneur doit s'adapter à la taille des blocs
             maxWidth:
               screenSize === "mobile"
                 ? `${cols * 80}px`
@@ -566,51 +664,43 @@ export function StreamDeck({ className }: StreamDeckProps) {
             margin: "0 auto",
           }}
         >
-          {buttons.map((config) => (
-            <ActionButton
+          {blocks.map((config) => ( // NOUVEAU: map sur 'blocks'
+            <ControlRenderer
               key={config.id}
               config={config}
-              isEditing={isEditing}
-              onEdit={() => handleEditButton(config)}
-              onExecute={() => handleExecuteAction(config)}
-              onDragStart={(e) => handleButtonDragStart(e, config.id)}
-              onDragEnd={handleButtonDragEnd}
-              onDragOver={handleButtonDragOver}
-              onDrop={(e) => handleButtonDrop(e, config.id)}
+              onExecute={() => handleExecuteAction(config)} // Pour les boutons (command/shortcut/yeelight)
+              onSliderValueChange={handleSliderValueChange} // Pour les sliders
+              // NOUVEAU: Passer les handlers de drag-drop au ControlRenderer
+              onDragStart={(e) => handleBlockDragStart(e, config.id)}
+              onDragEnd={handleBlockDragEnd}
+              onDragOver={handleBlockDragOver}
+              onDrop={(e) => handleBlockDrop(e, config.id)}
             />
           ))}
 
           {isEditing && <AddButton onClick={handleAddButton} />}
 
-          {/* Fill remaining grid slots for visual consistency */}
-          {Array.from({
-            length: Math.max(
-              0,
-              totalSlots - buttons.length - (isEditing ? 1 : 0),
-            ),
-          }).map((_, i) => (
-            <div key={`empty-${i}`} className="h-24 w-24" />
-          ))}
+          {/* Suppression des slots de remplissage car le layout en grille est plus flexible */}
         </div>
 
         {/* Empty state */}
-        {buttons.length === 0 && (
+        {blocks.length === 0 && ( // NOUVEAU: 'blocks.length'
           <div className="text-center py-12">
             <div className="text-muted-foreground mb-4">
               <Settings className="h-12 w-12 mx-auto mb-2 opacity-50" />
-              <p className="text-lg font-medium">Aucune action configurée</p>
+              <p className="text-lg font-medium">Aucun bloc configuré</p>
               <p className="text-sm">
-                Ajoutez votre premier bouton d'action pour commencer
+                Ajoutez votre premier bloc d'action ou d'affichage pour commencer
               </p>
             </div>
             <Button onClick={handleAddButton} className="mt-4">
-              Ajouter une première action
+              Ajouter un premier bloc
             </Button>
           </div>
         )}
       </div>
 
-      {/* Action Dialog */}
+      {/* Action Dialog (renommé en ActionButtonDialog pour l'édition de blocs) */}
       <ActionButtonDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}

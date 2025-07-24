@@ -18,22 +18,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ActionButtonConfig } from "@/types/stream-deck";
+import { ControlBlockConfig } from "@/types/stream-deck"; // NOUVEAU: Import du type générique ControlBlockConfig
 import * as Icons from "lucide-react";
 import { Trash2 } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area"; // Garder l'importation si ScrollArea est utilisé ailleurs.
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"; // Utilisé pour le sélecteur de couleur
 
 
 interface ActionButtonDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  config?: ActionButtonConfig;
-  onSave: (config: ActionButtonConfig) => void;
+  config?: ControlBlockConfig; // NOUVEAU: Utilise ControlBlockConfig
+  onSave: (config: ControlBlockConfig) => void; // NOUVEAU: Utilise ControlBlockConfig
   onDelete?: () => void;
 }
 
-// Sélection curée des options d'icônes (inchangée)
+// Sélection curée des options d'icônes
 const iconOptions = [
   { value: "Monitor", label: "Monitor", icon: Icons.Monitor },
   { value: "Gamepad2", label: "Gaming", icon: Icons.Gamepad2 },
@@ -77,7 +77,7 @@ const iconOptions = [
   { value: "MonitorSpeaker", label: "Speaker", icon: Icons.MonitorSpeaker },
 ];
 
-// Liste des couleurs (inchangée)
+// Liste complète des couleurs
 const colorOptions = [
   { value: "#3b82f6", label: "Blue" },
   { value: "#ef4444", label: "Red" },
@@ -103,7 +103,7 @@ const colorOptions = [
   { value: "#FF8C94", label: "Salmon" },
 ];
 
-// Fonction d'aide pour générer un ID unique simple (inchangée)
+// Fonction d'aide pour générer un ID unique simple
 function generateSimpleUniqueId() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -118,69 +118,95 @@ export function ActionButtonDialog({
   onSave,
   onDelete,
 }: ActionButtonDialogProps) {
-  const [formData, setFormData] = React.useState<Partial<ActionButtonConfig>>({
+  // NOUVEAU: Initialisation de formData pour inclure width, height, et les configs spécifiques
+  const [formData, setFormData] = React.useState<Partial<ControlBlockConfig>>({
     label: "",
     icon: "Monitor",
     color: "#3b82f6",
+    width: 1, // NOUVEAU: Largeur par défaut
+    height: 1, // NOUVEAU: Hauteur par défaut
     actionType: "command",
     command: "",
     shortcut: "",
     yeelightConfig: { ip: "", action: "toggle" },
+    sliderConfig: { apiEndpoint: "", min: 0, max: 100, initialValue: 50, unit: "" }, // NOUVEAU: Config slider par défaut
+    statusDisplayConfig: { apiEndpoint: "", dataType: "cpu", updateIntervalMs: 2000, labelUnit: "" }, // NOUVEAU: Config status par défaut
   });
 
   React.useEffect(() => {
     if (config) {
+      // Si un bloc existe, pré-remplir le formulaire avec sa configuration
       setFormData({
         ...config,
-        yeelightConfig: config.yeelightConfig || { ip: "", action: "toggle" }
+        // Assurer que les configs spécifiques sont toujours des objets pour éviter les erreurs
+        yeelightConfig: config.yeelightConfig || { ip: "", action: "toggle" },
+        sliderConfig: config.sliderConfig || { apiEndpoint: "", min: 0, max: 100, initialValue: 50, unit: "" },
+        statusDisplayConfig: config.statusDisplayConfig || { apiEndpoint: "", dataType: "cpu", updateIntervalMs: 2000, labelUnit: "" },
       });
     } else {
+      // Pour un nouveau bloc, réinitialiser à des valeurs par défaut
       setFormData({
         label: "",
         icon: "Monitor",
         color: "#3b82f6",
+        width: 1,
+        height: 1,
         actionType: "command",
         command: "",
         shortcut: "",
         yeelightConfig: { ip: "", action: "toggle" },
+        sliderConfig: { apiEndpoint: "", min: 0, max: 100, initialValue: 50, unit: "" },
+        statusDisplayConfig: { apiEndpoint: "", dataType: "cpu", updateIntervalMs: 2000, labelUnit: "" },
       });
     }
   }, [config]);
 
   const handleSave = () => {
-    if (!formData.label) return;
+    if (!formData.label) return; // Le libellé est obligatoire
 
-    const newConfig: ActionButtonConfig = {
+    const newConfig: ControlBlockConfig = {
       id: config?.id || generateSimpleUniqueId(),
       label: formData.label!,
       icon: formData.icon,
       color: formData.color,
+      width: formData.width,
+      height: formData.height,
       actionType: formData.actionType!,
 
       command: formData.actionType === 'command' ? formData.command : undefined,
       shortcut: formData.actionType === 'shortcut' ? formData.shortcut : undefined,
       yeelightConfig: formData.actionType === 'yeelight' ? formData.yeelightConfig : undefined,
+      sliderConfig: formData.actionType === 'slider' ? formData.sliderConfig : undefined, // NOUVEAU: Enregistre sliderConfig
+      statusDisplayConfig: formData.actionType === 'statusDisplay' ? formData.statusDisplayConfig : undefined, // NOUVEAU: Enregistre statusDisplayConfig
     };
 
-    onSave(newConfig);
-    onOpenChange(false);
+    onSave(newConfig); // Appelle la fonction de sauvegarde passée par les props
+    onOpenChange(false); // Ferme le dialogue
   };
 
   const handleDelete = () => {
     if (onDelete) {
-      onDelete();
-      onOpenChange(false);
+      onDelete(); // Appelle la fonction de suppression passée par les props
+      onOpenChange(false); // Ferme le dialogue
     }
   };
 
+  // Trouver l'icône sélectionnée pour l'affichage dans le Select
   const selectedIcon = iconOptions.find((opt) => opt.value === formData.icon);
+  // Options pour l'action Yeelight
   const yeelightActionOptions = [
     { value: "toggle", label: "Toggle (On/Off)" },
     { value: "on", label: "Turn On" },
     { value: "off", label: "Turn Off" },
   ];
-  const selectedYeelightAction = yeelightActionOptions.find(opt => opt.value === formData.yeelightConfig?.action);
-
+  // Options pour le type de données de l'afficheur de statut
+  const statusDataTypeOptions = [
+    { value: "cpu", label: "Utilisation CPU" },
+    { value: "ram", label: "Utilisation RAM" },
+    { value: "disk", label: "Espace Disque" },
+    { value: "network", label: "Activité Réseau" },
+    { value: "custom", label: "Personnalisé" },
+  ];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -285,6 +311,36 @@ export function ActionButtonDialog({
             </Select>
           </div>
 
+          {/* NOUVEAU: Champs Largeur et Hauteur */}
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="width" className="text-right">
+              Largeur (unités)
+            </Label>
+            <Input
+              id="width"
+              type="number"
+              value={formData.width}
+              onChange={(e) => setFormData({ ...formData, width: parseInt(e.target.value) || 1 })}
+              className="col-span-3"
+              placeholder="Ex: 1, 2, 3"
+              min="1"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="height" className="text-right">
+              Hauteur (unités)
+            </Label>
+            <Input
+              id="height"
+              type="number"
+              value={formData.height}
+              onChange={(e) => setFormData({ ...formData, height: parseInt(e.target.value) || 1 })}
+              className="col-span-3"
+              placeholder="Ex: 1, 2"
+              min="1"
+            />
+          </div>
+
           {/* Sélecteur de type d'action */}
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="actionType" className="text-right">
@@ -292,7 +348,7 @@ export function ActionButtonDialog({
             </Label>
             <Select
               value={formData.actionType}
-              onValueChange={(value: ActionButtonConfig['actionType']) =>
+              onValueChange={(value: ControlBlockConfig['actionType']) =>
                 setFormData({ ...formData, actionType: value })
               }
             >
@@ -303,6 +359,8 @@ export function ActionButtonDialog({
                 <SelectItem value="command">Commande Système</SelectItem>
                 <SelectItem value="shortcut">Raccourci Clavier</SelectItem>
                 <SelectItem value="yeelight">Ampoule Yeelight</SelectItem>
+                <SelectItem value="slider">Slider (Volume, Lumière...)</SelectItem> {/* NOUVEAU */}
+                <SelectItem value="statusDisplay">Afficheur de Statut (CPU, RAM...)</SelectItem> {/* NOUVEAU */}
               </SelectContent>
             </Select>
           </div>
@@ -320,7 +378,7 @@ export function ActionButtonDialog({
                   setFormData({ ...formData, command: e.target.value })
                 }
                 className="col-span-3"
-                placeholder="Entrez la commande système ou l'URL à exécuter..."
+                placeholder="Ex: start chrome.exe google.com"
                 rows={3}
               />
             </div>
@@ -368,7 +426,7 @@ export function ActionButtonDialog({
                 </Label>
                 <Select
                   value={formData.yeelightConfig?.action}
-                  onValueChange={(value: ActionButtonConfig['yeelightConfig']['action']) =>
+                  onValueChange={(value: ControlBlockConfig['yeelightConfig']['action']) =>
                     setFormData({
                       ...formData,
                       yeelightConfig: { ...formData.yeelightConfig!, action: value },
@@ -389,25 +447,159 @@ export function ActionButtonDialog({
               </div>
             </>
           )}
+
+          {/* NOUVEAU: Champs pour les sliders */}
+          {formData.actionType === 'slider' && (
+            <>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="sliderApi" className="text-right">
+                  Endpoint API
+                </Label>
+                <Input
+                  id="sliderApi"
+                  value={formData.sliderConfig?.apiEndpoint}
+                  onChange={(e) => setFormData({ ...formData, sliderConfig: { ...formData.sliderConfig!, apiEndpoint: e.target.value } })}
+                  className="col-span-3"
+                  placeholder="Ex: /api/set-volume"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="sliderMin" className="text-right">
+                  Min. Value
+                </Label>
+                <Input
+                  id="sliderMin"
+                  type="number"
+                  value={formData.sliderConfig?.min}
+                  onChange={(e) => setFormData({ ...formData, sliderConfig: { ...formData.sliderConfig!, min: parseInt(e.target.value) } })}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="sliderMax" className="text-right">
+                  Max. Value
+                </Label>
+                <Input
+                  id="sliderMax"
+                  type="number"
+                  value={formData.sliderConfig?.max}
+                  onChange={(e) => setFormData({ ...formData, sliderConfig: { ...formData.sliderConfig!, max: parseInt(e.target.value) } })}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="sliderInitial" className="text-right">
+                  Initial Value
+                </Label>
+                <Input
+                  id="sliderInitial"
+                  type="number"
+                  value={formData.sliderConfig?.initialValue}
+                  onChange={(e) => setFormData({ ...formData, sliderConfig: { ...formData.sliderConfig!, initialValue: parseInt(e.target.value) } })}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="sliderUnit" className="text-right">
+                  Unité
+                </Label>
+                <Input
+                  id="sliderUnit"
+                  value={formData.sliderConfig?.unit}
+                  onChange={(e) => setFormData({ ...formData, sliderConfig: { ...formData.sliderConfig!, unit: e.target.value } })}
+                  className="col-span-3"
+                  placeholder="Ex: %"
+                />
+              </div>
+            </>
+          )}
+
+          {/* NOUVEAU: Champs pour les afficheurs de statut */}
+          {formData.actionType === 'statusDisplay' && (
+            <>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="statusApi" className="text-right">
+                  Endpoint API
+                </Label>
+                <Input
+                  id="statusApi"
+                  value={formData.statusDisplayConfig?.apiEndpoint}
+                  onChange={(e) => setFormData({ ...formData, statusDisplayConfig: { ...formData.statusDisplayConfig!, apiEndpoint: e.target.value } })}
+                  className="col-span-3"
+                  placeholder="Ex: /api/get-cpu"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="statusDataType" className="text-right">
+                  Type de Donnée
+                </Label>
+                <Select
+                  value={formData.statusDisplayConfig?.dataType}
+                  onValueChange={(value: ControlBlockConfig['statusDisplayConfig']['dataType']) =>
+                    setFormData({ ...formData, statusDisplayConfig: { ...formData.statusDisplayConfig!, dataType: value } })
+                  }
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Sélectionner le type de donnée" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {statusDataTypeOptions.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="statusInterval" className="text-right">
+                  Intervalle (ms)
+                </Label>
+                <Input
+                  id="statusInterval"
+                  type="number"
+                  value={formData.statusDisplayConfig?.updateIntervalMs}
+                  onChange={(e) => setFormData({ ...formData, statusDisplayConfig: { ...formData.statusDisplayConfig!, updateIntervalMs: parseInt(e.target.value) } })}
+                  className="col-span-3"
+                  placeholder="Ex: 2000 (2 secondes)"
+                  min="500"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="statusUnit" className="text-right">
+                  Unité
+                </Label>
+                <Input
+                  id="statusUnit"
+                  value={formData.statusDisplayConfig?.labelUnit}
+                  onChange={(e) => setFormData({ ...formData, statusDisplayConfig: { ...formData.statusDisplayConfig!, labelUnit: e.target.value } })}
+                  className="col-span-3"
+                  placeholder="Ex: % ou GB"
+                />
+              </div>
+            </>
+          )}
         </div>
-        <DialogFooter className="flex justify-between">
-          {config && onDelete && (
+        <DialogFooter className="flex flex-col sm:flex-row sm:justify-between gap-2 sm:gap-0">
+          {onDelete && (
             <Button
               variant="destructive"
-              size="sm"
               onClick={onDelete}
-              className="mr-auto"
+              className="w-full sm:w-auto"
             >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete
+              Supprimer
             </Button>
           )}
-          <div className="flex gap-2">
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="w-full sm:w-auto"
+            >
+              Annuler
+            </Button>
             <Button onClick={handleSave} disabled={!formData.label}>
               {config ? "Update" : "Create"}
-            </Button>
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
             </Button>
           </div>
         </DialogFooter>

@@ -1,26 +1,25 @@
-import express_namespace from "express"; // Importez Express de manière robuste
-const express = express_namespace.default || express_namespace; // Prenez l'export par défaut ou le namespace complet
+import express_namespace from "express";
+const express = express_namespace.default || express_namespace;
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
 import { exec } from "child_process";
 import fs from "fs/promises";
 import path from "path";
-// SUPPRIMÉ : import bodyParser from "body-parser"; // Cette ligne est supprimée
+// import bodyParser from "body-parser"; // Garder commenté si vous avez eu des problèmes avec en dev
 
-// Importations et définitions pour __dirname en ES Modules
+// NOUVEAU: Importation du module 'os' de Node.js pour les stats système
+import os from "os";
+
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Import de la bibliothèque Yeelight
 import { Yeelight } from 'node-yeelight-wifi';
 
-// Chemin de configuration: utilise process.cwd() pour la compatibilité avec le .exe packagé.
 const CONFIG_FILE = path.join(process.cwd(), 'config.json');
 
-// Fonction pour lire la configuration depuis config.json
 async function readConfig() {
   try {
     const data = await fs.readFile(CONFIG_FILE, 'utf-8');
@@ -28,14 +27,13 @@ async function readConfig() {
   } catch (error: any) {
     if (error.code === 'ENOENT') {
       console.warn(`Fichier de configuration non trouvé à ${CONFIG_FILE}, création d'une configuration par défaut.`);
-      return []; // Retourne un tableau vide si le fichier n'existe pas
+      return [];
     }
     console.error("Erreur lors de la lecture du fichier de configuration :", error);
     throw error;
   }
 }
 
-// Fonction pour écrire la configuration dans config.json
 async function writeConfig(config: any) {
   try {
     await fs.writeFile(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf-8');
@@ -46,7 +44,6 @@ async function writeConfig(config: any) {
   }
 }
 
-// Fonction d'aide pour parser les raccourcis clavier pour le script PowerShell
 function parseShortcut(shortcut: string): { key: string, modifiers: string[] } | null {
     const parts = shortcut.split('+').map(p => p.trim());
     let rawKey = parts[parts.length - 1];
@@ -90,7 +87,6 @@ function parseShortcut(shortcut: string): { key: string, modifiers: string[] } |
     return null;
 }
 
-// Fonction pour contrôler l'ampoule Yeelight
 async function controlYeelight(action: 'toggle' | 'on' | 'off', ip: string) {
   if (!ip || !/^(\d{1,3}\.){3}\d{1,3}$/.test(ip)) {
     throw new Error('Adresse IP de l\'ampoule Yeelight invalide ou manquante.');
@@ -154,19 +150,19 @@ async function controlYeelight(action: 'toggle' | 'on' | 'off', ip: string) {
 export function createServer() {
   const app = express();
 
-  // Middlewares : REVENIR AUX MIDDLEWARES EXPRESS INTÉGRÉS
   app.use(cors());
-  app.use(express.json()); // Utilise express.json()
-  app.use(express.urlencoded({ extended: true })); // Utilise express.urlencoded()
+  // UTILISER express.json() et express.urlencoded() SI body-parser pose problème en dev
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
 
-  // Exemple de routes API (démos)
+
+  // Routes API
   app.get("/api/ping", (_req, res) => {
     res.json({ message: "Hello from Express server v2!" });
   });
 
   app.get("/api/demo", handleDemo);
 
-  // Route API pour récupérer la configuration (pages et boutons)
   app.get("/api/config", async (_req, res) => {
     try {
       const config = await readConfig();
@@ -176,7 +172,6 @@ export function createServer() {
     }
   });
 
-  // Route API pour sauvegarder la configuration
   app.post("/api/config", async (req, res) => {
     try {
       const newConfig = req.body;
@@ -187,7 +182,6 @@ export function createServer() {
     }
   });
 
-  // Route API pour exécuter des commandes ou des raccourcis clavier
   app.post("/api/execute-action", (req, res) => {
     const { command, shortcut } = req.body;
 
@@ -227,7 +221,6 @@ export function createServer() {
     }
   });
 
-  // Route API pour contrôler l'ampoule Yeelight
   app.post("/api/yeelight-toggle", async (req, res) => {
     const { action, yeelightIp } = req.body;
 
@@ -247,8 +240,60 @@ export function createServer() {
     }
   });
 
+  // NOUVEAU: Route API pour le slider de volume maître
+  app.post("/api/set-master-volume", (req, res) => {
+    const { value } = req.body; // La valeur du volume du slider
 
-  // Route API pour redémarrer le serveur
+    if (typeof value === 'undefined' || value === null || isNaN(Number(value))) {
+      return res.status(400).json({ error: "Valeur de volume manquante ou invalide." });
+    }
+
+    // Assurez-vous que nircmd.exe est dans le PATH ou utilisez le chemin complet
+    const volumeCommand = `nircmd.exe setsysvolume ${Math.min(Math.max(0, value), 65535)}`; // Clamper la valeur entre 0 et 65535
+
+    console.log(`Tentative de définir le volume maître : ${value} avec la commande: ${volumeCommand}`);
+    exec(volumeCommand, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Erreur d'exécution de la commande volume : ${error.message}`);
+        return res.status(500).json({ error: `Échec de la définition du volume : ${error.message}`, stderr: stderr });
+      }
+      if (stderr) {
+        console.warn(`Stderr volume : ${stderr}`);
+      }
+      console.log(`Stdout volume : ${stdout}`);
+      res.status(200).json({ message: `Volume défini à ${value} avec succès.` });
+    });
+  });
+
+  // NOUVEAU: Route API pour récupérer l'utilisation du CPU
+  app.get("/api/get-cpu-usage", (req, res) => {
+    // os.loadavg() retourne la charge moyenne du système sur 1, 5, et 15 minutes.
+    // Pourcentage CPU = (charge moyenne sur 1 min) / (nombre de cœurs CPU) * 100
+    const cpuLoad = os.loadavg()[0]; // Charge moyenne sur 1 minute
+    const numCpus = os.cpus().length; // Nombre de cœurs CPU
+
+    // C'est une estimation simple et rapide. Pour des stats plus précises, 'systeminformation' est mieux.
+    const cpuUsagePercent = parseFloat(((cpuLoad / numCpus) * 100).toFixed(1));
+
+    console.log(`CPU Usage demandé. Valeur: ${cpuUsagePercent}%`);
+    res.status(200).json({ value: cpuUsagePercent });
+  });
+
+  // NOUVEAU: Route API pour récupérer l'utilisation de la RAM
+  app.get("/api/get-ram-usage", (req, res) => {
+    const totalMemBytes = os.totalmem();
+    const freeMemBytes = os.freemem();
+    const usedMemBytes = totalMemBytes - freeMemBytes;
+
+    const usedMemGB = parseFloat((usedMemBytes / (1024 * 1024 * 1024)).toFixed(2));
+    const totalMemGB = parseFloat((totalMemBytes / (1024 * 1024 * 1024)).toFixed(2));
+    const usedMemPercent = parseFloat(((usedMemBytes / totalMemBytes) * 100).toFixed(1));
+
+    console.log(`RAM Usage demandé. Utilisé: ${usedMemGB} GB / ${totalMemGB} GB (${usedMemPercent}%)`);
+    res.status(200).json({ value: usedMemPercent, usedGB: usedMemGB, totalGB: totalMemGB });
+  });
+
+
   app.post("/api/restart-server", (req, res) => {
     console.log("Requête de redémarrage du serveur reçue.");
     const appName = "stream-deck-server";
