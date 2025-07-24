@@ -70,9 +70,9 @@ export function SettingsDialog({ open, onOpenChange, onRestartServer }: Settings
           <div className="space-y-4">
             <h4 className="text-sm font-medium">Informations sur l'application</h4>
             <div className="text-sm text-muted-foreground space-y-1">
-              <p>CONTROL PAD Client Web v1.1.0</p>
+              <p>CONTROL PAD Client Web v1.1.3</p>
               <p>by Cédric PALADJIAN</p>
-              <p>Nodes.js + Builder.io</p>
+              <p>TypeScript - Node.js - VITE</p>
             </div>
           </div>
         </div>

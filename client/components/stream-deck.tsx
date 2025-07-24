@@ -1,25 +1,14 @@
 import * as React from "react";
-import { ActionButton } from "@/components/ui/action-button";
-import { AddButton } from "@/components/ui/add-button";
-import { ActionButtonDialog } from "@/components/ui/action-button-dialog";
+import { Settings, Edit3, Eye, Cpu, MemoryStick, Volume2, Lightbulb, Mic, Camera, Gamepad2, Monitor, Headphones } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { StreamDeckPage, ControlBlockConfig } from "@/types/stream-deck";
+import { Button } from "@/components/ui/button";
 import { PageTabs } from "@/components/ui/page-tabs";
 import { PageDialog } from "@/components/ui/page-dialog";
 import { SettingsDialog } from "@/components/ui/settings-dialog";
-import { Button } from "@/components/ui/button";
-import {
-  Settings,
-  Edit3,
-  Eye,
-  Mic,
-  Camera,
-  Gamepad2,
-  Volume2,
-  Monitor,
-  Headphones,
-} from "lucide-react";
-import * as Icons from "lucide-react";
-import { cn } from "@/lib/utils";
-import { StreamDeckPage, ActionButtonConfig } from "@/types/stream-deck";
+import { AddButton } from "@/components/ui/add-button";
+import { ControlRenderer } from "@/components/ui/control-renderer";
+import { ControlDialog } from "@/components/ui/control-dialog";
 
 interface StreamDeckProps {
   className?: string;
@@ -32,20 +21,14 @@ export function StreamDeck({ className }: StreamDeckProps) {
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [pageDialogOpen, setPageDialogOpen] = React.useState(false);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
-  const [editingButton, setEditingButton] = React.useState<
-    ActionButtonConfig | undefined
-  >();
-  const [editingPage, setEditingPage] = React.useState<
-    StreamDeckPage | undefined
-  >();
-  const [draggedButton, setDraggedButton] = React.useState<string | null>(null);
-  const [draggedPage, setDraggedPage] = React.useState<string | null>(null);
+  const [editingControl, setEditingControl] = React.useState<ControlBlockConfig | undefined>();
+  const [editingPage, setEditingPage] = React.useState<StreamDeckPage | undefined>();
+  const [draggedControl, setDraggedControl] = React.useState<string | null>(null);
 
-  // Initialisation de l'objet Audio une seule fois
   const clickSound = React.useMemo(() => {
     try {
-      const audio = new Audio('/button.wav'); // Assurez-vous que 'button.wav' existe dans votre dossier public/
-      audio.volume = 0.2; // Règle le volume à un niveau bas (0.0 à 1.0)
+      const audio = new Audio('/button.wav');
+      audio.volume = 0.2;
       return audio;
     } catch (e) {
       console.warn("Impossible de créer l'objet Audio :", e);
@@ -53,189 +36,134 @@ export function StreamDeck({ className }: StreamDeckProps) {
     }
   }, []);
 
-
   const currentPage = pages.find((page) => page.id === currentPageId);
-  const buttons = currentPage?.buttons || [];
+  const blocks = currentPage?.blocks || [];
 
-  // Charge les pages depuis le serveur au montage du composant
-  React.useEffect(() => {
-    const loadConfig = async () => {
-      try {
-        const response = await fetch("/api/config");
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data: StreamDeckPage[] = await response.json();
-        if (data.length > 0) {
-          setPages(data);
-          setCurrentPageId(data[0].id);
-        } else {
-          createDefaultPages(); // Crée des pages par défaut si le serveur renvoie vide
-        }
-      } catch (error) {
-        console.error("Échec du chargement de la configuration depuis le serveur :", error);
-        createDefaultPages(); // Utilise les pages par défaut en cas d'erreur
-      }
-    };
-    loadConfig();
-  }, []);
-
-  // Sauvegarde les pages sur le serveur quand elles changent
   const saveConfigToServer = React.useCallback(async (currentPages: StreamDeckPage[]) => {
     try {
+      // Nettoyer les anciennes clés "buttons" avant de sauvegarder
+      const pagesToSave = currentPages.map(({ buttons, ...page }) => page);
       const response = await fetch("/api/config", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(currentPages),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pagesToSave),
       });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       console.log("Configuration sauvegardée sur le serveur.");
-    }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    catch (error: any) { // Utilisez 'any' ou définissez un type plus spécifique pour l'erreur
-      console.error("Échec de la sauvegarde de la configuration sur le serveur :", error);
+    } catch (error: any) {
+      console.error("Échec de la sauvegarde :", error);
     }
   }, []);
-
-  // Définit des pages par défaut si aucune n'est trouvée (utilisé au premier lancement ou si le fichier config.json est vide)
+  
   const createDefaultPages = React.useCallback(() => {
     const defaultPages: StreamDeckPage[] = [
       {
-        id: "main",
-        name: "Principal",
-        color: "#3b82f6",
-        icon: "Home",
-        buttons: [
-          {
-            id: "demo-1",
-            label: "Couper Micro",
-            icon: "Mic",
-            color: "#ef4444",
-            command: "nircmd.exe mutesysvolume 2", // Exemple: nécessite NirCmd installé
-            shortcut: "",
-          },
-          {
-            id: "demo-2",
-            label: "Lancer OBS",
-            icon: "Camera",
-            color: "#8b5cf6",
-            command: "start obs64.exe", // Exemple: lance OBS
-            shortcut: "",
-          },
-          {
-            id: "demo-3",
-            label: "Mode Jeu (F6)",
-            icon: "Gamepad2",
-            color: "#22c55e",
-            command: "",
-            shortcut: "F6", // Exemple: envoie la touche F6 (nécessite robotjs sur le serveur)
-          },
-        ],
-      },
-      {
-        id: "media",
-        name: "Média",
-        color: "#f97316",
-        icon: "Monitor",
-        buttons: [
-          {
-            id: "demo-4",
-            label: "Volume +",
-            icon: "Volume2",
-            color: "#3b82f6",
-            command: "nircmd.exe changesysvolume 1000", // Exemple: nécessite NirCmd
-            shortcut: "",
-          },
-          {
-            id: "demo-5",
-            label: "VLC",
-            icon: "Monitor",
-            color: "#f97316",
-            command: "start vlc.exe", // Exemple: lance VLC
-            shortcut: "",
-          },
-          {
-            id: "demo-6",
-            label: "Discord",
-            icon: "Headphones",
-            color: "#8b5cf6",
-            command: "start discord.exe", // Exemple: lance Discord
-            shortcut: "",
-          },
+        id: "main", name: "Principal", color: "#3b82f6", icon: "Home",
+        blocks: [
+            { id: "cmd-mic", label: "Couper Micro", icon: "Mic", color: "#ef4444", width: 1, height: 1, actionType: "command", command: "nircmd.exe mutesysvolume 2" },
+            { id: "slider-volume", label: "Volume PC", icon: "Volume2", color: "#3b82f6", width: 3, height: 1, actionType: "slider", sliderConfig: { apiEndpoint: "/api/set-master-volume", min: 0, max: 65535, initialValue: 32767, unit: "" } },
+            { id: "status-cpu", label: "CPU", icon: "Cpu", color: "#ef4444", width: 2, height: 1, actionType: "statusDisplay", statusDisplayConfig: { apiEndpoint: "/api/get-cpu-usage", dataType: "cpu", updateIntervalMs: 2000, labelUnit: "%" } },
+            { id: "status-ram", label: "RAM", icon: "MemoryStick", color: "#22c55e", width: 2, height: 1, actionType: "statusDisplay", statusDisplayConfig: { apiEndpoint: "/api/get-ram-usage", dataType: "ram", updateIntervalMs: 3000, labelUnit: "%" } },
         ],
       },
     ];
     setPages(defaultPages);
-    setCurrentPageId(defaultPages[0].id);
-    saveConfigToServer(defaultPages); // Sauvegarde les pages par défaut sur le serveur
+    if (defaultPages.length > 0) setCurrentPageId(defaultPages[0].id);
+    saveConfigToServer(defaultPages);
   }, [saveConfigToServer]);
 
 
-  // Appelle saveConfigToServer chaque fois que 'pages' change
   React.useEffect(() => {
-    if (pages.length > 0) {
+    const loadConfig = async () => {
+      try {
+        const response = await fetch("/api/config");
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        
+        const migratedData = data.map((page: any) => {
+            const newBlocks = (page.blocks || page.buttons || []).map((block: any) => {
+                if (!block.actionType) {
+                    if (block.shortcut) {
+                        return {...block, actionType: 'shortcut'};
+                    }
+                    return {...block, actionType: 'command'};
+                }
+                return block;
+            });
+
+            return { ...page, blocks: newBlocks, buttons: undefined };
+        });
+
+        if (migratedData && migratedData.length > 0) {
+          setPages(migratedData);
+          setCurrentPageId(migratedData[0].id);
+        } else {
+          createDefaultPages();
+        }
+      } catch (error) {
+        console.error("Échec du chargement de la config, création par défaut:", error);
+        createDefaultPages();
+      }
+    };
+    loadConfig();
+  }, [createDefaultPages]);
+
+  React.useEffect(() => {
+    if (pages.length > 0 && currentPageId) {
       saveConfigToServer(pages);
     }
-  }, [pages, saveConfigToServer]);
+  }, [pages, currentPageId, saveConfigToServer]);
 
-
-  const handleAddButton = () => {
-    setEditingButton(undefined);
+  const handleAddControl = () => {
+    setEditingControl(undefined);
     setDialogOpen(true);
   };
 
-  const handleEditButton = (config: ActionButtonConfig) => {
-    setEditingButton(config);
+  const handleEditControl = (config: ControlBlockConfig) => {
+    setEditingControl(config);
     setDialogOpen(true);
   };
 
-  const handleSaveButton = (config: ActionButtonConfig) => {
-    setPages((prev) => {
-      const newPages = prev.map((page) => {
+  const handleSaveControl = (config: ControlBlockConfig) => {
+    switch (config.actionType) {
+      case "slider":
+        config.width = 3;
+        config.height = 1;
+        break;
+      case "statusDisplay":
+        config.width = 2;
+        config.height = 1;
+        break;
+      default:
+        config.width = 1;
+        config.height = 1;
+        break;
+    }
+    setPages((prev) =>
+      prev.map((page) => {
         if (page.id === currentPageId) {
-          if (editingButton) {
-            return {
-              ...page,
-              buttons: page.buttons.map((btn) =>
-                btn.id === config.id ? config : btn,
-              ),
-            };
+          const blocks = page.blocks || [];
+          if (editingControl) {
+            return { ...page, blocks: blocks.map((ctrl) => ctrl.id === config.id ? config : ctrl) };
           } else {
-            return {
-              ...page,
-              buttons: [...page.buttons, config],
-            };
+            return { ...page, blocks: [...blocks, config] };
           }
         }
         return page;
-      });
-      return newPages;
-    });
+      })
+    );
     setDialogOpen(false);
   };
-
-  const handleDeleteButton = () => {
-    if (editingButton) {
-      setPages((prev) => {
-        const newPages = prev.map((page) => {
+  
+  const handleDeleteControl = () => {
+      if (!editingControl) return;
+      setPages(prev => prev.map(page => {
           if (page.id === currentPageId) {
-            return {
-              ...page,
-              buttons: page.buttons.filter(
-                (btn) => btn.id !== editingButton.id,
-              ),
-            };
+              return { ...page, blocks: (page.blocks || []).filter(b => b.id !== editingControl.id) };
           }
           return page;
-        });
-        return newPages;
-      });
+      }));
       setDialogOpen(false);
-    }
   };
 
   const handleAddPage = () => {
@@ -251,10 +179,8 @@ export function StreamDeck({ className }: StreamDeckProps) {
   const handleSavePage = (pageData: StreamDeckPage) => {
     setPages((prev) => {
       if (editingPage) {
-        // Met à jour une page existante
         return prev.map((page) => (page.id === pageData.id ? pageData : page));
       } else {
-        // Ajoute une nouvelle page
         const newPages = [...prev, pageData];
         setCurrentPageId(pageData.id);
         return newPages;
@@ -263,142 +189,138 @@ export function StreamDeck({ className }: StreamDeckProps) {
     setPageDialogOpen(false);
   };
 
-  const handleDeletePage = () => {
-    if (editingPage && pages.length > 1) {
+  const handleDeletePage = (pageId: string) => {
+    if (pages.length > 1) {
       setPages((prev) => {
-        const newPages = prev.filter((page) => page.id !== editingPage.id);
-        if (currentPageId === editingPage.id) {
+        const newPages = prev.filter((page) => page.id !== pageId);
+        if (currentPageId === pageId) {
           setCurrentPageId(newPages[0].id);
         }
         return newPages;
       });
-      setPageDialogOpen(false);
     }
   };
 
-  // Gestionnaires de glisser-déposer pour les boutons
-  const handleButtonDragStart = (e: React.DragEvent, buttonId: string) => {
-    setDraggedButton(buttonId);
+  const handleControlDragStart = (e: React.DragEvent, controlId: string) => {
+    setDraggedControl(controlId);
     e.dataTransfer.effectAllowed = "move";
   };
 
-  const handleButtonDragEnd = () => {
-    setDraggedButton(null);
+  const handleControlDragEnd = () => {
+    setDraggedControl(null);
   };
 
-  const handleButtonDragOver = (e: React.DragEvent) => {
+  const handleControlDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
   };
-
-  const handleButtonDrop = (e: React.DragEvent, targetButtonId: string) => {
+  
+  const handleControlDrop = (e: React.DragEvent, targetControlId: string) => {
     e.preventDefault();
-    if (!draggedButton || draggedButton === targetButtonId) return;
-
-    setPages((prev) => {
-      const newPages = prev.map((page) => {
+    if (!draggedControl || draggedControl === targetControlId) return;
+  
+    setPages((prev) =>
+      prev.map((page) => {
         if (page.id === currentPageId) {
-          const buttons = [...page.buttons];
-          const draggedIndex = buttons.findIndex(
-            (btn) => btn.id === draggedButton,
-          );
-          const targetIndex = buttons.findIndex(
-            // eslint-disable-next-line @typescript-eslint/no-shadow
-            (btn) => btn.id === targetButtonId,
-          );
-
-          if (draggedIndex !== -1 && targetIndex !== -1) {
-            const [draggedItem] = buttons.splice(draggedIndex, 1);
-            buttons.splice(targetIndex, 0, draggedItem);
+          const controls = [...page.blocks];
+          const draggedIndex = controls.findIndex((ctrl) => ctrl.id === draggedControl);
+          const targetIndex = controls.findIndex((ctrl) => ctrl.id === targetControlId);
+  
+          if (draggedIndex > -1 && targetIndex > -1) {
+            const [draggedItem] = controls.splice(draggedIndex, 1);
+            controls.splice(targetIndex, 0, draggedItem);
           }
-          return { ...page, buttons };
+          return { ...page, blocks: controls };
         }
         return page;
-      });
-      return newPages;
-    });
-    setDraggedButton(null);
+      })
+    );
+    setDraggedControl(null);
   };
-
-  // Gestionnaire de réorganisation des pages
+  
   const handlePageReorder = (sourceId: string, targetId: string) => {
     setPages((prev) => {
-      const pages = [...prev];
-      const sourceIndex = pages.findIndex((page) => page.id === sourceId);
-      const targetIndex = pages.findIndex((page) => page.id === targetId);
-
-      if (sourceIndex !== -1 && targetIndex !== -1) {
-        const [draggedPage] = pages.splice(sourceIndex, 1);
-        pages.splice(targetIndex, 0, draggedPage);
+      const newPages = [...prev];
+      const sourceIndex = newPages.findIndex((p) => p.id === sourceId);
+      const targetIndex = newPages.findIndex((p) => p.id === targetId);
+      if (sourceIndex > -1 && targetIndex > -1) {
+        const [removed] = newPages.splice(sourceIndex, 1);
+        newPages.splice(targetIndex, 0, removed);
       }
-      return pages;
+      return newPages;
     });
   };
 
-  // Fonction pour exécuter l'action via l'API du serveur
-  const handleExecuteAction = async (config: ActionButtonConfig) => {
-    if (!config.command && !config.shortcut) {
-      if (clickSound) clickSound.play(); // Joue le son même s'il n'y a pas de commande
-      return;
+  const handleExecuteAction = async (config: ControlBlockConfig) => {
+    if (clickSound) clickSound.play();
+    let apiUrl = '';
+    let body: any = {};
+
+    switch (config.actionType) {
+      case 'command':
+        if (!config.command) return alert("Commande non configurée.");
+        apiUrl = "/api/execute-action";
+        body = { command: config.command };
+        break;
+      case 'shortcut':
+        if (!config.shortcut) return alert("Raccourci non configuré.");
+        apiUrl = "/api/execute-action";
+        body = { shortcut: config.shortcut };
+        break;
+      case 'yeelight':
+        if (!config.yeelightConfig?.ip) return alert("IP Yeelight non configurée.");
+        apiUrl = "/api/yeelight-toggle";
+        body = { action: config.yeelightConfig.action, yeelightIp: config.yeelightConfig.ip };
+        break;
+      default:
+        return;
     }
 
     try {
-      const response = await fetch("/api/execute-action", {
+      const response = await fetch(apiUrl, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          command: config.command,
-          shortcut: config.shortcut,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
       });
-
       const data = await response.json();
-
-      if (!response.ok) {
-        console.error("Erreur serveur :", data.error);
-        if (clickSound) clickSound.play(); // Joue le son pour l'erreur
-      } else {
-        console.log("Action exécutée :", data.message);
-        if (clickSound) clickSound.play(); // Joue le son pour le succès
-      }
-    }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    catch (error: any) {
-      console.error("Erreur réseau ou client :", error);
-      if (clickSound) clickSound.play(); // Joue le son pour l'erreur réseau
+      if (!response.ok) throw new Error(data.error || 'Erreur serveur');
+    } catch (error: any) {
+      console.error("Erreur d'exécution :", error);
+      alert(`Erreur: ${error.message}`);
     }
   };
 
-  // Fonction pour redémarrer le serveur via un appel API
+  const handleSliderValueChange = React.useCallback(async (config: ControlBlockConfig, value: number) => {
+    if (!config.sliderConfig?.apiEndpoint) return console.error("Endpoint API du slider non configuré.");
+    try {
+      const response = await fetch(config.sliderConfig.apiEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Erreur serveur');
+    } catch (error: any) {
+      console.error(`Erreur réseau slider (${config.label}):`, error);
+      alert(`Erreur slider (${config.label}) : ${error.message}`);
+    }
+  }, []);
+
   const handleRestartServer = async () => {
+    if (clickSound) clickSound.play();
     try {
-      const response = await fetch("/api/restart-server", {
-        method: "POST",
-      });
+      const response = await fetch("/api/restart-server", { method: "POST" });
       const data = await response.json();
-      if (response.ok) {
-        console.log("Redémarrage serveur :", data.message);
-        if (clickSound) clickSound.play(); // Joue le son pour le succès
-      } else {
-        console.error("Échec du redémarrage du serveur :", data.error);
-        if (clickSound) clickSound.play(); // Joue le son pour l'erreur
-      }
-    }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    catch (error: any) {
-      console.error("Erreur lors du redémarrage du serveur :", error);
-      if (clickSound) clickSound.play(); // Joue le son pour l'erreur réseau
+      if (!response.ok) throw new Error(data.error || 'Erreur serveur');
+      alert("Le serveur redémarre...");
+    } catch (error: any) {
+      console.error("Erreur lors du redémarrage :", error);
+      alert(`Échec du redémarrage : ${error.message}`);
     }
   };
-
-
-  // Calcule les dimensions de la grille en fonction du nombre de boutons et de la taille de l'écran
-  const [screenSize, setScreenSize] = React.useState<
-    "mobile" | "tablet" | "desktop"
-  >("desktop");
-
+  
+  const [screenSize, setScreenSize] = React.useState<"mobile" | "tablet" | "desktop">("desktop");
+  
   React.useEffect(() => {
     const checkScreenSize = () => {
       const width = window.innerWidth;
@@ -406,191 +328,101 @@ export function StreamDeck({ className }: StreamDeckProps) {
       else if (width < 1024) setScreenSize("tablet");
       else setScreenSize("desktop");
     };
-
     checkScreenSize();
     window.addEventListener("resize", checkScreenSize);
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
-  const getGridDimensions = () => {
-    const buttonCount = buttons.length + (isEditing ? 1 : 0);
-
-    switch (screenSize) {
-      case "mobile":
-        return {
-          cols: Math.min(3, Math.max(2, Math.ceil(Math.sqrt(buttonCount)))),
-          maxCols: 3,
-        };
-      case "tablet":
-        return {
-          cols: Math.min(
-            4,
-            Math.max(3, Math.ceil(Math.sqrt(buttonCount * 0.8))),
-          ),
-          maxCols: 4,
-        };
-      default:
-        return {
-          cols: Math.min(
-            6,
-            Math.max(4, Math.ceil(Math.sqrt(buttonCount * 0.7))),
-          ),
-          maxCols: 6,
-        };
-    }
-  };
-
-  const { cols, maxCols } = getGridDimensions();
-  const totalSlots = Math.max(cols * 3, buttons.length + (isEditing ? 1 : 0)); // Minimum 3 rangées
+  const cols = { mobile: 3, tablet: 4, desktop: 6 }[screenSize];
 
   return (
     <div className={cn("flex flex-col h-full", className)}>
-      {/* En-tête */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-6 border-b border-border/50 gap-4 sm:gap-0">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold">CONTROL PAD</h1>
           <p className="text-xs sm:text-sm text-muted-foreground">
-            Contrôlez votre PC à distance avec des boutons d'action personnalisables
+            Contrôlez votre PC à distance avec des blocs d'action personnalisables
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant={isEditing ? "default" : "outline"}
-            size="sm"
-            onClick={() => setIsEditing(!isEditing)}
-            className="gap-2 text-xs sm:text-sm"
-          >
-            {isEditing ? (
-              <>
-                <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Mode Affichage</span>
-                <span className="sm:hidden">Voir</span>
-              </>
-            ) : (
-              <>
-                <Edit3 className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Mode Édition</span>
-                <span className="sm:hidden">Éditer</span>
-              </>
-            )}
+          <Button variant={isEditing ? "default" : "outline"} size="sm" onClick={() => setIsEditing(!isEditing)} className="gap-2 text-xs sm:text-sm">
+            {isEditing ? <><Eye className="h-3 w-3 sm:h-4 sm:w-4" /> <span className="hidden sm:inline">Mode Affichage</span><span className="sm:hidden">Voir</span></> : <><Edit3 className="h-3 w-3 sm:h-4 sm:w-4" /> <span className="hidden sm:inline">Mode Édition</span><span className="sm:hidden">Éditer</span></>}
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2 text-xs sm:text-sm"
-            onClick={() => setSettingsOpen(true)}
-          >
+          <Button variant="outline" size="sm" className="gap-2 text-xs sm:text-sm" onClick={() => setSettingsOpen(true)}>
             <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="hidden sm:inline">Paramètres</span>
           </Button>
         </div>
       </div>
 
-      {/* Navigation entre les pages */}
       <PageTabs
         pages={pages}
         currentPageId={currentPageId}
         onPageChange={setCurrentPageId}
         onAddPage={handleAddPage}
         onEditPage={handleEditPage}
-        onDeletePage={(pageId) => {
-          if (pages.length > 1) {
-            setPages((prev) => {
-              const newPages = prev.filter((page) => page.id !== pageId);
-              if (currentPageId === pageId) {
-                setCurrentPageId(newPages[0].id);
-              }
-              return newPages;
-            });
-          }
-        }}
+        onDeletePage={handleDeletePage}
         onReorderPages={handlePageReorder}
         isEditing={isEditing}
       />
 
-      {/* Grille des boutons */}
       <div className="flex-1 p-3 sm:p-6 overflow-auto">
         {isEditing && (
           <div className="text-center text-sm text-muted-foreground mb-4 p-2 bg-primary/10 rounded-lg border border-primary/20">
-            🎛️ Mode Édition Actif - Faites glisser pour réorganiser les boutons et les pages, cliquez sur les boutons pour les modifier.
+            🎛️ Mode Édition Actif - Glissez pour réorganiser, cliquez pour modifier.
           </div>
         )}
         <div
           className="grid gap-2 sm:gap-4 justify-center"
           style={{
-            gridTemplateColumns: `repeat(${cols}, 1fr)`,
-            maxWidth:
-              screenSize === "mobile"
-                ? `${cols * 80}px`
-                : screenSize === "tablet"
-                  ? `${cols * 96}px`
-                  : `${cols * 112}px`,
+            gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
+            maxWidth: screenSize === "mobile" ? `${cols * 90}px`
+                      : screenSize === "tablet" ? `${cols * 106}px`
+                      : `${cols * 122}px`,
             margin: "0 auto",
           }}
         >
-          {buttons.map((config) => (
-            <ActionButton
+          {blocks.map((config) => (
+            <ControlRenderer
               key={config.id}
               config={config}
+              onExecute={handleExecuteAction}
+              onSliderValueChange={handleSliderValueChange}
               isEditing={isEditing}
-              onEdit={() => handleEditButton(config)}
-              onExecute={() => handleExecuteAction(config)}
-              onDragStart={(e) => handleButtonDragStart(e, config.id)}
-              onDragEnd={handleButtonDragEnd}
-              onDragOver={handleButtonDragOver}
-              onDrop={(e) => handleButtonDrop(e, config.id)}
+              onEdit={() => handleEditControl(config)}
+              onDragStart={handleControlDragStart}
+              onDragEnd={handleControlDragEnd}
+              onDragOver={handleControlDragOver}
+              onDrop={handleControlDrop}
             />
           ))}
-
-          {isEditing && <AddButton onClick={handleAddButton} />}
-
-          {/* Remplir les emplacements de grille restants pour une cohérence visuelle */}
-          {Array.from({
-            length: Math.max(
-              0,
-              totalSlots - buttons.length - (isEditing ? 1 : 0),
-            ),
-          }).map((_, i) => (
-            <div key={`empty-${i}`} className="h-24 w-24" />
-          ))}
+          {isEditing && <AddButton onClick={handleAddControl} />}
         </div>
-
-        {/* État vide */}
-        {buttons.length === 0 && (
+        {blocks.length === 0 && (
           <div className="text-center py-12">
             <div className="text-muted-foreground mb-4">
               <Settings className="h-12 w-12 mx-auto mb-2 opacity-50" />
               <p className="text-lg font-medium">Aucune action configurée</p>
-              <p className="text-sm">
-                Ajoutez votre premier bouton d'action pour commencer
-              </p>
+              <p className="text-sm">Passez en mode édition pour ajouter un bloc</p>
             </div>
-            <Button onClick={handleAddButton} className="mt-4">
-              Ajouter une première action
-            </Button>
           </div>
         )}
       </div>
 
-      {/* Dialogue d'action */}
-      <ActionButtonDialog
+      <ControlDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        config={editingButton}
-        onSave={handleSaveButton}
-        onDelete={editingButton ? handleDeleteButton : undefined}
+        config={editingControl}
+        onSave={handleSaveControl}
+        onDelete={editingControl ? handleDeleteControl : undefined}
       />
-
-      {/* Dialogue de page */}
       <PageDialog
         open={pageDialogOpen}
         onOpenChange={setPageDialogOpen}
         page={editingPage}
         onSave={handleSavePage}
-        onDelete={editingPage ? handleDeletePage : undefined}
+        onDelete={editingPage ? () => handleDeletePage(editingPage.id) : undefined}
       />
-
-      {/* Dialogue des paramètres */}
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} onRestartServer={handleRestartServer} />
     </div>
   );
