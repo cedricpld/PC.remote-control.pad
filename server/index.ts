@@ -301,6 +301,57 @@ export function createServer() {
     });
   });
 
+  // NOUVEAU: Route API pour l'utilisation du GPU (CUDA)
+  app.get("/api/get-cuda-usage", (_req, res) => {
+    const command = 'nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits';
+    exec(command, (error, stdout, stderr) => {
+      if (error || stderr) {
+        console.error("Erreur nvidia-smi (GPU):", error || stderr);
+        return res.status(500).json({ error: "NVIDIA-SMI non trouvé. GPU NVIDIA requis." });
+      }
+      const usage = parseFloat(stdout.trim());
+      if (!isNaN(usage)) {
+        return res.status(200).json({ value: usage });
+      }
+      return res.status(500).json({ error: "Réponse invalide de nvidia-smi." });
+    });
+  });
+
+  // NOUVEAU: Route API pour l'utilisation de la VRAM en %
+  app.get("/api/get-vram-usage-percent", (_req, res) => {
+    const command = 'nvidia-smi --query-gpu=memory.used,memory.total --format=csv,noheader,nounits';
+    exec(command, (error, stdout, stderr) => {
+      if (error || stderr) {
+        console.error("Erreur nvidia-smi (VRAM):", error || stderr);
+        return res.status(500).json({ error: "NVIDIA-SMI non trouvé. GPU NVIDIA requis." });
+      }
+      const [used, total] = stdout.trim().split(',').map(parseFloat);
+      if (!isNaN(used) && !isNaN(total) && total > 0) {
+        const percentage = (used / total) * 100;
+        return res.status(200).json({ value: parseFloat(percentage.toFixed(1)) });
+      }
+      return res.status(500).json({ error: "Réponse invalide de nvidia-smi pour la VRAM." });
+    });
+  });
+
+  // NOUVEAU: Route API pour l'utilisation de la VRAM en Go
+  app.get("/api/get-vram-usage-gb", (_req, res) => {
+    const command = 'nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits';
+    exec(command, (error, stdout, stderr) => {
+      if (error || stderr) {
+        console.error("Erreur nvidia-smi (VRAM):", error || stderr);
+        return res.status(500).json({ error: "NVIDIA-SMI non trouvé. GPU NVIDIA requis." });
+      }
+      const usedMb = parseFloat(stdout.trim());
+      if (!isNaN(usedMb)) {
+        const usedGb = usedMb / 1024;
+        return res.status(200).json({ value: parseFloat(usedGb.toFixed(2)) });
+      }
+      return res.status(500).json({ error: "Réponse invalide de nvidia-smi pour la VRAM." });
+    });
+  });
+
+
   // NOUVEAU: Route API pour récupérer l'utilisation de la RAM
   app.get("/api/get-ram-usage", (_req, res) => {
     const totalMemBytes = os.totalmem();
