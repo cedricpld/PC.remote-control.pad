@@ -9,14 +9,15 @@ interface StatusDisplayProps {
   config: ControlBlockConfig;
   className?: string;
   isEditing?: boolean;
+  onEdit?: () => void;
   [key: string]: any;
 }
 
 export const StatusDisplay = React.forwardRef<HTMLDivElement, StatusDisplayProps>(
-  ({ config, className, isEditing, ...props }, ref) => {
+  ({ config, className, isEditing, onEdit, ...props }, ref) => {
+    // ... (toute la logique interne du composant reste la même)
     const [currentValue, setCurrentValue] = React.useState<number | null>(null);
     const [error, setError] = React.useState<string | null>(null);
-
     const fetchData = React.useCallback(async () => {
       if (!config.statusDisplayConfig?.apiEndpoint) return setError("API non configurée.");
       try {
@@ -35,12 +36,13 @@ export const StatusDisplay = React.forwardRef<HTMLDivElement, StatusDisplayProps
       const interval = setInterval(fetchData, config.statusDisplayConfig?.updateIntervalMs || 5000);
       return () => clearInterval(interval);
     }, [fetchData, config.statusDisplayConfig?.updateIntervalMs]);
-
+    
     const IconComponent = config.icon ? (Icons as any)[config.icon] : null;
 
     return (
       <div
         ref={ref}
+        onClick={isEditing ? onEdit : undefined} // On utilise onClick ici
         className={cn(
           "relative flex flex-col items-center justify-center p-2 space-y-2 h-24 w-full",
           "rounded-xl border-2 bg-card/50 backdrop-blur-sm text-center transition-all",
@@ -53,6 +55,7 @@ export const StatusDisplay = React.forwardRef<HTMLDivElement, StatusDisplayProps
         }}
         {...props}
       >
+        {/* ... (le reste du JSX reste identique) ... */}
         <div className="flex items-center justify-center gap-2 w-full">
             {IconComponent && <IconComponent className="h-4 w-4 shrink-0" style={{ color: config.color || "currentColor" }}/>}
             <Label

@@ -10,11 +10,13 @@ interface ControlSliderProps {
   onValueChange?: (value: number) => void;
   className?: string;
   isEditing?: boolean;
+  onEdit?: () => void;
   [key: string]: any;
 }
 
 export const ControlSlider = React.forwardRef<HTMLDivElement, ControlSliderProps>(
-  ({ config, onValueChange, className, isEditing, ...props }, ref) => {
+  ({ config, onValueChange, className, isEditing, onEdit, ...props }, ref) => {
+    // ... (toute la logique interne du composant reste la même)
     const [sliderValue, setSliderValue] = React.useState(config.sliderConfig?.initialValue || 0);
 
     React.useEffect(() => {
@@ -35,6 +37,7 @@ export const ControlSlider = React.forwardRef<HTMLDivElement, ControlSliderProps
     return (
       <div
         ref={ref}
+        onClick={isEditing ? onEdit : undefined} // On utilise onClick ici
         className={cn(
           "relative flex flex-col items-center justify-center p-2 space-y-2 h-24 w-full",
           "rounded-xl border-2 bg-card/50 backdrop-blur-sm transition-all",
@@ -47,7 +50,8 @@ export const ControlSlider = React.forwardRef<HTMLDivElement, ControlSliderProps
         }}
         {...props}
       >
-        <div className="flex items-center justify-center gap-2 w-full">
+        {/* ... (le reste du JSX reste identique) ... */}
+         <div className="flex items-center justify-center gap-2 w-full">
             {IconComponent && <IconComponent className="h-4 w-4 shrink-0" style={{ color: config.color || "currentColor" }}/>}
             <Label
               className="text-xs font-medium text-center leading-tight truncate"
