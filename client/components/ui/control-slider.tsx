@@ -22,9 +22,7 @@ export const ControlSlider = React.forwardRef<HTMLDivElement, ControlSliderProps
     }, [config.sliderConfig?.initialValue]);
 
     const handleSliderChange = (value: number[]) => {
-      if (onValueChange) {
-        onValueChange(value[0]);
-      }
+      if (onValueChange) onValueChange(value[0]);
     };
 
     const IconComponent = config.icon ? (Icons as any)[config.icon] : null;
@@ -38,7 +36,8 @@ export const ControlSlider = React.forwardRef<HTMLDivElement, ControlSliderProps
       <div
         ref={ref}
         className={cn(
-          "relative flex flex-col items-center justify-center p-2 rounded-lg sm:rounded-xl border-2 border-border/50 bg-card/50 backdrop-blur-sm space-y-1 h-full transition-all",
+          "relative flex flex-col items-center justify-center p-2 space-y-2 h-24 w-full",
+          "rounded-xl border-2 bg-card/50 backdrop-blur-sm transition-all",
           isEditing && "ring-2 ring-primary/50 cursor-move hover:ring-primary",
           className
         )}
@@ -58,7 +57,7 @@ export const ControlSlider = React.forwardRef<HTMLDivElement, ControlSliderProps
             </Label>
         </div>
         <Slider
-          defaultValue={[sliderValue]}
+          value={[sliderValue]}
           min={min}
           max={max}
           step={1}

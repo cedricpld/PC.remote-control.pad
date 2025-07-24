@@ -155,7 +155,7 @@ export function createServer() {
   app.post("/api/restart-server", (_req, res) => {
     console.log("Requête de redémarrage du serveur reçue.");
     res.status(200).json({ message: `Le serveur va redémarrer si PM2 est configuré.` });
-    // La logique de redémarrage réelle dépend de PM2 ou d'un autre outil
+    // Pour un redémarrage réel, PM2 ou un autre gestionnaire de processus est nécessaire
     // exec('pm2 restart stream-deck-server').unref();
   });
 

@@ -41,8 +41,12 @@ export function StreamDeck({ className }: StreamDeckProps) {
 
   const saveConfigToServer = React.useCallback(async (currentPages: StreamDeckPage[]) => {
     try {
-      // Nettoyer les anciennes clés "buttons" avant de sauvegarder
-      const pagesToSave = currentPages.map(({ buttons, ...page }) => page);
+      const pagesToSave = currentPages.map(({ buttons, ...page }: any) => {
+        // Nettoie les anciennes clés "buttons" et les blocs sans actionType avant de sauvegarder
+        const cleanedBlocks = (page.blocks || []).filter((b: ControlBlockConfig) => b.actionType);
+        return {...page, blocks: cleanedBlocks};
+      });
+
       const response = await fetch("/api/config", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -60,10 +64,10 @@ export function StreamDeck({ className }: StreamDeckProps) {
       {
         id: "main", name: "Principal", color: "#3b82f6", icon: "Home",
         blocks: [
-            { id: "cmd-mic", label: "Couper Micro", icon: "Mic", color: "#ef4444", width: 1, height: 1, actionType: "command", command: "nircmd.exe mutesysvolume 2" },
-            { id: "slider-volume", label: "Volume PC", icon: "Volume2", color: "#3b82f6", width: 2, height: 1, actionType: "slider", sliderConfig: { apiEndpoint: "/api/set-master-volume", min: 0, max: 65535, initialValue: 32767, unit: "" } },
-            { id: "status-cpu", label: "CPU", icon: "Cpu", color: "#ef4444", width: 1, height: 1, actionType: "statusDisplay", statusDisplayConfig: { apiEndpoint: "/api/get-cpu-usage", dataType: "cpu", updateIntervalMs: 2000, labelUnit: "%" } },
-            { id: "status-ram", label: "RAM", icon: "MemoryStick", color: "#22c55e", width: 1, height: 1, actionType: "statusDisplay", statusDisplayConfig: { apiEndpoint: "/api/get-ram-usage", dataType: "ram", updateIntervalMs: 3000, labelUnit: "%" } },
+            { id: "cmd-mic", label: "Couper Micro", icon: "Mic", color: "#ef4444", width: 1, actionType: "command", command: "nircmd.exe mutesysvolume 2" },
+            { id: "slider-volume", label: "Volume PC", icon: "Volume2", color: "#3b82f6", width: 2, actionType: "slider", sliderConfig: { apiEndpoint: "/api/set-master-volume", min: 0, max: 65535, initialValue: 32767, unit: "" } },
+            { id: "status-cpu", label: "CPU", icon: "Cpu", color: "#ef4444", width: 1, actionType: "statusDisplay", statusDisplayConfig: { apiEndpoint: "/api/get-cpu-usage", dataType: "cpu", updateIntervalMs: 2000, labelUnit: "%" } },
+            { id: "status-ram", label: "RAM", icon: "MemoryStick", color: "#22c55e", width: 1, actionType: "statusDisplay", statusDisplayConfig: { apiEndpoint: "/api/get-ram-usage", dataType: "ram", updateIntervalMs: 3000, labelUnit: "%" } },
         ],
       },
     ];
@@ -91,7 +95,8 @@ export function StreamDeck({ className }: StreamDeckProps) {
                 return block;
             });
 
-            return { ...page, blocks: newBlocks, buttons: undefined };
+            const { buttons, ...restOfPage } = page;
+            return { ...restOfPage, blocks: newBlocks };
         });
 
         if (migratedData && migratedData.length > 0) {
@@ -108,6 +113,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
     loadConfig();
   }, [createDefaultPages]);
 
+  // Sauvegarder automatiquement les changements
   React.useEffect(() => {
     if (pages.length > 0 && currentPageId) {
       saveConfigToServer(pages);

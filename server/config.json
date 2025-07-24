@@ -42,22 +42,14 @@
         }
       },
       {
-        "id": "demo-2",
-        "label": "Lancer OBS",
-        "icon": "Camera",
-        "color": "#8b5cf6",
-        "command": "start obs64.exe",
-        "actionType": "command"
-      },
-      {
-        "id": "demo-3",
-        "label": "Select",
-        "icon": "Gamepad2",
-        "color": "#22c55e",
+        "id": "f0b648d7-2a48-4425-b600-316224dbc20d",
+        "label": "RAM",
+        "icon": "MemoryStick",
+        "color": "#f97316",
         "width": 1,
-        "actionType": "shortcut",
+        "actionType": "statusDisplay",
         "command": "",
-        "shortcut": "Ctrl+A",
+        "shortcut": "",
         "yeelightConfig": {
           "ip": "",
           "action": "toggle"
@@ -70,11 +62,19 @@
           "unit": ""
         },
         "statusDisplayConfig": {
-          "apiEndpoint": "",
+          "apiEndpoint": "/api/get-ram-usage",
           "dataType": "cpu",
           "updateIntervalMs": 2000,
-          "labelUnit": ""
+          "labelUnit": "%"
         }
+      },
+      {
+        "id": "demo-2",
+        "label": "Lancer OBS",
+        "icon": "Camera",
+        "color": "#8b5cf6",
+        "command": "start obs64.exe",
+        "actionType": "command"
       },
       {
         "id": "1e228913-7635-4482-8b51-50fdb37a0381",
@@ -95,6 +95,33 @@
           "max": 100,
           "initialValue": 50,
           "unit": "%"
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": ""
+        }
+      },
+      {
+        "id": "demo-3",
+        "label": "Select",
+        "icon": "Gamepad2",
+        "color": "#22c55e",
+        "width": 1,
+        "actionType": "shortcut",
+        "command": "",
+        "shortcut": "Ctrl+A",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
         },
         "statusDisplayConfig": {
           "apiEndpoint": "",

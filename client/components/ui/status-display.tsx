@@ -18,10 +18,7 @@ export const StatusDisplay = React.forwardRef<HTMLDivElement, StatusDisplayProps
     const [error, setError] = React.useState<string | null>(null);
 
     const fetchData = React.useCallback(async () => {
-      if (!config.statusDisplayConfig?.apiEndpoint) {
-        setError("API non configurée.");
-        return;
-      }
+      if (!config.statusDisplayConfig?.apiEndpoint) return setError("API non configurée.");
       try {
         const response = await fetch(config.statusDisplayConfig.apiEndpoint);
         if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
@@ -45,7 +42,8 @@ export const StatusDisplay = React.forwardRef<HTMLDivElement, StatusDisplayProps
       <div
         ref={ref}
         className={cn(
-          "relative flex flex-col items-center justify-center p-2 rounded-lg sm:rounded-xl border-2 border-border/50 bg-card/50 backdrop-blur-sm text-center space-y-1 h-full transition-all",
+          "relative flex flex-col items-center justify-center p-2 space-y-2 h-24 w-full",
+          "rounded-xl border-2 bg-card/50 backdrop-blur-sm text-center transition-all",
           isEditing && "ring-2 ring-primary/50 cursor-move hover:ring-primary",
           className
         )}
@@ -64,11 +62,10 @@ export const StatusDisplay = React.forwardRef<HTMLDivElement, StatusDisplayProps
               {config.label}
             </Label>
         </div>
-        {error ? (
-          <span className="text-destructive text-xs">{error}</span>
-        ) : currentValue !== null ? (
+        {error ? <span className="text-destructive text-xs">{error}</span>
+        : currentValue !== null ? (
           <>
-            <span className="text-base font-bold text-foreground">
+            <span className="text-lg font-bold text-foreground">
               {currentValue.toFixed(config.statusDisplayConfig?.dataType === 'cpu' ? 1 : 0)}
               {config.statusDisplayConfig?.labelUnit}
             </span>
@@ -76,9 +73,7 @@ export const StatusDisplay = React.forwardRef<HTMLDivElement, StatusDisplayProps
               <Progress value={currentValue} className="w-full h-1.5" />
             )}
           </>
-        ) : (
-          <span className="text-muted-foreground text-xs">...</span>
-        )}
+        ) : <span className="text-muted-foreground text-xs">...</span>}
       </div>
     );
   }
