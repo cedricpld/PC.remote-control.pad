@@ -256,6 +256,34 @@
           "updateIntervalMs": 2000,
           "labelUnit": ""
         }
+      },
+      {
+        "id": "171fca35-90ec-4205-906d-8689d0883143",
+        "label": "calc",
+        "icon": "Monitor",
+        "color": "#3b82f6",
+        "width": 1,
+        "height": 1,
+        "actionType": "command",
+        "command": "start calc.exe",
+        "shortcut": "",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": ""
+        }
       }
     ]
   }
