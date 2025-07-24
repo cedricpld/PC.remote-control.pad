@@ -146,6 +146,34 @@
         }
       },
       {
+        "id": "4b18af61-4953-43ff-accf-2ec0d57d6180",
+        "label": "Tout selectionner",
+        "icon": "Folder",
+        "color": "#22c55e",
+        "width": 1,
+        "height": 1,
+        "actionType": "shortcut",
+        "command": "",
+        "shortcut": "Ctrl+A",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": ""
+        }
+      },
+      {
         "id": "9d9c1c5a-33cd-4354-8b4a-c7647140ddb3",
         "label": "VLC",
         "icon": "Monitor",
@@ -183,34 +211,6 @@
         "actionType": "command",
         "command": "start plex.exe",
         "shortcut": "",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
-        },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
-        },
-        "statusDisplayConfig": {
-          "apiEndpoint": "",
-          "dataType": "cpu",
-          "updateIntervalMs": 2000,
-          "labelUnit": ""
-        }
-      },
-      {
-        "id": "4b18af61-4953-43ff-accf-2ec0d57d6180",
-        "label": "Tout selectionner",
-        "icon": "Folder",
-        "color": "#22c55e",
-        "width": 1,
-        "height": 1,
-        "actionType": "shortcut",
-        "command": "",
-        "shortcut": "Ctrl+A",
         "yeelightConfig": {
           "ip": "",
           "action": "toggle"
