@@ -118,15 +118,15 @@
         }
       },
       {
-        "id": "4b18af61-4953-43ff-accf-2ec0d57d6180",
-        "label": "Tout selectionner",
-        "icon": "Folder",
-        "color": "#22c55e",
+        "id": "171fca35-90ec-4205-906d-8689d0883143",
+        "label": "calc",
+        "icon": "Terminal",
+        "color": "#3b82f6",
         "width": 1,
         "height": 1,
-        "actionType": "shortcut",
-        "command": "",
-        "shortcut": "Ctrl+A",
+        "actionType": "command",
+        "command": "start calc.exe",
+        "shortcut": "",
         "yeelightConfig": {
           "ip": "",
           "action": "toggle"
@@ -146,14 +146,14 @@
         }
       },
       {
-        "id": "aca29153-80f7-41f8-bbe1-4f2453629ccd",
-        "label": "Micro",
-        "icon": "Mic",
-        "color": "#3b82f6",
-        "width": 3,
+        "id": "9d9c1c5a-33cd-4354-8b4a-c7647140ddb3",
+        "label": "VLC",
+        "icon": "Monitor",
+        "color": "#f97316",
+        "width": 1,
         "height": 1,
-        "actionType": "slider",
-        "command": "",
+        "actionType": "command",
+        "command": "start vlc.exe",
         "shortcut": "",
         "yeelightConfig": {
           "ip": "",
@@ -164,7 +164,63 @@
           "min": 0,
           "max": 100,
           "initialValue": 50,
-          "unit": "%"
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": ""
+        }
+      },
+      {
+        "id": "3f45057f-75e1-40eb-a0bb-90c5158078ed",
+        "label": "Plex",
+        "icon": "Play",
+        "color": "#eab308",
+        "width": 1,
+        "height": 1,
+        "actionType": "command",
+        "command": "start plex.exe",
+        "shortcut": "",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": ""
+        }
+      },
+      {
+        "id": "4b18af61-4953-43ff-accf-2ec0d57d6180",
+        "label": "Tout selectionner",
+        "icon": "Folder",
+        "color": "#22c55e",
+        "width": 1,
+        "height": 1,
+        "actionType": "shortcut",
+        "command": "",
+        "shortcut": "Ctrl+A",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
         },
         "statusDisplayConfig": {
           "apiEndpoint": "",
@@ -227,62 +283,6 @@
           "dataType": "cpu",
           "updateIntervalMs": 2000,
           "labelUnit": "%"
-        }
-      },
-      {
-        "id": "9d9c1c5a-33cd-4354-8b4a-c7647140ddb3",
-        "label": "calc",
-        "icon": "Terminal",
-        "color": "#3b82f6",
-        "width": 1,
-        "height": 1,
-        "actionType": "command",
-        "command": "start vlc.exe",
-        "shortcut": "",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
-        },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
-        },
-        "statusDisplayConfig": {
-          "apiEndpoint": "",
-          "dataType": "cpu",
-          "updateIntervalMs": 2000,
-          "labelUnit": ""
-        }
-      },
-      {
-        "id": "171fca35-90ec-4205-906d-8689d0883143",
-        "label": "calc",
-        "icon": "Monitor",
-        "color": "#3b82f6",
-        "width": 1,
-        "height": 1,
-        "actionType": "command",
-        "command": "start calc.exe",
-        "shortcut": "",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
-        },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
-        },
-        "statusDisplayConfig": {
-          "apiEndpoint": "",
-          "dataType": "cpu",
-          "updateIntervalMs": 2000,
-          "labelUnit": ""
         }
       }
     ]
