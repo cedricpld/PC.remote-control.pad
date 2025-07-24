@@ -282,32 +282,21 @@ export function createServer() {
     });
   });
 
-  // AMÉLIORÉ: Route API pour récupérer l'utilisation du CPU avec WMIC pour plus de fiabilité
+  // AMÉLIORÉ: Utilisation de PowerShell WMI pour une mesure fiable et indépendante de la langue
   app.get("/api/get-cpu-usage", (_req, res) => {
-    // Cette commande est spécifique à Windows et est plus fiable que os.cpus()
-    exec('wmic cpu get loadpercentage', (error, stdout, stderr) => {
+    const command = "powershell.exe -Command \"(Get-WmiObject -Class Win32_PerfFormattedData_PerfOS_Processor | Where-Object {$_.Name -eq '_Total'}).PercentProcessorTime\"";
+    
+    exec(command, (error, stdout, stderr) => {
       if (error || stderr) {
-        console.error("Erreur WMIC:", error || stderr);
-        // Solution de secours si WMIC échoue
-        const cpus = os.cpus();
-        const total = cpus.reduce((acc, cpu) => {
-            for (const type in cpu.times) {
-                acc.total += cpu.times[type as keyof typeof cpu.times];
-            }
-            acc.idle += cpu.times.idle;
-            return acc;
-        }, { total: 0, idle: 0 });
-        const usage = 100 - (100 * (total.idle / cpus.length) / (total.total / cpus.length));
+        console.error("Erreur de la commande CPU (Get-WmiObject):", error || stderr);
+        return res.status(500).json({ error: "Impossible de récupérer l'usage CPU via WMI." });
+      }
+      
+      const usage = parseFloat(stdout.trim().replace(',', '.'));
+      if (!isNaN(usage)) {
         return res.status(200).json({ value: parseFloat(usage.toFixed(1)) });
       }
       
-      const lines = stdout.trim().split('\n');
-      if (lines.length > 1) {
-        const usage = parseInt(lines[1].trim(), 10);
-        if (!isNaN(usage)) {
-          return res.status(200).json({ value: usage });
-        }
-      }
       return res.status(500).json({ error: "Réponse invalide de la commande CPU." });
     });
   });
