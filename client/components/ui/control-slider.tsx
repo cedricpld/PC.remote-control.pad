@@ -9,11 +9,12 @@ interface ControlSliderProps {
   config: ControlBlockConfig;
   onValueChange?: (value: number) => void;
   className?: string;
+  isEditing?: boolean; // Ajout de la prop
   [key: string]: any;
 }
 
 export const ControlSlider = React.forwardRef<HTMLDivElement, ControlSliderProps>(
-  ({ config, onValueChange, className, ...props }, ref) => {
+  ({ config, onValueChange, className, isEditing, ...props }, ref) => {
     const [sliderValue, setSliderValue] = React.useState(config.sliderConfig?.initialValue || 0);
 
     React.useEffect(() => {
@@ -42,7 +43,8 @@ export const ControlSlider = React.forwardRef<HTMLDivElement, ControlSliderProps
       <div
         ref={ref}
         className={cn(
-          "flex flex-col items-center justify-center p-2 rounded-lg sm:rounded-xl border-2 border-border/50 bg-card/50 backdrop-blur-sm space-y-1 h-full",
+          "flex flex-col items-center justify-center p-2 rounded-lg sm:rounded-xl border-2 border-border/50 bg-card/50 backdrop-blur-sm space-y-1 h-full transition-all",
+          isEditing && "ring-2 ring-primary/50 cursor-move hover:ring-primary", // Ligne ajoutée
           className
         )}
         style={{ 

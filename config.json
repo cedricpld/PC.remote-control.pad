@@ -7,8 +7,8 @@
     "blocks": [
       {
         "id": "cmd-mic",
-        "label": "Couper Micro",
-        "icon": "Mic",
+        "label": "Couper Son",
+        "icon": "Volume2",
         "color": "#ef4444",
         "width": 1,
         "height": 1,

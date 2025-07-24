@@ -8,11 +8,12 @@ import * as Icons from "lucide-react";
 interface StatusDisplayProps {
   config: ControlBlockConfig;
   className?: string;
+  isEditing?: boolean; // Ajout de la prop
   [key: string]: any;
 }
 
 export const StatusDisplay = React.forwardRef<HTMLDivElement, StatusDisplayProps>(
-  ({ config, className, ...props }, ref) => {
+  ({ config, className, isEditing, ...props }, ref) => {
     const [currentValue, setCurrentValue] = React.useState<number | null>(null);
     const [error, setError] = React.useState<string | null>(null);
 
@@ -44,7 +45,8 @@ export const StatusDisplay = React.forwardRef<HTMLDivElement, StatusDisplayProps
       <div
         ref={ref}
         className={cn(
-          "flex flex-col items-center justify-center p-2 rounded-lg sm:rounded-xl border-2 border-border/50 bg-card/50 backdrop-blur-sm text-center space-y-1 h-full",
+          "flex flex-col items-center justify-center p-2 rounded-lg sm:rounded-xl border-2 border-border/50 bg-card/50 backdrop-blur-sm text-center space-y-1 h-full transition-all",
+          isEditing && "ring-2 ring-primary/50 cursor-move hover:ring-primary", // Ligne ajoutée
           className
         )}
         style={{ 

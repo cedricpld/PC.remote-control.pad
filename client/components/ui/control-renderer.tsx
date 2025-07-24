@@ -30,7 +30,6 @@ export const ControlRenderer: React.FC<ControlRendererProps> = ({
 }) => {
   const gridClasses = `col-span-${config.width || 1} row-span-${config.height || 1}`;
 
-  // CORRIGÉ : La propriété "onClick" a été retirée d'ici pour ne plus interférer
   const interactiveProps = {
     draggable: isEditing,
     onDragStart: (e: React.DragEvent) => onDragStart && onDragStart(e, config.id),
@@ -47,8 +46,8 @@ export const ControlRenderer: React.FC<ControlRendererProps> = ({
         <ActionButton
           config={config}
           onExecute={() => onExecute && onExecute(config)}
-          isEditing={isEditing} // Ajout de la prop isEditing
-          onEdit={onEdit}       // Ajout de la prop onEdit
+          isEditing={isEditing}
+          onEdit={onEdit}
           className={`w-full h-full ${gridClasses}`}
           {...interactiveProps}
         />
@@ -58,6 +57,8 @@ export const ControlRenderer: React.FC<ControlRendererProps> = ({
         <ControlSlider
           config={config}
           onValueChange={(value) => onSliderValueChange && onSliderValueChange(config, value)}
+          isEditing={isEditing}
+          onClick={isEditing ? onEdit : undefined} // Ligne corrigée
           className={`w-full h-full ${gridClasses}`}
           {...interactiveProps}
         />
@@ -66,6 +67,8 @@ export const ControlRenderer: React.FC<ControlRendererProps> = ({
       return (
         <StatusDisplay
           config={config}
+          isEditing={isEditing}
+          onClick={isEditing ? onEdit : undefined} // Ligne corrigée
           className={`w-full h-full ${gridClasses}`}
           {...interactiveProps}
         />
