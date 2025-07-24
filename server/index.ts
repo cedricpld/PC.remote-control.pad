@@ -1,3 +1,4 @@
+import os from "os";
 import express_namespace from "express"; // Importez Express de manière robuste
 const express = express_namespace.default || express_namespace; // Prenez l'export par défaut ou le namespace complet
 import cors from "cors";
@@ -264,6 +265,44 @@ export function createServer() {
       console.log(`Stdout PM2 : ${stdout}`);
       res.status(200).json({ message: `Serveur ${appName} redémarré avec succès via PM2.` });
     });
+  });
+
+  // NOUVEAU: Route API pour le slider de volume maître
+  app.post("/api/set-master-volume", (req, res) => {
+    const { value } = req.body;
+    if (typeof value === 'undefined' || value === null || isNaN(Number(value))) {
+      return res.status(400).json({ error: "Valeur de volume manquante ou invalide." });
+    }
+    const volumeCommand = `nircmd.exe setsysvolume ${Math.min(Math.max(0, value), 65535)}`;
+    exec(volumeCommand, (error, stdout, stderr) => {
+      if (error) {
+        return res.status(500).json({ error: `Échec de la commande volume : ${error.message}`, stderr });
+      }
+      res.status(200).json({ message: `Volume défini à ${value} avec succès.` });
+    });
+  });
+
+  // NOUVEAU: Route API pour récupérer l'utilisation du CPU
+  app.get("/api/get-cpu-usage", (_req, res) => {
+    const cpus = os.cpus();
+    const total = cpus.reduce((acc, cpu) => {
+      for (const type in cpu.times) {
+        acc.total += cpu.times[type as keyof typeof cpu.times];
+      }
+      acc.idle += cpu.times.idle;
+      return acc;
+    }, { total: 0, idle: 0 });
+    const usage = 100 - (100 * (total.idle / cpus.length) / (total.total / cpus.length));
+    res.status(200).json({ value: parseFloat(usage.toFixed(1)) });
+  });
+
+  // NOUVEAU: Route API pour récupérer l'utilisation de la RAM
+  app.get("/api/get-ram-usage", (_req, res) => {
+    const totalMemBytes = os.totalmem();
+    const freeMemBytes = os.freemem();
+    const usedMemBytes = totalMemBytes - freeMemBytes;
+    const usedMemPercent = parseFloat(((usedMemBytes / totalMemBytes) * 100).toFixed(1));
+    res.status(200).json({ value: usedMemPercent });
   });
 
   return app;

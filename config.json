@@ -4,90 +4,146 @@
     "name": "Principal",
     "color": "#3b82f6",
     "icon": "Home",
-    "buttons": [
+    "blocks": [
       {
-        "id": "demo-1",
-        "label": "Couper Son",
-        "icon": "Volume2",
-        "color": "#ef4444",
-        "command": "nircmd.exe mutesysvolume 2",
-        "shortcut": ""
-      },
-      {
-        "id": "demo-2",
-        "label": "Lancer OBS",
-        "icon": "Camera",
-        "color": "#8b5cf6"
-      },
-      {
-        "id": "demo-3",
-        "label": "Mode Jeu (F6)",
-        "icon": "Gamepad2",
-        "color": "#22c55e"
-      },
-      {
-        "id": "c5e1556a-f228-4860-871e-c05062a9162a",
-        "label": "Screenshot",
-        "icon": "Monitor",
-        "color": "#22c55e",
-        "command": "",
-        "shortcut": "Win+D"
-      },
-      {
-        "id": "321f998d-a2b8-4570-8342-8990849c163d",
-        "label": "Mute Discord",
+        "id": "cmd-mic",
+        "label": "Couper Micro",
         "icon": "Mic",
-        "color": "#8b5cf6",
-        "command": "",
-        "shortcut": "Ctrl+Shift+M"
-      },
-      {
-        "id": "b5a6d93e-2e48-4110-9d0f-2d3851ac3dd2",
-        "label": "Salon +",
-        "icon": "Upload",
-        "color": "#8b5cf6",
-        "command": "",
-        "shortcut": "Ctrl+Alt+Up"
-      },
-      {
-        "id": "ef31be17-4f89-4651-acc2-1a51bcc9057c",
-        "label": "stes",
-        "icon": "Monitor",
-        "color": "#3b82f6",
+        "color": "#ef4444",
+        "width": 1,
+        "height": 1,
         "actionType": "command",
-        "command": ""
-      }
-    ]
-  },
-  {
-    "id": "media",
-    "name": "Média",
-    "color": "#f97316",
-    "icon": "Monitor",
-    "buttons": [
+        "command": "nircmd.exe mutesysvolume 2",
+        "shortcut": "",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": ""
+        }
+      },
       {
-        "id": "demo-4",
-        "label": "Volume +",
+        "id": "slider-volume",
+        "label": "Volume PC",
         "icon": "Volume2",
         "color": "#3b82f6",
-        "command": "nircmd.exe changesysvolume 1000",
-        "shortcut": ""
+        "width": 3,
+        "height": 1,
+        "actionType": "slider",
+        "command": "",
+        "shortcut": "",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "/api/set-master-volume",
+          "min": 0,
+          "max": 65535,
+          "initialValue": 32767,
+          "unit": "%"
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": ""
+        }
       },
       {
-        "id": "demo-5",
-        "label": "VLC",
-        "icon": "Monitor",
-        "color": "#f97316",
-        "command": "start vlc.exe",
-        "shortcut": ""
+        "id": "status-cpu",
+        "label": "CPU",
+        "icon": "Cpu",
+        "color": "#ef4444",
+        "width": 3,
+        "height": 3,
+        "actionType": "statusDisplay",
+        "command": "",
+        "shortcut": "",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "/api/get-cpu-usage",
+          "dataType": "cpu",
+          "updateIntervalMs": 1000,
+          "labelUnit": "%"
+        }
       },
       {
-        "id": "demo-6",
-        "label": "Discord",
-        "icon": "Headphones",
-        "color": "#8b5cf6",
-        "command": "start discord.exe",
-        "shortcut": ""
+        "id": "status-ram",
+        "label": "RAM",
+        "icon": "MemoryStick",
+        "color": "#22c55e",
+        "width": 1,
+        "height": 1,
+        "actionType": "statusDisplay",
+        "command": "",
+        "shortcut": "",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "/api/get-ram-usage",
+          "dataType": "ram",
+          "updateIntervalMs": 5000,
+          "labelUnit": "%"
+        }
+      },
+      {
+        "id": "4b18af61-4953-43ff-accf-2ec0d57d6180",
+        "label": "Tout selectionner",
+        "icon": "Folder",
+        "color": "#22c55e",
+        "width": 1,
+        "height": 1,
+        "actionType": "shortcut",
+        "command": "",
+        "shortcut": "Ctrl+A",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": ""
+        }
       }
     ]
   }
