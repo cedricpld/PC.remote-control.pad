@@ -1,7 +1,6 @@
 export interface StreamDeckPage {
   id: string;
   name: string;
-  // 'buttons' est renommé en 'blocks' pour être plus générique
   blocks: ControlBlockConfig[];
   color?: string;
   icon?: string;
@@ -14,14 +13,11 @@ export interface ControlBlockConfig {
   icon?: string;
   color?: string;
 
-  // Propriétés de taille pour la grille
-  width?: number; // en unités de grille (ex: 1, 2)
-  height?: number; // en unités de grille (ex: 1, 2)
+  // La hauteur a été retirée
+  width?: number; // en unités de grille (ex: 1, 2, 3)
 
-  // Type de l'action ou du comportement du bloc
   actionType: 'command' | 'shortcut' | 'yeelight' | 'slider' | 'statusDisplay';
 
-  // --- Propriétés spécifiques à chaque type ---
   command?: string;
   shortcut?: string;
   

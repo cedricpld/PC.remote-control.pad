@@ -38,8 +38,8 @@
         "label": "Volume PC",
         "icon": "Volume2",
         "color": "#3b82f6",
-        "width": 3,
-        "height": 1,
+        "width": 1,
+        "height": 3,
         "actionType": "slider",
         "command": "",
         "shortcut": "",
@@ -85,35 +85,7 @@
         "statusDisplayConfig": {
           "apiEndpoint": "/api/get-cpu-usage",
           "dataType": "cpu",
-          "updateIntervalMs": 1000,
-          "labelUnit": "%"
-        }
-      },
-      {
-        "id": "status-ram",
-        "label": "RAM",
-        "icon": "MemoryStick",
-        "color": "#22c55e",
-        "width": 1,
-        "height": 1,
-        "actionType": "statusDisplay",
-        "command": "",
-        "shortcut": "",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
-        },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
-        },
-        "statusDisplayConfig": {
-          "apiEndpoint": "/api/get-ram-usage",
-          "dataType": "ram",
-          "updateIntervalMs": 5000,
+          "updateIntervalMs": 100,
           "labelUnit": "%"
         }
       },
@@ -143,6 +115,34 @@
           "dataType": "cpu",
           "updateIntervalMs": 2000,
           "labelUnit": ""
+        }
+      },
+      {
+        "id": "status-ram",
+        "label": "RAM",
+        "icon": "MemoryStick",
+        "color": "#22c55e",
+        "width": 3,
+        "height": 2,
+        "actionType": "statusDisplay",
+        "command": "",
+        "shortcut": "",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "/api/get-ram-usage",
+          "dataType": "ram",
+          "updateIntervalMs": 5000,
+          "labelUnit": "%"
         }
       }
     ]

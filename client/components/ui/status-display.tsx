@@ -8,11 +8,12 @@ import * as Icons from "lucide-react";
 interface StatusDisplayProps {
   config: ControlBlockConfig;
   className?: string;
+  isEditing?: boolean;
   [key: string]: any;
 }
 
 export const StatusDisplay = React.forwardRef<HTMLDivElement, StatusDisplayProps>(
-  ({ config, className, ...props }, ref) => {
+  ({ config, className, isEditing, ...props }, ref) => {
     const [currentValue, setCurrentValue] = React.useState<number | null>(null);
     const [error, setError] = React.useState<string | null>(null);
 
@@ -44,7 +45,8 @@ export const StatusDisplay = React.forwardRef<HTMLDivElement, StatusDisplayProps
       <div
         ref={ref}
         className={cn(
-          "flex flex-col items-center justify-center p-2 rounded-lg sm:rounded-xl border-2 border-border/50 bg-card/50 backdrop-blur-sm text-center space-y-1 h-full",
+          "relative flex flex-col items-center justify-center p-2 rounded-lg sm:rounded-xl border-2 border-border/50 bg-card/50 backdrop-blur-sm text-center space-y-1 h-full transition-all",
+          isEditing && "ring-2 ring-primary/50 cursor-move hover:ring-primary",
           className
         )}
         style={{ 
@@ -55,7 +57,12 @@ export const StatusDisplay = React.forwardRef<HTMLDivElement, StatusDisplayProps
       >
         <div className="flex items-center justify-center gap-2 w-full">
             {IconComponent && <IconComponent className="h-4 w-4 shrink-0" style={{ color: config.color || "currentColor" }}/>}
-            <Label className="text-xs font-medium leading-tight truncate">{config.label}</Label>
+            <Label
+              className="text-xs font-medium leading-tight truncate"
+              style={{ color: config.color ? config.color : "hsl(var(--foreground))" }}
+            >
+              {config.label}
+            </Label>
         </div>
         {error ? (
           <span className="text-destructive text-xs">{error}</span>

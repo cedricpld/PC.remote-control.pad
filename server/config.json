@@ -15,6 +15,33 @@
         "actionType": "command"
       },
       {
+        "id": "f4e2a821-c298-4e97-812a-36712d38b278",
+        "label": "CPU",
+        "icon": "Cpu",
+        "color": "#3b82f6",
+        "width": 2,
+        "actionType": "statusDisplay",
+        "command": "",
+        "shortcut": "",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "/api/get-cpu-usage",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": "%"
+        }
+      },
+      {
         "id": "demo-2",
         "label": "Lancer OBS",
         "icon": "Camera",
@@ -24,11 +51,57 @@
       },
       {
         "id": "demo-3",
-        "label": "Mode Jeu (F6)",
+        "label": "Select",
         "icon": "Gamepad2",
         "color": "#22c55e",
-        "shortcut": "F6",
-        "actionType": "shortcut"
+        "width": 1,
+        "actionType": "shortcut",
+        "command": "",
+        "shortcut": "Ctrl+A",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": ""
+        }
+      },
+      {
+        "id": "1e228913-7635-4482-8b51-50fdb37a0381",
+        "label": "Volume",
+        "icon": "Volume2",
+        "color": "#3b82f6",
+        "width": 3,
+        "actionType": "slider",
+        "command": "",
+        "shortcut": "",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "/api/set-master-volume",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": "%"
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": ""
+        }
       }
     ]
   },

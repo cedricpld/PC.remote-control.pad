@@ -4,6 +4,7 @@ import { ActionButton } from './action-button';
 import { ControlSlider } from './control-slider';
 import { StatusDisplay } from './status-display';
 import * as Icons from "lucide-react";
+import { cn } from '@/lib/utils';
 
 interface ControlRendererProps {
   config: ControlBlockConfig;
@@ -18,64 +19,40 @@ interface ControlRendererProps {
 }
 
 export const ControlRenderer: React.FC<ControlRendererProps> = ({ 
-  config, 
-  onExecute, 
-  onSliderValueChange,
-  isEditing,
-  onEdit,
-  onDragStart,
-  onDragEnd,
-  onDragOver,
-  onDrop,
+  config, onExecute, onSliderValueChange, isEditing, onEdit,
+  onDragStart, onDragEnd, onDragOver, onDrop,
 }) => {
-  const gridClasses = `col-span-${config.width || 1} row-span-${config.height || 1}`;
-
   const interactiveProps = {
     draggable: isEditing,
     onClick: isEditing ? onEdit : undefined,
     onDragStart: (e: React.DragEvent) => onDragStart && onDragStart(e, config.id),
-    onDragEnd,
-    onDragOver,
+    onDragEnd, onDragOver,
     onDrop: (e: React.DragEvent) => onDrop && onDrop(e, config.id),
+    // **CORRECTION : On applique le style ici**
+    style: {
+      gridColumn: `span ${config.width || 1}`,
+    }
   };
+
+  const sharedProps = {
+    config, isEditing, onEdit,
+    ...interactiveProps
+  }
 
   switch (config.actionType) {
     case 'command':
     case 'shortcut':
     case 'yeelight':
-      return (
-        <ActionButton
-          config={config}
-          onExecute={() => onExecute && onExecute(config)}
-          className={`w-full h-full ${gridClasses}`}
-          {...interactiveProps}
-        />
-      );
+      return <ActionButton {...sharedProps} onExecute={() => onExecute && onExecute(config)} />;
     case 'slider':
-      return (
-        <ControlSlider
-          config={config}
-          onValueChange={(value) => onSliderValueChange && onSliderValueChange(config, value)}
-          className={`w-full h-full ${gridClasses}`}
-          {...interactiveProps}
-        />
-      );
+      return <ControlSlider {...sharedProps} onValueChange={(value) => onSliderValueChange && onSliderValueChange(config, value)} />;
     case 'statusDisplay':
-      return (
-        <StatusDisplay
-          config={config}
-          className={`w-full h-full ${gridClasses}`}
-          {...interactiveProps}
-        />
-      );
+      return <StatusDisplay {...sharedProps} />;
     default:
       return (
-        <div 
-          className={`flex items-center justify-center p-2 rounded-lg border border-red-500 text-red-500 w-full h-full ${gridClasses}`}
-          {...interactiveProps}
-        >
+        <div {...interactiveProps} className={cn("flex items-center justify-center p-2 rounded-lg border border-red-500 text-red-500")}>
           <Icons.AlertCircle className="h-4 w-4 mr-2" />
-          <span>Type inconnu: {config.actionType}</span>
+          <span>Type inconnu</span>
         </div>
       );
   }

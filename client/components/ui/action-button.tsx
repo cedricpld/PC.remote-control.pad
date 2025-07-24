@@ -1,41 +1,20 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { LucideIcon } from "lucide-react";
 import { Button } from "./button";
-import { ActionButtonConfig } from "@/types/stream-deck";
+import { ControlBlockConfig } from "@/types/stream-deck";
 import * as Icons from "lucide-react";
 
 interface ActionButtonProps {
-  config: ActionButtonConfig;
+  config: ControlBlockConfig;
   onEdit?: () => void;
   onExecute?: () => void;
   className?: string;
   isEditing?: boolean;
-  onDragStart?: (e: React.DragEvent) => void;
-  onDragEnd?: (e: React.DragEvent) => void;
-  onDragOver?: (e: React.DragEvent) => void;
-  onDrop?: (e: React.DragEvent) => void;
+  [key: string]: any; // Pour accepter les props de drag-and-drop
 }
 
-export const ActionButton = React.forwardRef<
-  HTMLButtonElement,
-  ActionButtonProps
->(
-  (
-    {
-      config,
-      onEdit,
-      onExecute,
-      className,
-      isEditing = false,
-      onDragStart,
-      onDragEnd,
-      onDragOver,
-      onDrop,
-      ...props
-    },
-    ref,
-  ) => {
+export const ActionButton = React.forwardRef<HTMLButtonElement, ActionButtonProps>(
+  ({ config, onEdit, onExecute, className, isEditing = false, ...props }, ref) => {
     const IconComponent = config.icon ? (Icons as any)[config.icon] : null;
 
     return (
@@ -43,20 +22,15 @@ export const ActionButton = React.forwardRef<
         ref={ref}
         variant="outline"
         className={cn(
-          "relative h-16 w-16 sm:h-20 sm:w-20 lg:h-24 lg:w-24 flex-col gap-1 sm:gap-2 rounded-lg sm:rounded-xl border-2 border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-200 hover:border-primary/50 hover:bg-card/80 hover:scale-105 active:scale-95",
+          "relative h-full w-full flex-col gap-1 sm:gap-2 rounded-lg sm:rounded-xl border-2 border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-200 hover:border-primary/50 hover:bg-card/80 hover:scale-105 active:scale-95",
           isEditing && "ring-2 ring-primary/50 cursor-move hover:ring-primary",
-          className,
+          className
         )}
         style={{
           backgroundColor: config.color ? `${config.color}20` : undefined,
           borderColor: config.color ? `${config.color}40` : undefined,
         }}
         onClick={isEditing ? onEdit : onExecute}
-        draggable={isEditing}
-        onDragStart={onDragStart}
-        onDragEnd={onDragEnd}
-        onDragOver={onDragOver}
-        onDrop={onDrop}
         {...props}
       >
         {IconComponent && (
@@ -65,7 +39,10 @@ export const ActionButton = React.forwardRef<
             style={{ color: config.color || "currentColor" }}
           />
         )}
-        <span className="text-[10px] sm:text-xs font-medium text-center leading-tight px-1">
+        <span
+          className="text-[10px] sm:text-xs font-medium text-center leading-tight px-1"
+          style={{ color: config.color ? config.color : "hsl(var(--foreground))" }}
+        >
           {config.label}
         </span>
         {config.shortcut && (
@@ -75,7 +52,7 @@ export const ActionButton = React.forwardRef<
         )}
       </Button>
     );
-  },
+  }
 );
 
 ActionButton.displayName = "ActionButton";

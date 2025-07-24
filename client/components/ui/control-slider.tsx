@@ -9,11 +9,12 @@ interface ControlSliderProps {
   config: ControlBlockConfig;
   onValueChange?: (value: number) => void;
   className?: string;
+  isEditing?: boolean;
   [key: string]: any;
 }
 
 export const ControlSlider = React.forwardRef<HTMLDivElement, ControlSliderProps>(
-  ({ config, onValueChange, className, ...props }, ref) => {
+  ({ config, onValueChange, className, isEditing, ...props }, ref) => {
     const [sliderValue, setSliderValue] = React.useState(config.sliderConfig?.initialValue || 0);
 
     React.useEffect(() => {
@@ -21,28 +22,24 @@ export const ControlSlider = React.forwardRef<HTMLDivElement, ControlSliderProps
     }, [config.sliderConfig?.initialValue]);
 
     const handleSliderChange = (value: number[]) => {
-      const newValue = value[0];
-      setSliderValue(newValue);
       if (onValueChange) {
-        onValueChange(newValue);
+        onValueChange(value[0]);
       }
     };
 
     const IconComponent = config.icon ? (Icons as any)[config.icon] : null;
-
     const min = config.sliderConfig?.min || 0;
     const max = config.sliderConfig?.max || 100;
     const displayValueAsPercent = max === 65535;
-    const displayValue = displayValueAsPercent
-      ? Math.round((sliderValue / max) * 100)
-      : sliderValue;
+    const displayValue = displayValueAsPercent ? Math.round((sliderValue / max) * 100) : sliderValue;
     const displayUnit = displayValueAsPercent ? '%' : config.sliderConfig?.unit || '';
 
     return (
       <div
         ref={ref}
         className={cn(
-          "flex flex-col items-center justify-center p-2 rounded-lg sm:rounded-xl border-2 border-border/50 bg-card/50 backdrop-blur-sm space-y-1 h-full",
+          "relative flex flex-col items-center justify-center p-2 rounded-lg sm:rounded-xl border-2 border-border/50 bg-card/50 backdrop-blur-sm space-y-1 h-full transition-all",
+          isEditing && "ring-2 ring-primary/50 cursor-move hover:ring-primary",
           className
         )}
         style={{ 
@@ -53,7 +50,12 @@ export const ControlSlider = React.forwardRef<HTMLDivElement, ControlSliderProps
       >
         <div className="flex items-center justify-center gap-2 w-full">
             {IconComponent && <IconComponent className="h-4 w-4 shrink-0" style={{ color: config.color || "currentColor" }}/>}
-            <Label className="text-xs font-medium text-center leading-tight truncate">{config.label}</Label>
+            <Label
+              className="text-xs font-medium text-center leading-tight truncate"
+              style={{ color: config.color ? config.color : "hsl(var(--foreground))" }}
+            >
+              {config.label}
+            </Label>
         </div>
         <Slider
           defaultValue={[sliderValue]}
