@@ -59,8 +59,6 @@ const DEFAULT_FORM_DATA: Partial<ControlBlockConfig> = {
     label: "",
     icon: "Monitor",
     color: "#3b82f6",
-    width: 1,
-    height: 1,
     actionType: "command",
     command: "",
     shortcut: "",
@@ -99,13 +97,30 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
   
   const handleSave = () => {
     if (!formData.label) return;
+
+    let width = 1, height = 1;
+    switch (formData.actionType) {
+        case 'slider':
+            width = 3;
+            height = 1;
+            break;
+        case 'statusDisplay':
+            width = 2;
+            height = 1;
+            break;
+        default: // command, shortcut, yeelight
+            width = 1;
+            height = 1;
+            break;
+    }
+
     const newConfig: ControlBlockConfig = {
       id: config?.id || generateSimpleUniqueId(),
       label: formData.label!,
       icon: formData.icon,
       color: formData.color,
-      width: formData.width,
-      height: formData.height,
+      width: width,
+      height: height,
       actionType: formData.actionType!,
       command: formData.actionType === 'command' ? formData.command : "",
       shortcut: formData.actionType === 'shortcut' ? formData.shortcut : "",
@@ -137,8 +152,6 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
           <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="label" className="text-right">Libellé</Label><Input id="label" value={formData.label || ""} onChange={e => setFormData({ ...formData, label: e.target.value })} className="col-span-3" /></div>
           <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="icon" className="text-right">Icône</Label><Select value={formData.icon} onValueChange={value => setFormData({ ...formData, icon: value })}><SelectTrigger className="col-span-3">{selectedIcon && <div className="flex items-center gap-2"><selectedIcon.icon className="h-4 w-4" />{selectedIcon.label}</div>}</SelectTrigger><SelectContent>{iconOptions.map(o => <SelectItem key={o.value} value={o.value}><div className="flex items-center gap-2"><o.icon className="h-4 w-4" />{o.label}</div></SelectItem>)}</SelectContent></Select></div>
           <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="color" className="text-right">Couleur</Label><Select value={formData.color} onValueChange={value => setFormData({ ...formData, color: value })}><SelectTrigger className="col-span-3"><div className="flex items-center gap-2"><div className="h-4 w-4 rounded border" style={{ backgroundColor: formData.color }} />{colorOptions.find(c => c.value === formData.color)?.label}</div></SelectTrigger><SelectContent>{colorOptions.map(o => <SelectItem key={o.value} value={o.value}><div className="flex items-center gap-2"><div className="h-4 w-4 rounded border" style={{ backgroundColor: o.value }} />{o.label}</div></SelectItem>)}</SelectContent></Select></div>
-          <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="width" className="text-right">Largeur</Label><Input id="width" type="number" value={formData.width || 1} onChange={e => setFormData({ ...formData, width: parseInt(e.target.value) || 1 })} className="col-span-3" min="1" /></div>
-          <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="height" className="text-right">Hauteur</Label><Input id="height" type="number" value={formData.height || 1} onChange={e => setFormData({ ...formData, height: parseInt(e.target.value) || 1 })} className="col-span-3" min="1" /></div>
           <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="actionType" className="text-right">Type</Label><Select value={formData.actionType} onValueChange={(value: ControlBlockConfig['actionType']) => setFormData({ ...formData, actionType: value })}><SelectTrigger className="col-span-3"><SelectValue placeholder="Choisir un type">{actionTypeLabel}</SelectValue></SelectTrigger><SelectContent><SelectItem value="command">Commande</SelectItem><SelectItem value="shortcut">Raccourci</SelectItem><SelectItem value="yeelight">Yeelight</SelectItem><SelectItem value="slider">Slider</SelectItem><SelectItem value="statusDisplay">Afficheur Statut</SelectItem></SelectContent></Select></div>
           
           {formData.actionType === 'command' && <div className="grid grid-cols-4 items-start gap-4"><Label htmlFor="command" className="text-right mt-2">Commande</Label><Textarea id="command" value={formData.command || ""} onChange={e => setFormData({ ...formData, command: e.target.value })} className="col-span-3" rows={3} /></div>}

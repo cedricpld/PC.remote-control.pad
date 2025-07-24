@@ -62,12 +62,12 @@
         }
       },
       {
-        "id": "status-cpu",
+        "id": "0eef8f20-7103-4095-ad79-ba21a976e0bf",
         "label": "CPU",
         "icon": "Cpu",
-        "color": "#ef4444",
-        "width": 3,
-        "height": 3,
+        "color": "#3b82f6",
+        "width": 2,
+        "height": 1,
         "actionType": "statusDisplay",
         "command": "",
         "shortcut": "",
@@ -85,16 +85,16 @@
         "statusDisplayConfig": {
           "apiEndpoint": "/api/get-cpu-usage",
           "dataType": "cpu",
-          "updateIntervalMs": 1000,
+          "updateIntervalMs": 2000,
           "labelUnit": "%"
         }
       },
       {
-        "id": "status-ram",
+        "id": "acf17886-c135-45e3-8517-f5cd877a20cd",
         "label": "RAM",
         "icon": "MemoryStick",
-        "color": "#22c55e",
-        "width": 1,
+        "color": "#3b82f6",
+        "width": 2,
         "height": 1,
         "actionType": "statusDisplay",
         "command": "",
@@ -112,8 +112,8 @@
         },
         "statusDisplayConfig": {
           "apiEndpoint": "/api/get-ram-usage",
-          "dataType": "ram",
-          "updateIntervalMs": 5000,
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
           "labelUnit": "%"
         }
       },
@@ -137,6 +137,34 @@
           "max": 100,
           "initialValue": 50,
           "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": ""
+        }
+      },
+      {
+        "id": "aca29153-80f7-41f8-bbe1-4f2453629ccd",
+        "label": "Micro",
+        "icon": "Mic",
+        "color": "#3b82f6",
+        "width": 3,
+        "height": 1,
+        "actionType": "slider",
+        "command": "",
+        "shortcut": "",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": "%"
         },
         "statusDisplayConfig": {
           "apiEndpoint": "",

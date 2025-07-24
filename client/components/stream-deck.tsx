@@ -61,9 +61,9 @@ export function StreamDeck({ className }: StreamDeckProps) {
         id: "main", name: "Principal", color: "#3b82f6", icon: "Home",
         blocks: [
             { id: "cmd-mic", label: "Couper Micro", icon: "Mic", color: "#ef4444", width: 1, height: 1, actionType: "command", command: "nircmd.exe mutesysvolume 2" },
-            { id: "slider-volume", label: "Volume PC", icon: "Volume2", color: "#3b82f6", width: 2, height: 1, actionType: "slider", sliderConfig: { apiEndpoint: "/api/set-master-volume", min: 0, max: 65535, initialValue: 32767, unit: "" } },
-            { id: "status-cpu", label: "CPU", icon: "Cpu", color: "#ef4444", width: 1, height: 1, actionType: "statusDisplay", statusDisplayConfig: { apiEndpoint: "/api/get-cpu-usage", dataType: "cpu", updateIntervalMs: 2000, labelUnit: "%" } },
-            { id: "status-ram", label: "RAM", icon: "MemoryStick", color: "#22c55e", width: 1, height: 1, actionType: "statusDisplay", statusDisplayConfig: { apiEndpoint: "/api/get-ram-usage", dataType: "ram", updateIntervalMs: 3000, labelUnit: "%" } },
+            { id: "slider-volume", label: "Volume PC", icon: "Volume2", color: "#3b82f6", width: 3, height: 1, actionType: "slider", sliderConfig: { apiEndpoint: "/api/set-master-volume", min: 0, max: 65535, initialValue: 32767, unit: "" } },
+            { id: "status-cpu", label: "CPU", icon: "Cpu", color: "#ef4444", width: 2, height: 1, actionType: "statusDisplay", statusDisplayConfig: { apiEndpoint: "/api/get-cpu-usage", dataType: "cpu", updateIntervalMs: 2000, labelUnit: "%" } },
+            { id: "status-ram", label: "RAM", icon: "MemoryStick", color: "#22c55e", width: 2, height: 1, actionType: "statusDisplay", statusDisplayConfig: { apiEndpoint: "/api/get-ram-usage", dataType: "ram", updateIntervalMs: 3000, labelUnit: "%" } },
         ],
       },
     ];
@@ -125,6 +125,20 @@ export function StreamDeck({ className }: StreamDeckProps) {
   };
 
   const handleSaveControl = (config: ControlBlockConfig) => {
+    switch (config.actionType) {
+      case "slider":
+        config.width = 3;
+        config.height = 1;
+        break;
+      case "statusDisplay":
+        config.width = 2;
+        config.height = 1;
+        break;
+      default:
+        config.width = 1;
+        config.height = 1;
+        break;
+    }
     setPages((prev) =>
       prev.map((page) => {
         if (page.id === currentPageId) {
