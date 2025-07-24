@@ -17,8 +17,10 @@ import {
   Volume2,
   Monitor,
   Headphones,
-  Lightbulb,
-} from "lucide-react";
+  Lightbulb, // Garder Lightbulb pour les icônes par défaut
+  Cpu, // NOUVEAU: Import pour l'icône CPU
+  MemoryStick // NOUVEAU: Import pour l'icône MemoryStick (RAM)
+} from "lucide-react"; // Assurez-vous que toutes les icônes utilisées dans createDefaultPages sont importées
 import * as Icons from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StreamDeckPage, ControlBlockConfig } from "@/types/stream-deck"; // NOUVEAU: Import de ControlBlockConfig
@@ -71,7 +73,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
         const data: StreamDeckPage[] = await response.json();
         if (data.length > 0) {
           setPages(data);
-          setCurrentPageId(parsed[0].id); // Utilisez 'parsed' ici après un potentiel JSON.parse
+          setCurrentPageId(data[0].id); // Utilisez data[0].id car 'parsed' n'est plus pertinent ici
         } else {
           createDefaultPages();
         }
@@ -165,9 +167,9 @@ export function StreamDeck({ className }: StreamDeckProps) {
             sliderConfig: {
               apiEndpoint: "/api/set-master-volume", // NOUVEAU API à créer
               min: 0,
-              max: 65535, // Volume max pour NirCmd
+              max: 65535, // Volume max pour NirCmd (valeur brute)
               initialValue: 32767, // ~50%
-              unit: "", // Unité peut être vide ou "%" si vous traduisez la valeur
+              unit: "", // L'unité sera gérée par le composant
             },
           },
           // NOUVEAU BLOC : Afficheur CPU
@@ -268,7 +270,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
           if (editingButton) {
             return {
               ...page,
-              blocks: page.blocks.map((btn) => // NOUVEAU: 'blocks'
+              blocks: page.blocks.map((btn) => // NOUVEAU: 'blocks' au lieu de 'buttons'
                 btn.id === config.id ? config : btn,
               ),
             };
@@ -293,7 +295,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
           if (page.id === currentPageId) {
             return {
               ...page,
-              blocks: page.blocks.filter( // NOUVEAU: 'blocks'
+              blocks: page.blocks.filter( // NOUVEAU: 'blocks' au lieu de 'buttons'
                 (btn) => btn.id !== editingButton.id,
               ),
             };
@@ -400,7 +402,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
     });
   };
 
-  // MODIFICATION ICI: Gérer les différents types d'action et les nouvelles APIs
+  // MODIFICATION ICI: Gérer les différents types d'action
   const handleExecuteAction = async (config: ControlBlockConfig) => { // NOUVEAU: Utilise ControlBlockConfig
     if (clickSound) clickSound.play(); // Joue le son au début de l'action
 
@@ -429,25 +431,14 @@ export function StreamDeck({ className }: StreamDeckProps) {
           alert("Configuration Ampoule Yeelight incomplète (IP ou action manquante).");
           return;
         }
-        apiUrl = "/api/yeelight-toggle";
+        apiUrl = "/api/yeelight-toggle"; // Point d'API pour Yeelight
         body = { ip: config.yeelightConfig.ip, action: config.yeelightConfig.action };
         break;
-      case 'slider': // NOUVEAU: Logique pour les sliders (envoi de la valeur actuelle)
-        if (!config.sliderConfig?.apiEndpoint) {
-          alert("Endpoint API du slider non configuré.");
-          return;
-        }
-        // Pour les sliders, nous enverrons la valeur actuelle si elle est définie
-        // Vous devrez implémenter la logique pour obtenir la valeur actuelle du slider
-        // ou la passer via un autre mécanisme si le clic déclenche l'envoi de valeur.
-        // Pour l'instant, on suppose que le `onValueChange` du ControlSlider gère ça
-        // et que handleExecuteAction n'est pas appelé sur un simple clic pour les sliders.
-        // Cette branche devrait être pour les actions "bouton" liées au slider si elles existent.
-        // Pour un slider, l'action est déclenchée par son onValueCommit directement.
-        console.log(`Slider clické, mais l'action sera gérée par le slider lui-même.`);
-        return; // Les sliders ne déclenchent pas cette partie normalement.
+      case 'slider': // NOUVEAU: Les sliders ne déclenchent pas cette fonction au clic
+        console.log(`Le bloc slider a été cliqué. L'action est gérée par le composant Slider.`);
+        return;
       case 'statusDisplay': // NOUVEAU: Les afficheurs de statut ne sont pas "exécutables"
-        console.log(`Afficheur de statut cliqué. Pas d'action à exécuter.`);
+        console.log(`Le bloc afficheur de statut a été cliqué. Pas d'action directe au clic.`);
         return;
       default:
         alert("Type d'action non reconnu.");
@@ -511,7 +502,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
 
 
   const handleRestartServer = async () => {
-    if (clickSound) clickSound.play();
+    if (clickSound) clickSound.play(); // Joue le son au début
 
     try {
       const response = await fetch("/api/restart-server", {
@@ -550,32 +541,22 @@ export function StreamDeck({ className }: StreamDeckProps) {
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
-  // MODIFIÉ: Ajustement des dimensions de la grille
+  // MODIFIÉ: Ajustement des dimensions de la grille pour le layout en grille CSS
   const getGridDimensions = () => {
-    // Calcule la taille totale de la grille nécessaire basée sur la somme des largeurs et hauteurs des blocs
-    // plutot que juste le compte des blocs. Ceci est une simplification et peut nécessiter un layout plus sophistiqué
-    // si les blocs ont des tailles variables et un agencement complexe.
-    // Pour l'affichage initial, on peut toujours tenter de trouver le nombre max de colonnes.
     const maxColsPerScreen = {
       mobile: 3,
       tablet: 4,
       desktop: 6
     };
     const currentMaxCols = maxColsPerScreen[screenSize];
-    const maxRows = Math.ceil((blocks.length + (isEditing ? 1 : 0)) / currentMaxCols);
-
-    // Une approche plus précise si les largeurs/hauteurs sont vraiment variables
-    // nécessiterait un algorithme de "packing" ou de calcul de grille plus intelligent.
-    // Pour l'instant, nous nous basons sur un nombre fixe de colonnes.
     return {
       cols: currentMaxCols,
-      maxCols: currentMaxCols, // maxCols utilisé pour le style du conteneur
+      maxCols: currentMaxCols,
     };
   };
 
   const { cols, maxCols } = getGridDimensions();
-  // La variable totalSlots n'est plus pertinente si on utilise un placement par grille CSS
-  // const totalSlots = Math.max(cols * 3, blocks.length + (isEditing ? 1 : 0));
+  // totalSlots n'est plus pertinent avec le layout CSS Grid span
 
 
   return (
@@ -654,7 +635,6 @@ export function StreamDeck({ className }: StreamDeckProps) {
           className="grid gap-2 sm:gap-4 justify-center"
           style={{
             gridTemplateColumns: `repeat(${cols}, 1fr)`,
-            // La largeur maximale du conteneur doit s'adapter à la taille des blocs
             maxWidth:
               screenSize === "mobile"
                 ? `${cols * 80}px`
@@ -670,7 +650,10 @@ export function StreamDeck({ className }: StreamDeckProps) {
               config={config}
               onExecute={() => handleExecuteAction(config)} // Pour les boutons (command/shortcut/yeelight)
               onSliderValueChange={handleSliderValueChange} // Pour les sliders
-              // NOUVEAU: Passer les handlers de drag-drop au ControlRenderer
+              // NOUVEAU: Passage des props isEditing pour le mode édition
+              isEditing={isEditing} // Passe le mode d'édition au ControlRenderer
+              onEdit={() => handleEditButton(config)} // Pour l'édition au clic du bloc
+              // Handlers de drag-drop passés au ControlRenderer
               onDragStart={(e) => handleBlockDragStart(e, config.id)}
               onDragEnd={handleBlockDragEnd}
               onDragOver={handleBlockDragOver}
@@ -680,7 +663,6 @@ export function StreamDeck({ className }: StreamDeckProps) {
 
           {isEditing && <AddButton onClick={handleAddButton} />}
 
-          {/* Suppression des slots de remplissage car le layout en grille est plus flexible */}
         </div>
 
         {/* Empty state */}
@@ -700,7 +682,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
         )}
       </div>
 
-      {/* Action Dialog (renommé en ActionButtonDialog pour l'édition de blocs) */}
+      {/* Action Dialog (maintenant pour ControlBlockConfig) */}
       <ActionButtonDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
