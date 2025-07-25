@@ -55,9 +55,9 @@
 
 ### Version Portable
 
-Si le ```npm run build``` a fonctionné, vous pouvez creer la version portable
+Si le ```npm run build``` a fonctionné, vous pouvez créer la version portable
 
-Vous avez simplement besoin de crer un dossier où vous voulez (Par exemple dans ```C:\Program Files```) et d'y copier les dossier ```dist``` et ```node_modules``` ainsi que les fichiers ```config.json```, ```CONTROL-PAD.bat```, ```node.exe``` et ```package.json```
+Vous avez simplement besoin de créer un dossier où vous voulez (Par exemple dans ```C:\Program Files```) et d'y copier les dossier ```dist``` et ```node_modules``` ainsi que les fichiers ```config.json```, ```CONTROL-PAD.bat```, ```node.exe``` et ```package.json```
 
 Enfin normalement vous n'aurez qu'à lancer ```CONTROL-PAD.bat``` et votre server sera fonctionnel
 
