@@ -209,7 +209,7 @@
         "width": 1,
         "height": 1,
         "actionType": "command",
-        "command": "start plex.exe",
+        "command": "start \"\" \"E:\\Programmes\\Plex Media Server\\Plex Media Server.exe\"",
         "shortcut": "",
         "yeelightConfig": {
           "ip": "",
@@ -294,6 +294,90 @@
         "height": 1,
         "actionType": "command",
         "command": "start \"\" \"E:\\Programmes\\ProtonVPN\\ProtonVPN.Launcher.exe\"",
+        "shortcut": "",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": ""
+        }
+      },
+      {
+        "id": "f3574bef-0780-4a70-86c4-76caaa406e87",
+        "label": "Veille",
+        "icon": "Pause",
+        "color": "#ec4899",
+        "width": 1,
+        "height": 1,
+        "actionType": "command",
+        "command": "nircmd.exe standby",
+        "shortcut": "",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": ""
+        }
+      },
+      {
+        "id": "9ab88aa3-e25a-4057-8f56-d65e1bea1d15",
+        "label": "Veille ⛔",
+        "icon": "Square",
+        "color": "#ef4444",
+        "width": 1,
+        "height": 1,
+        "actionType": "command",
+        "command": "schtasks /run /tn \"CONTROL-PAD-sleep\"",
+        "shortcut": "",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": ""
+        }
+      },
+      {
+        "id": "1bf9d686-5a24-40e3-9410-51a9f595edb1",
+        "label": "Win+D",
+        "icon": "Monitor",
+        "color": "#3b82f6",
+        "width": 1,
+        "height": 1,
+        "actionType": "command",
+        "command": "nircmd.exe sendkeypress elevate win+d",
         "shortcut": "",
         "yeelightConfig": {
           "ip": "",
