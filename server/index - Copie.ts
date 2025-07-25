@@ -19,9 +19,6 @@ import { Yeelight } from 'node-yeelight-wifi';
 
 // Chemin de configuration: utilise process.cwd() pour la compatibilité avec le .exe packagé.
 const CONFIG_FILE = path.join(process.cwd(), 'config.json');
-// CORRECTION : Chemin direct vers le nircmd.exe local pour la portabilité
-const NIRCMD_PATH = path.join(__dirname, 'scripts', 'nircmd.exe');
-
 
 // Fonction pour lire la configuration depuis config.json
 async function readConfig() {
@@ -48,20 +45,6 @@ async function writeConfig(config: any) {
     throw error;
   }
 }
-
-// CORRECTION : Nouvelle fonction pour traduire les raccourcis pour NirCmd
-function translateShortcutToNircmd(shortcut: string): string | null {
-    if (!shortcut) return null;
-    const parts = shortcut.toLowerCase().split('+').map(p => p.trim());
-    const keyMap: { [key: string]: string } = {
-        'ctrl': 'lcontrol', 'alt': 'lalt', 'shift': 'lshift', 'win': 'lwin', 'windows': 'lwin',
-        'esc': 'escape', 'printscreen': 'printsc',
-    };
-    const translatedParts = parts.map(part => keyMap[part] || part);
-    // On met le chemin complet entre guillemets pour gérer les espaces
-    return `"${NIRCMD_PATH}" sendkeypress ${translatedParts.join('+')}`;
-}
-
 
 // Fonction pour contrôler l'ampoule Yeelight
 async function controlYeelight(action: 'toggle' | 'on' | 'off', ip: string) {
@@ -156,39 +139,39 @@ export function createServer() {
   });
 
   // CORRIGÉ: Route API pour exécuter des actions, en revenant à la logique de la v1.1.1
-    app.post("/api/execute-action", (req, res) => {
-      const { command, shortcut } = req.body;
-      console.log('Requête reçue sur /api/execute-action avec :', req.body);
-  
-      if (command) {
-          console.log(`Exécution de la commande : ${command}`);
-          exec(command, (error, stdout, stderr) => {
-              if (error) {
-                  console.error(`Erreur d'exécution de la commande : ${error.message}`);
-                  return res.status(500).json({ error: `Échec de l'exécution : ${error.message}`, stderr });
-              }
-              if (stderr) console.warn(`Stderr : ${stderr}`);
-              console.log(`Stdout : ${stdout}`);
-              res.status(200).json({ message: `Commande "${command}" exécutée`, stdout, stderr });
-          });
-      } else if (shortcut) {
-          const scriptPath = path.join(__dirname, 'scripts', 'simulate-shortcut.ps1');
-          const psCommand = `powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}" -Shortcut "${shortcut}"`;
-  
-          console.log(`Exécution du raccourci via PowerShell : ${psCommand}`);
-          exec(psCommand, (error, stdout, stderr) => {
-              if (error) {
-                  console.error(`Erreur d'exécution du script PowerShell : ${error.message}`);
-                  return res.status(500).json({ error: `Échec de la simulation du raccourci "${shortcut}"`, details: error.message, stderr });
-              }
-              if (stderr) console.warn(`Stderr PowerShell : ${stderr}`);
-              console.log(`Stdout PowerShell : ${stdout}`);
-              res.status(200).json({ message: `Raccourci "${shortcut}" simulé avec succès.` });
-          });
-      } else {
-          return res.status(400).json({ error: "Aucune commande ou raccourci fourni." });
-      }
-    });
+  app.post("/api/execute-action", (req, res) => {
+    const { command, shortcut } = req.body;
+    console.log('Requête reçue sur /api/execute-action avec :', req.body);
+
+    if (command) {
+        console.log(`Exécution de la commande : ${command}`);
+        exec(command, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`Erreur d'exécution de la commande : ${error.message}`);
+                return res.status(500).json({ error: `Échec de l'exécution : ${error.message}`, stderr });
+            }
+            if (stderr) console.warn(`Stderr : ${stderr}`);
+            console.log(`Stdout : ${stdout}`);
+            res.status(200).json({ message: `Commande "${command}" exécutée`, stdout, stderr });
+        });
+    } else if (shortcut) {
+        const scriptPath = path.join(__dirname, 'scripts', 'simulate-shortcut.ps1');
+        const psCommand = `powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}" -Shortcut "${shortcut}"`;
+
+        console.log(`Exécution du raccourci via PowerShell : ${psCommand}`);
+        exec(psCommand, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`Erreur d'exécution du script PowerShell : ${error.message}`);
+                return res.status(500).json({ error: `Échec de la simulation du raccourci "${shortcut}"`, details: error.message, stderr });
+            }
+            if (stderr) console.warn(`Stderr PowerShell : ${stderr}`);
+            console.log(`Stdout PowerShell : ${stdout}`);
+            res.status(200).json({ message: `Raccourci "${shortcut}" simulé avec succès.` });
+        });
+    } else {
+        return res.status(400).json({ error: "Aucune commande ou raccourci fourni." });
+    }
+  });
 
   app.post("/api/yeelight-toggle", async (req, res) => {
     const { action, yeelightIp } = req.body;
@@ -215,8 +198,7 @@ export function createServer() {
   app.post("/api/set-master-volume", (req, res) => {
     const { value } = req.body;
     if (value === undefined) return res.status(400).json({ error: "Valeur de volume manquante." });
-    // CORRECTION : Utilisation du chemin local pour nircmd
-    const volumeCommand = `"${NIRCMD_PATH}" setsysvolume ${Math.min(Math.max(0, value), 65535)}`;
+    const volumeCommand = `nircmd.exe setsysvolume ${Math.min(Math.max(0, value), 65535)}`;
     exec(volumeCommand, (error, stdout, stderr) => {
       if (error) {
         return res.status(500).json({ error: `Échec de la commande volume : ${error.message}`, stderr });
