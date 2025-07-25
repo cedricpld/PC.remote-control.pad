@@ -2,6 +2,9 @@
   "name": "fusion-starter",
   "private": true,
   "type": "module",
+  "bin": {
+    "control-pad": "./dist/server/node-build.mjs"
+  },
   "pkg": {
     "assets": [
       "dist/spa/*"
@@ -11,6 +14,7 @@
     ]
   },
   "scripts": {
+    "transpile": "babel dist/server/node-build.mjs --out-file dist/server/node-build.transpiled.js",
     "dev": "vite",
     "build": "npm run build:client && npm run build:server && node -e \"const fs = require('fs'); const path = require('path'); const srcServerDir = path.resolve(__dirname, 'server'); const destServerDir = path.resolve(__dirname, 'dist/server'); fs.mkdirSync(destServerDir, { recursive: true }); try { fs.copyFileSync(path.join(srcServerDir, 'config.json'), path.join(destServerDir, 'config.json')); console.log('config.json copied!'); } catch (e) { if (e.code !== 'ENOENT') throw e; console.warn('config.json not found in server/ dir, skipping copy.'); } fs.cpSync(path.join(srcServerDir, 'scripts'), path.join(destServerDir, 'scripts'), { recursive: true }); console.log('scripts folder copied!');\"",
     "build:client": "vite build",
@@ -28,6 +32,11 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@babel/cli": "^7.28.0",
+    "@babel/core": "^7.28.0",
+    "@babel/plugin-syntax-import-meta": "^7.10.4",
+    "@babel/plugin-transform-modules-commonjs": "^7.27.1",
+    "@babel/preset-env": "^7.28.0",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
