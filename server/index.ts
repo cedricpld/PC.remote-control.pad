@@ -6,19 +6,17 @@ import { handleDemo } from "./routes/demo";
 import { exec } from "child_process";
 import fs from "fs/promises";
 import path from "path";
-
 // Importations et définitions pour __dirname en ES Modules
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
 // Import de la bibliothèque Yeelight
 import { Yeelight } from 'node-yeelight-wifi';
-
 // Chemin de configuration: utilise process.cwd() pour la compatibilité avec le .exe packagé.
 const CONFIG_FILE = path.join(process.cwd(), 'config.json');
+// CORRECTION : Chemin direct vers le nircmd.exe local pour la portabilité
+const NIRCMD_PATH = path.join(__dirname, 'scripts', 'nircmd.exe');
 
 // Fonction pour lire la configuration depuis config.json
 async function readConfig() {
@@ -34,7 +32,6 @@ async function readConfig() {
     throw error;
   }
 }
-
 // Fonction pour écrire la configuration dans config.json
 async function writeConfig(config: any) {
   try {
@@ -51,19 +48,15 @@ async function controlYeelight(action: 'toggle' | 'on' | 'off', ip: string) {
   if (!ip || !/^(\d{1,3}\.){3}\d{1,3}$/.test(ip)) {
     throw new Error('Adresse IP de l\'ampoule Yeelight invalide ou manquante.');
   }
-
   return new Promise((resolve, reject) => {
     const yeelight = new Yeelight({ ip: ip, port: 55443 });
-
     let connected = false;
     let timeoutId: NodeJS.Timeout;
-
     const cleanup = () => {
       clearTimeout(timeoutId);
       yeelight.removeAllListeners();
       yeelight.disconnect();
     };
-
     yeelight.on('connected', () => {
       connected = true;
       console.log(`Yeelight: Connecté à ${ip}. Exécution de l'action: ${action}`);
@@ -79,7 +72,6 @@ async function controlYeelight(action: 'toggle' | 'on' | 'off', ip: string) {
           reject(`Contrôle Yeelight échoué: ${err.message}`);
         });
     });
-
     yeelight.on('disconnected', () => {
       console.log('Yeelight: Déconnecté.');
       if (!connected) {
@@ -87,13 +79,11 @@ async function controlYeelight(action: 'toggle' | 'on' | 'off', ip: string) {
         reject('Contrôle Yeelight échoué: Déconnecté avant que la commande ne puisse être envoyée. L\'ampoule est-elle en ligne et le mode développeur activé ?');
       }
     });
-
     yeelight.on('error', (err: any) => {
       console.error('Yeelight: Erreur lors du contrôle:', err);
       cleanup();
       reject(`Contrôle Yeelight échoué: ${err.message}`);
     });
-
     timeoutId = setTimeout(() => {
       if (!connected) {
         console.warn('Yeelight: Connexion expirée.');
@@ -101,24 +91,18 @@ async function controlYeelight(action: 'toggle' | 'on' | 'off', ip: string) {
         reject('Contrôle Yeelight échoué: Connexion expirée. L\'ampoule est-elle en ligne et le mode développeur activé ?');
       }
     }, 5000);
-
     yeelight.connect();
   });
 }
-
-
 export function createServer() {
   const app = express();
-
   // Middlewares
   app.use(cors());
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
-
   // Routes API
   app.get("/api/ping", (_req, res) => res.json({ message: "Hello from Express server v2!" }));
   app.get("/api/demo", handleDemo);
-
   app.get("/api/config", async (_req, res) => {
     try {
       const config = await readConfig();
@@ -127,7 +111,6 @@ export function createServer() {
       res.status(500).json({ error: "Échec de la récupération de la configuration." });
     }
   });
-
   app.post("/api/config", async (req, res) => {
     try {
       const newConfig = req.body;
@@ -137,40 +120,40 @@ export function createServer() {
       res.status(500).json({ error: "Échec de la sauvegarde de la configuration." });
     }
   });
-
-  // CORRIGÉ: Route API pour exécuter des actions, en revenant à la logique de la v1.1.1
+  
+  // CORRIGÉ : Route API pour exécuter des actions
   app.post("/api/execute-action", (req, res) => {
     const { command, shortcut } = req.body;
+    let finalCommand: string | null = null;
     console.log('Requête reçue sur /api/execute-action avec :', req.body);
 
     if (command) {
-        console.log(`Exécution de la commande : ${command}`);
-        exec(command, (error, stdout, stderr) => {
-            if (error) {
-                console.error(`Erreur d'exécution de la commande : ${error.message}`);
-                return res.status(500).json({ error: `Échec de l'exécution : ${error.message}`, stderr });
-            }
-            if (stderr) console.warn(`Stderr : ${stderr}`);
-            console.log(`Stdout : ${stdout}`);
-            res.status(200).json({ message: `Commande "${command}" exécutée`, stdout, stderr });
-        });
+        // Si la commande commence par "nircmd.exe", on la remplace par le chemin complet
+        if (command.startsWith('nircmd.exe')) {
+            finalCommand = `"${NIRCMD_PATH}" ${command.substring('nircmd.exe'.length)}`;
+        } else {
+            finalCommand = command; // Pour les autres commandes comme 'start vlc.exe'
+        }
     } else if (shortcut) {
+        // La logique pour les raccourcis via PowerShell reste inchangée, comme vous le souhaitez
         const scriptPath = path.join(__dirname, 'scripts', 'simulate-shortcut.ps1');
-        const psCommand = `powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}" -Shortcut "${shortcut}"`;
-
-        console.log(`Exécution du raccourci via PowerShell : ${psCommand}`);
-        exec(psCommand, (error, stdout, stderr) => {
-            if (error) {
-                console.error(`Erreur d'exécution du script PowerShell : ${error.message}`);
-                return res.status(500).json({ error: `Échec de la simulation du raccourci "${shortcut}"`, details: error.message, stderr });
-            }
-            if (stderr) console.warn(`Stderr PowerShell : ${stderr}`);
-            console.log(`Stdout PowerShell : ${stdout}`);
-            res.status(200).json({ message: `Raccourci "${shortcut}" simulé avec succès.` });
-        });
-    } else {
+        finalCommand = `powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}" -Shortcut "${shortcut}"`;
+    }
+    
+    if (!finalCommand) {
         return res.status(400).json({ error: "Aucune commande ou raccourci fourni." });
     }
+
+    console.log(`Exécution de la commande finale : ${finalCommand}`);
+    exec(finalCommand, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Erreur d'exécution de la commande : ${error.message}`);
+            return res.status(500).json({ error: `Échec de l'exécution : ${error.message}`, stderr });
+        }
+        if (stderr) console.warn(`Stderr : ${stderr}`);
+        console.log(`Stdout : ${stdout}`);
+        res.status(200).json({ message: `Action exécutée avec succès`, stdout, stderr });
+    });
   });
 
   app.post("/api/yeelight-toggle", async (req, res) => {
@@ -184,7 +167,6 @@ export function createServer() {
       res.status(500).json({ error: `Contrôle Yeelight échoué: ${error.message}` });
     }
   });
-
   app.post("/api/restart-server", (req, res) => {
     exec(`pm2 restart stream-deck-server`, (error, stdout, stderr) => {
       if (error) {
@@ -194,11 +176,11 @@ export function createServer() {
       res.status(200).json({ message: `Serveur redémarré avec succès.` });
     });
   });
-
   app.post("/api/set-master-volume", (req, res) => {
     const { value } = req.body;
     if (value === undefined) return res.status(400).json({ error: "Valeur de volume manquante." });
-    const volumeCommand = `nircmd.exe setsysvolume ${Math.min(Math.max(0, value), 65535)}`;
+    // Utilisation du chemin local pour nircmd
+    const volumeCommand = `"${NIRCMD_PATH}" setsysvolume ${Math.min(Math.max(0, value), 65535)}`;
     exec(volumeCommand, (error, stdout, stderr) => {
       if (error) {
         return res.status(500).json({ error: `Échec de la commande volume : ${error.message}`, stderr });
@@ -206,7 +188,6 @@ export function createServer() {
       res.status(200).json({ message: `Volume défini à ${value}.` });
     });
   });
-
   // Routes de monitoring
   app.get("/api/get-cpu-usage", (_req, res) => {
     const command = "powershell.exe -Command \"(Get-WmiObject -Class Win32_PerfFormattedData_PerfOS_Processor | Where-Object {$_.Name -eq '_Total'}).PercentProcessorTime\"";
@@ -219,7 +200,6 @@ export function createServer() {
       return res.status(500).json({ error: "Réponse invalide de la commande CPU." });
     });
   });
-
   app.get("/api/get-cuda-usage", (_req, res) => {
     const command = 'nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits';
     exec(command, (error, stdout, stderr) => {
@@ -245,7 +225,6 @@ export function createServer() {
       return res.status(500).json({ error: "Réponse invalide de nvidia-smi." });
     });
   });
-
   app.get("/api/get-vram-usage-percent", (_req, res) => {
     const command = 'nvidia-smi --query-gpu=memory.used,memory.total --format=csv,noheader,nounits';
     exec(command, (error, stdout, stderr) => {
@@ -258,7 +237,6 @@ export function createServer() {
       return res.status(500).json({ error: "Réponse invalide de nvidia-smi pour la VRAM." });
     });
   });
-
   app.get("/api/get-vram-usage-gb", (_req, res) => {
     const command = 'nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits';
     exec(command, (error, stdout, stderr) => {
@@ -271,7 +249,6 @@ export function createServer() {
       return res.status(500).json({ error: "Réponse invalide de nvidia-smi pour la VRAM." });
     });
   });
-
   app.get("/api/get-ram-usage", (_req, res) => {
     const totalMemBytes = os.totalmem();
     const freeMemBytes = os.freemem();
@@ -279,6 +256,5 @@ export function createServer() {
     const usedMemPercent = parseFloat(((usedMemBytes / totalMemBytes) * 100).toFixed(1));
     res.status(200).json({ value: usedMemPercent });
   });
-
   return app;
 }

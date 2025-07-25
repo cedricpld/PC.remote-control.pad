@@ -85,7 +85,7 @@
         "statusDisplayConfig": {
           "apiEndpoint": "/api/get-cpu-usage",
           "dataType": "cpu",
-          "updateIntervalMs": 2000,
+          "updateIntervalMs": 1000,
           "labelUnit": "%"
         }
       },
@@ -113,8 +113,36 @@
         "statusDisplayConfig": {
           "apiEndpoint": "/api/get-ram-usage",
           "dataType": "cpu",
-          "updateIntervalMs": 2000,
+          "updateIntervalMs": 1000,
           "labelUnit": "%"
+        }
+      },
+      {
+        "id": "4b18af61-4953-43ff-accf-2ec0d57d6180",
+        "label": "Tout selectionner",
+        "icon": "Folder",
+        "color": "#22c55e",
+        "width": 1,
+        "height": 1,
+        "actionType": "shortcut",
+        "command": "",
+        "shortcut": "Ctrl+A",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": ""
         }
       },
       {
@@ -202,34 +230,6 @@
         }
       },
       {
-        "id": "4b18af61-4953-43ff-accf-2ec0d57d6180",
-        "label": "Tout selectionner",
-        "icon": "Folder",
-        "color": "#22c55e",
-        "width": 1,
-        "height": 1,
-        "actionType": "shortcut",
-        "command": "",
-        "shortcut": "Ctrl+A",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
-        },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
-        },
-        "statusDisplayConfig": {
-          "apiEndpoint": "",
-          "dataType": "cpu",
-          "updateIntervalMs": 2000,
-          "labelUnit": ""
-        }
-      },
-      {
         "id": "d9006582-0732-4a30-823e-3d9df489e27d",
         "label": "CUDA",
         "icon": "Cpu",
@@ -253,7 +253,7 @@
         "statusDisplayConfig": {
           "apiEndpoint": "/api/get-cuda-usage",
           "dataType": "cpu",
-          "updateIntervalMs": 2000,
+          "updateIntervalMs": 1000,
           "labelUnit": "%"
         }
       },
@@ -281,7 +281,7 @@
         "statusDisplayConfig": {
           "apiEndpoint": "/api/get-vram-usage-percent",
           "dataType": "cpu",
-          "updateIntervalMs": 2000,
+          "updateIntervalMs": 1000,
           "labelUnit": "%"
         }
       }

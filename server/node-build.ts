@@ -1,32 +1,57 @@
 import path from "path";
+import os from "os";
 import { createServer } from "./index";
-// MODIFICATION ICI: Importez Express de manière robuste
-import express_namespace from "express"; // Importez le module Express
-const express = express_namespace.default || express_namespace; // Prenez l'export par défaut ou le namespace complet
+import express_namespace from "express";
+const express = express_namespace.default || express_namespace;
+import { fileURLToPath } from "url";
 
 const app = createServer();
 const port = process.env.PORT || 3467;
 
-// In production, serve the built SPA files
-const __dirname = import.meta.dirname;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const distPath = path.join(__dirname, "../spa");
 
 // Serve static files
 app.use(express.static(distPath));
 
 // Handle React Router - serve index.html for all non-API routes
-app.get("*", (req, res) => {
-  // Don't serve index.html for API routes
+app.get("*", (req, res, next) => {
   if (req.path.startsWith("/api/") || req.path.startsWith("/health")) {
-    return res.status(404).json({ error: "API endpoint not found" });
+    return next();
   }
-
   res.sendFile(path.join(distPath, "index.html"));
 });
 
 app.listen(port, () => {
   console.log(`🚀 Fusion Starter server running on port ${port}`);
+  
+  // --- DÉBUT DE LA CORRECTION ---
+  const interfaces = os.networkInterfaces();
+  let localIp = null;
+  const candidates: string[] = [];
+
+  for (const name of Object.keys(interfaces)) {
+    for (const net of interfaces[name]!) {
+      if (net.family === 'IPv4' && !net.internal) {
+        candidates.push(net.address);
+      }
+    }
+  }
+
+  // On cherche en priorité une adresse IP de réseau local typique
+  localIp = candidates.find(ip => ip.startsWith('192.168.')) || null;
+
+  // Si on n'en trouve pas, on prend la première disponible comme solution de secours
+  if (!localIp && candidates.length > 0) {
+    localIp = candidates[0];
+  }
+  // --- FIN DE LA CORRECTION ---
+
   console.log(`📱 Frontend: http://localhost:${port}`);
+  if (localIp) {
+    console.log(`   Sur votre réseau : http://${localIp}:${port}`);
+  }
   console.log(`🔧 API: http://localhost:${port}/api`);
 });
 
