@@ -85,7 +85,7 @@
         "statusDisplayConfig": {
           "apiEndpoint": "/api/get-cpu-usage",
           "dataType": "cpu",
-          "updateIntervalMs": 2000,
+          "updateIntervalMs": 1000,
           "labelUnit": "%"
         }
       },
@@ -113,7 +113,7 @@
         "statusDisplayConfig": {
           "apiEndpoint": "/api/get-ram-usage",
           "dataType": "cpu",
-          "updateIntervalMs": 2000,
+          "updateIntervalMs": 1000,
           "labelUnit": "%"
         }
       },
@@ -253,7 +253,7 @@
         "statusDisplayConfig": {
           "apiEndpoint": "/api/get-cuda-usage",
           "dataType": "cpu",
-          "updateIntervalMs": 2000,
+          "updateIntervalMs": 1000,
           "labelUnit": "%"
         }
       },
@@ -281,7 +281,7 @@
         "statusDisplayConfig": {
           "apiEndpoint": "/api/get-vram-usage-percent",
           "dataType": "cpu",
-          "updateIntervalMs": 2000,
+          "updateIntervalMs": 1000,
           "labelUnit": "%"
         }
       }
