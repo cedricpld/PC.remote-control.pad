@@ -118,15 +118,15 @@
         }
       },
       {
-        "id": "171fca35-90ec-4205-906d-8689d0883143",
-        "label": "calc",
-        "icon": "Terminal",
-        "color": "#3b82f6",
+        "id": "4b18af61-4953-43ff-accf-2ec0d57d6180",
+        "label": "Tout selectionner",
+        "icon": "Folder",
+        "color": "#22c55e",
         "width": 1,
         "height": 1,
-        "actionType": "command",
-        "command": "start calc.exe",
-        "shortcut": "",
+        "actionType": "shortcut",
+        "command": "",
+        "shortcut": "Ctrl+A",
         "yeelightConfig": {
           "ip": "",
           "action": "toggle"
@@ -146,15 +146,15 @@
         }
       },
       {
-        "id": "4b18af61-4953-43ff-accf-2ec0d57d6180",
-        "label": "Tout selectionner",
-        "icon": "Folder",
-        "color": "#22c55e",
+        "id": "171fca35-90ec-4205-906d-8689d0883143",
+        "label": "calc",
+        "icon": "Terminal",
+        "color": "#3b82f6",
         "width": 1,
         "height": 1,
-        "actionType": "shortcut",
-        "command": "",
-        "shortcut": "Ctrl+A",
+        "actionType": "command",
+        "command": "start calc.exe",
+        "shortcut": "",
         "yeelightConfig": {
           "ip": "",
           "action": "toggle"
