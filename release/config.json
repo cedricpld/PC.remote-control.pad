@@ -1,0 +1,290 @@
+[
+  {
+    "id": "main",
+    "name": "Principal",
+    "color": "#3b82f6",
+    "icon": "Home",
+    "blocks": [
+      {
+        "id": "cmd-mic",
+        "label": "Couper Son",
+        "icon": "Volume2",
+        "color": "#ef4444",
+        "width": 1,
+        "height": 1,
+        "actionType": "command",
+        "command": "nircmd.exe mutesysvolume 2",
+        "shortcut": "",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": ""
+        }
+      },
+      {
+        "id": "slider-volume",
+        "label": "Volume PC",
+        "icon": "Volume2",
+        "color": "#3b82f6",
+        "width": 3,
+        "height": 1,
+        "actionType": "slider",
+        "command": "",
+        "shortcut": "",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "/api/set-master-volume",
+          "min": 0,
+          "max": 65535,
+          "initialValue": 32767,
+          "unit": "%"
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": ""
+        }
+      },
+      {
+        "id": "0eef8f20-7103-4095-ad79-ba21a976e0bf",
+        "label": "CPU",
+        "icon": "Cpu",
+        "color": "#3b82f6",
+        "width": 2,
+        "height": 1,
+        "actionType": "statusDisplay",
+        "command": "",
+        "shortcut": "",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "/api/get-cpu-usage",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": "%"
+        }
+      },
+      {
+        "id": "acf17886-c135-45e3-8517-f5cd877a20cd",
+        "label": "RAM",
+        "icon": "MemoryStick",
+        "color": "#3b82f6",
+        "width": 2,
+        "height": 1,
+        "actionType": "statusDisplay",
+        "command": "",
+        "shortcut": "",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "/api/get-ram-usage",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": "%"
+        }
+      },
+      {
+        "id": "171fca35-90ec-4205-906d-8689d0883143",
+        "label": "calc",
+        "icon": "Terminal",
+        "color": "#3b82f6",
+        "width": 1,
+        "height": 1,
+        "actionType": "command",
+        "command": "start calc.exe",
+        "shortcut": "",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": ""
+        }
+      },
+      {
+        "id": "4b18af61-4953-43ff-accf-2ec0d57d6180",
+        "label": "Tout selectionner",
+        "icon": "Folder",
+        "color": "#22c55e",
+        "width": 1,
+        "height": 1,
+        "actionType": "shortcut",
+        "command": "",
+        "shortcut": "Ctrl+A",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": ""
+        }
+      },
+      {
+        "id": "9d9c1c5a-33cd-4354-8b4a-c7647140ddb3",
+        "label": "VLC",
+        "icon": "Monitor",
+        "color": "#f97316",
+        "width": 1,
+        "height": 1,
+        "actionType": "command",
+        "command": "start vlc.exe",
+        "shortcut": "",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": ""
+        }
+      },
+      {
+        "id": "3f45057f-75e1-40eb-a0bb-90c5158078ed",
+        "label": "Plex",
+        "icon": "Play",
+        "color": "#eab308",
+        "width": 1,
+        "height": 1,
+        "actionType": "command",
+        "command": "start plex.exe",
+        "shortcut": "",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": ""
+        }
+      },
+      {
+        "id": "d9006582-0732-4a30-823e-3d9df489e27d",
+        "label": "CUDA",
+        "icon": "Cpu",
+        "color": "#ef4444",
+        "width": 2,
+        "height": 1,
+        "actionType": "statusDisplay",
+        "command": "",
+        "shortcut": "",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "/api/get-cuda-usage",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": "%"
+        }
+      },
+      {
+        "id": "4ce714f9-ba1c-4128-b703-ed3b84798867",
+        "label": "VRAM",
+        "icon": "MemoryStick",
+        "color": "#ef4444",
+        "width": 2,
+        "height": 1,
+        "actionType": "statusDisplay",
+        "command": "",
+        "shortcut": "",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "/api/get-vram-usage-percent",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": "%"
+        }
+      }
+    ]
+  }
+]

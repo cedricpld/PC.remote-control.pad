@@ -7,39 +7,24 @@ export default defineConfig({
     lib: {
       entry: path.resolve(__dirname, "server/node-build.ts"),
       name: "server",
-      fileName: "production",
-      formats: ["es"],
+      fileName: "production", // On force le nom du fichier
+      formats: ["cjs"],
     },
     outDir: "dist/server",
-    target: "node22",
+    target: "node18",
     ssr: true,
     rollupOptions: {
       external: [
-        // Node.js built-ins
-        "fs",
-        "path",
-        "url",
-        "http",
-        "https",
-        "os",
-        "crypto",
-        "stream",
-        "util",
-        "events",
-        "buffer",
-        "querystring",
-        "child_process",
-        // External dependencies that should not be bundled
-        "express",
-        "cors",
+        "express", "cors", "fs", "path", "url", "http", "https", "os", 
+        "crypto", "stream", "util", "events", "buffer", "querystring", "child_process"
       ],
       output: {
-        format: "es",
-        entryFileNames: "[name].mjs",
+        format: "cjs",
+        entryFileNames: "[name].cjs",
       },
     },
-    minify: false, // Keep readable for debugging
-    sourcemap: true,
+    minify: false,
+    sourcemap: false,
   },
   resolve: {
     alias: {

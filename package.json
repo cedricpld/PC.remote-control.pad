@@ -2,22 +2,34 @@
   "name": "fusion-starter",
   "private": true,
   "type": "module",
+  "main": "pkg-start.js",
+  "bin": "pkg-start.js",
   "pkg": {
-    "assets": [
-      "dist/spa/*"
+    "targets": [
+      "node18-win-x64"
     ],
-    "scripts": [
-      "dist/server/**/*.js"
-    ]
+    "outputPath": "release"
   },
   "scripts": {
     "dev": "vite",
     "build": "npm run build:client && npm run build:server && node -e \"const fs = require('fs'); const path = require('path'); const srcServerDir = path.resolve(__dirname, 'server'); const destServerDir = path.resolve(__dirname, 'dist/server'); fs.mkdirSync(destServerDir, { recursive: true }); try { fs.copyFileSync(path.join(srcServerDir, 'config.json'), path.join(destServerDir, 'config.json')); console.log('config.json copied!'); } catch (e) { if (e.code !== 'ENOENT') throw e; console.warn('config.json not found in server/ dir, skipping copy.'); } fs.cpSync(path.join(srcServerDir, 'scripts'), path.join(destServerDir, 'scripts'), { recursive: true }); console.log('scripts folder copied!');\"",
     "build:client": "vite build",
     "build:server": "vite build --config vite.config.server.ts",
+    "package": "npm run build && pkg . --output \"release/CONTROL_PAD_1.1.3.exe\"",
     "copy:config": "copyfiles -u 1 server/config.json dist/server",
     "copy:scripts": "copyfiles -u 1 server/scripts/** dist/server/scripts",
     "start": "node dist/server/node-build.mjs",
+    "test": "vitest --run",
+    "format.fix": "prettier --write .",
+    "typecheck": "tsc"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run build:client && npm run build:server && node -e \"const fs = require('fs'); const path = require('path'); const srcServerDir = path.resolve(__dirname, 'server'); const destServerDir = path.resolve(__dirname, 'dist/server'); fs.mkdirSync(destServerDir, { recursive: true }); try { fs.copyFileSync(path.join(srcServerDir, 'config.json'), path.join(destServerDir, 'config.json')); console.log('config.json copied!'); } catch (e) { if (e.code !== 'ENOENT') throw e; console.warn('config.json not found in server/ dir, skipping copy.'); } fs.cpSync(path.join(srcServerDir, 'scripts'), path.join(destServerDir, 'scripts'), { recursive: true }); console.log('scripts folder copied!');\"",
+    "build:client": "vite build",
+    "build:server": "vite build --config vite.config.server.ts",
+    "build:exe": "npm run build && npx pkg dist/server/server.cjs --output release/CONTROL_PAD.exe",
+    "start": "node dist/server/server.cjs",
     "test": "vitest --run",
     "format.fix": "prettier --write .",
     "typecheck": "tsc"
