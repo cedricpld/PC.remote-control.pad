@@ -496,6 +496,34 @@
           "updateIntervalMs": 2000,
           "labelUnit": ""
         }
+      },
+      {
+        "id": "6d8c7e85-ff7b-45b7-b345-bbe99787706a",
+        "label": "STOP ComfyUI",
+        "icon": "Square",
+        "color": "#ef4444",
+        "width": 1,
+        "height": 1,
+        "actionType": "command",
+        "command": "taskkill /IM python.exe /F",
+        "shortcut": "",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": ""
+        }
       }
     ]
   },
