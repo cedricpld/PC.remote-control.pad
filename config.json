@@ -127,8 +127,8 @@
     "blocks": [
       {
         "id": "9c56fc75-278c-428e-a03d-9a270e39f7c5",
-        "label": "Ctrl+Z",
-        "icon": "Monitor",
+        "label": " ",
+        "icon": "Undo2",
         "color": "#f97316",
         "width": 1,
         "height": 1,
@@ -155,8 +155,8 @@
       },
       {
         "id": "268eae49-1c57-4dd6-abcb-be134dba3aa5",
-        "label": "Alt+F4",
-        "icon": "Monitor",
+        "label": " ",
+        "icon": "MonitorX",
         "color": "#ef4444",
         "width": 1,
         "height": 1,
@@ -183,8 +183,8 @@
       },
       {
         "id": "c1621bb0-4cb6-4a38-b7c3-9aeec01e49de",
-        "label": "Ctrl+A",
-        "icon": "Folder",
+        "label": " ",
+        "icon": "SquareDashed",
         "color": "#22c55e",
         "width": 1,
         "height": 1,
@@ -240,7 +240,7 @@
       {
         "id": "10306d62-3fec-4e75-9cbc-b49468fdbb10",
         "label": "Veille",
-        "icon": "Pause",
+        "icon": "Moon",
         "color": "#ec4899",
         "width": 1,
         "height": 1,
@@ -268,7 +268,7 @@
       {
         "id": "f0da5452-dd84-45a8-b087-054473083b8b",
         "label": "Veille ⛔",
-        "icon": "Square",
+        "icon": "Eclipse",
         "color": "#ef4444",
         "width": 1,
         "height": 1,
@@ -299,12 +299,12 @@
     "id": "67d022d2-bdf3-4f3e-aaa0-527ae5699877",
     "name": "App",
     "color": "#22c55e",
-    "icon": "Zap",
+    "icon": "LayoutGrid",
     "blocks": [
       {
         "id": "ef45aeaa-b487-4f9b-a940-c46d46c86f2d",
         "label": "Calc",
-        "icon": "Terminal",
+        "icon": "Calculator",
         "color": "#3b82f6",
         "width": 1,
         "height": 1,
@@ -332,7 +332,7 @@
       {
         "id": "a0776947-0d1a-405a-957c-15fe7684b2eb",
         "label": "VLC",
-        "icon": "Monitor",
+        "icon": "TrafficCone",
         "color": "#f97316",
         "width": 1,
         "height": 1,
@@ -360,7 +360,7 @@
       {
         "id": "f1bb26b9-3999-4356-bc03-284c67596e35",
         "label": "Plex",
-        "icon": "Play",
+        "icon": "ChevronRight",
         "color": "#eab308",
         "width": 1,
         "height": 1,
@@ -388,7 +388,7 @@
       {
         "id": "a0922007-de08-4c18-a5e7-6ad8ca1f8a19",
         "label": "ProtonVPN",
-        "icon": "Wifi",
+        "icon": "GlobeLock",
         "color": "#8b5cf6",
         "width": 1,
         "height": 1,
@@ -414,14 +414,14 @@
         }
       },
       {
-        "id": "2a2e451a-90da-4a49-9d91-55b67b302f9b",
-        "label": "RustDesk",
-        "icon": "Monitor",
-        "color": "#1fc7ff",
+        "id": "345d7263-8496-4887-9d3c-0e9755227508",
+        "label": "TeamViewer",
+        "icon": "ScreenShare",
+        "color": "#281fff",
         "width": 1,
         "height": 1,
         "actionType": "command",
-        "command": "start \"\" \"E:\\Programmes\\RustDesk\\rustdesk.exe\"",
+        "command": "start \"\" \"C:\\Program Files\\TeamViewer\\TeamViewer.exe\"",
         "shortcut": "",
         "yeelightConfig": {
           "ip": "",
@@ -442,14 +442,14 @@
         }
       },
       {
-        "id": "345d7263-8496-4887-9d3c-0e9755227508",
-        "label": "TeamViewer",
-        "icon": "Monitor",
-        "color": "#281fff",
+        "id": "2a2e451a-90da-4a49-9d91-55b67b302f9b",
+        "label": "RustDesk",
+        "icon": "ScreenShare",
+        "color": "#1fc7ff",
         "width": 1,
         "height": 1,
         "actionType": "command",
-        "command": "start \"\" \"C:\\Program Files\\TeamViewer\\TeamViewer.exe\"",
+        "command": "start \"\" \"E:\\Programmes\\RustDesk\\rustdesk.exe\"",
         "shortcut": "",
         "yeelightConfig": {
           "ip": "",
@@ -500,7 +500,7 @@
       {
         "id": "6d8c7e85-ff7b-45b7-b345-bbe99787706a",
         "label": "STOP ComfyUI",
-        "icon": "Square",
+        "icon": "Ban",
         "color": "#ef4444",
         "width": 1,
         "height": 1,
