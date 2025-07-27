@@ -477,7 +477,7 @@
         "width": 1,
         "height": 1,
         "actionType": "command",
-        "command": "start \"\" \"E:\\Programmes\\ComfyUI\\run_nvidia_gpu.bat\"",
+        "command": "start \"\" \"E:\\Programmes\\ComfyUI\\run_nvidia_gpu_CONTROL-PAD.bat\"\n",
         "shortcut": "",
         "yeelightConfig": {
           "ip": "",
