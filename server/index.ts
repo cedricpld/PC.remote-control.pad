@@ -168,14 +168,14 @@ export function createServer() {
     }
   });
   app.post("/api/restart-server", (req, res) => {
-    exec(`pm2 restart stream-deck-server`, (error, stdout, stderr) => {
-      if (error) {
-        console.error(`Erreur PM2 : ${error.message}`);
-        return res.status(500).json({ error: `Échec du redémarrage : ${error.message}`, stderr });
-      }
-      res.status(200).json({ message: `Serveur redémarré avec succès.` });
-    });
-  });
+    res.status(200).json({ message: "Serveur en cours d'arrêt..." });
+
+    setTimeout(() => {
+        console.log("Fermeture du serveur...");
+        process.exit(0);
+    }, 100);
+});
+
   app.post("/api/set-master-volume", (req, res) => {
     const { value } = req.body;
     if (value === undefined) return res.status(400).json({ error: "Valeur de volume manquante." });

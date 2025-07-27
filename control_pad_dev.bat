@@ -5,3 +5,4 @@ cd /d "C:\Users\cedri\Documents\GitHub\PC.remote-control.pad"
 
 REM Lance le serveur en mode développement
 start cmd /k npm run dev
+exit
