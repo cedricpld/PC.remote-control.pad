@@ -41,15 +41,17 @@ export function StreamDeck({ className }: StreamDeckProps) {
 
   const saveConfigToServer = React.useCallback(async (currentPages: StreamDeckPage[]) => {
     try {
-      // Nettoyer les anciennes clés "buttons" avant de sauvegarder
-      const pagesToSave = currentPages.map(({ buttons, ...page }) => page);
-      const response = await fetch("/api/config", {
+      const pagesToSave = currentPages.map(({ buttons, ...page }: any) => {
+        const cleanedBlocks = (page.blocks || []).filter((b: ControlBlockConfig) => b.actionType);
+        return {...page, blocks: cleanedBlocks};
+      });
+
+      await fetch("/api/config", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(pagesToSave),
       });
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      console.log("Configuration sauvegardée sur le serveur.");
+      // Pas de log ici pour éviter de surcharger la console à chaque sauvegarde
     } catch (error: any) {
       console.error("Échec de la sauvegarde :", error);
     }
@@ -60,18 +62,16 @@ export function StreamDeck({ className }: StreamDeckProps) {
       {
         id: "main", name: "Principal", color: "#3b82f6", icon: "Home",
         blocks: [
-            { id: "cmd-mic", label: "Couper Micro", icon: "Mic", color: "#ef4444", width: 1, height: 1, actionType: "command", command: "nircmd.exe mutesysvolume 2" },
-            { id: "slider-volume", label: "Volume PC", icon: "Volume2", color: "#3b82f6", width: 3, height: 1, actionType: "slider", sliderConfig: { apiEndpoint: "/api/set-master-volume", min: 0, max: 65535, initialValue: 32767, unit: "" } },
-            { id: "status-cpu", label: "CPU", icon: "Cpu", color: "#ef4444", width: 2, height: 1, actionType: "statusDisplay", statusDisplayConfig: { apiEndpoint: "/api/get-cpu-usage", dataType: "cpu", updateIntervalMs: 2000, labelUnit: "%" } },
-            { id: "status-ram", label: "RAM", icon: "MemoryStick", color: "#22c55e", width: 2, height: 1, actionType: "statusDisplay", statusDisplayConfig: { apiEndpoint: "/api/get-ram-usage", dataType: "ram", updateIntervalMs: 3000, labelUnit: "%" } },
+            { id: "cmd-mic", label: "Couper Micro", icon: "Mic", color: "#ef4444", width: 1, actionType: "command", command: "nircmd.exe mutesysvolume 2" },
+            { id: "slider-volume", label: "Volume PC", icon: "Volume2", color: "#3b82f6", width: 2, actionType: "slider", sliderConfig: { apiEndpoint: "/api/set-master-volume", min: 0, max: 65535, initialValue: 32767, unit: "" } },
+            { id: "status-cpu", label: "CPU", icon: "Cpu", color: "#ef4444", width: 1, actionType: "statusDisplay", statusDisplayConfig: { apiEndpoint: "/api/get-cpu-usage", dataType: "cpu", updateIntervalMs: 2000, labelUnit: "%" } },
+            { id: "status-ram", label: "RAM", icon: "MemoryStick", color: "#22c55e", width: 1, actionType: "statusDisplay", statusDisplayConfig: { apiEndpoint: "/api/get-ram-usage", dataType: "ram", updateIntervalMs: 3000, labelUnit: "%" } },
         ],
       },
     ];
     setPages(defaultPages);
     if (defaultPages.length > 0) setCurrentPageId(defaultPages[0].id);
-    saveConfigToServer(defaultPages);
-  }, [saveConfigToServer]);
-
+  }, []);
 
   React.useEffect(() => {
     const loadConfig = async () => {
@@ -83,15 +83,13 @@ export function StreamDeck({ className }: StreamDeckProps) {
         const migratedData = data.map((page: any) => {
             const newBlocks = (page.blocks || page.buttons || []).map((block: any) => {
                 if (!block.actionType) {
-                    if (block.shortcut) {
-                        return {...block, actionType: 'shortcut'};
-                    }
+                    if (block.shortcut) return {...block, actionType: 'shortcut'};
                     return {...block, actionType: 'command'};
                 }
                 return block;
             });
-
-            return { ...page, blocks: newBlocks, buttons: undefined };
+            const { buttons, ...restOfPage } = page;
+            return { ...restOfPage, blocks: newBlocks };
         });
 
         if (migratedData && migratedData.length > 0) {
@@ -108,11 +106,16 @@ export function StreamDeck({ className }: StreamDeckProps) {
     loadConfig();
   }, [createDefaultPages]);
 
+  // **CORRECTION APPLIQUÉE ICI**
+  // Ce `useEffect` est maintenant plus simple et plus fiable pour la sauvegarde.
   React.useEffect(() => {
-    if (pages.length > 0 && currentPageId) {
+    // On s'assure que l'état initial n'est pas vide avant de sauvegarder,
+    // pour éviter d'écraser la config avec un tableau vide au premier rendu.
+    const isInitialLoad = pages.length === 0 && !currentPageId;
+    if (!isInitialLoad) {
       saveConfigToServer(pages);
     }
-  }, [pages, currentPageId, saveConfigToServer]);
+  }, [pages, saveConfigToServer]);
 
   const handleAddControl = () => {
     setEditingControl(undefined);
@@ -125,20 +128,6 @@ export function StreamDeck({ className }: StreamDeckProps) {
   };
 
   const handleSaveControl = (config: ControlBlockConfig) => {
-    switch (config.actionType) {
-      case "slider":
-        config.width = 3;
-        config.height = 1;
-        break;
-      case "statusDisplay":
-        config.width = 2;
-        config.height = 1;
-        break;
-      default:
-        config.width = 1;
-        config.height = 1;
-        break;
-    }
     setPages((prev) =>
       prev.map((page) => {
         if (page.id === currentPageId) {
@@ -179,7 +168,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
   const handleSavePage = (pageData: StreamDeckPage) => {
     setPages((prev) => {
       if (editingPage) {
-        return prev.map((page) => (page.id === pageData.id ? pageData : page));
+        return prev.map((page) => (page.id === pageData.id ? { ...page, ...pageData } : page));
       } else {
         const newPages = [...prev, pageData];
         setCurrentPageId(pageData.id);
