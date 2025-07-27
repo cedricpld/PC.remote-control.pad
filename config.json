@@ -618,7 +618,7 @@
         }
       },
       {
-        "id": "1e7d9792-f1ff-4a4f-a206-1ddbbf49e984",
+        "id": "slider-volume",
         "label": "Volume",
         "icon": "Volume2",
         "color": "#3b82f6",
@@ -635,7 +635,7 @@
           "apiEndpoint": "/api/set-master-volume",
           "min": 0,
           "max": 65535,
-          "initialValue": 100,
+          "initialValue": 65535,
           "unit": "%"
         },
         "statusDisplayConfig": {
