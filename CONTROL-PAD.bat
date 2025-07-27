@@ -1,6 +1,5 @@
 @echo off
 :: Ce script utilise la version portable de Node.js pour démarrer le serveur
-
 :: Change le répertoire courant vers le répertoire où se trouve le script
 cd /d "%~dp0"
 
@@ -11,9 +10,8 @@ if not exist "node.exe" (
     exit /b 1
 )
 
-
-REM Lance le serveur en mode production dans la même fenêtre cmd
+:: Lance le serveur en mode production dans la même fenêtre cmd
 npm run start
 
-REM Une fois que le serveur est arrêté, la fenêtre cmd se fermera automatiquement
+:: Une fois que le serveur est arrêté, la fenêtre cmd se fermera automatiquement
 exit

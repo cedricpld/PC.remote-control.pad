@@ -308,6 +308,19 @@ export function StreamDeck({ className }: StreamDeckProps) {
     }
   };
   
+  const handleStopServer = async () => {
+  if (clickSound) clickSound.play();
+  try {
+    const response = await fetch("/api/stop-server", { method: "POST" });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Erreur serveur');
+    alert("Le serveur s'arrête...");
+  } catch (error: any) {
+    console.error("Erreur lors de l'arrêt du serveur :", error);
+    alert(`Échec de l'arrêt du serveur : ${error.message}`);
+  }
+};
+
   const [screenSize, setScreenSize] = React.useState<"mobile" | "tablet" | "desktop">("desktop");
   
   React.useEffect(() => {
@@ -412,7 +425,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
         onSave={handleSavePage}
         onDelete={editingPage ? () => handleDeletePage(editingPage.id) : undefined}
       />
-      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} onRestartServer={handleRestartServer} />
+      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} onRestartServer={handleRestartServer} onStopServer={handleStopServer} />
     </div>
   );
 }

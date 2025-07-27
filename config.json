@@ -121,7 +121,7 @@
   },
   {
     "id": "0f201d11-6c86-4703-8d9f-165d33a2d82d",
-    "name": "Shortcuts",
+    "name": "Actions",
     "color": "#6b7280",
     "icon": "Terminal",
     "blocks": [
@@ -674,5 +674,12 @@
         }
       }
     ]
+  },
+  {
+    "id": "c7f93124-318b-44ea-aeb2-1a168aa752e9",
+    "name": "TEST2",
+    "color": "#3b82f6",
+    "icon": "Home",
+    "blocks": []
   }
 ]

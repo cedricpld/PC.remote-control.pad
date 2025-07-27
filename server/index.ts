@@ -6,6 +6,7 @@ import { handleDemo } from "./routes/demo";
 import { exec } from "child_process";
 import fs from "fs/promises";
 import path from "path";
+import { exec } from 'child_process';
 // Importations et définitions pour __dirname en ES Modules
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -167,14 +168,43 @@ export function createServer() {
       res.status(500).json({ error: `Contrôle Yeelight échoué: ${error.message}` });
     }
   });
-  app.post("/api/restart-server", (req, res) => {
-    res.status(200).json({ message: "Serveur en cours d'arrêt..." });
+  
+app.post("/api/restart-server", (req, res) => {
+  res.status(200).json({ message: "Serveur en cours de redémarrage..." });
 
-    setTimeout(() => {
-        console.log("Fermeture du serveur...");
-        process.exit(0);
-    }, 100);
+  // Chemin vers votre script PowerShell pour redémarrer le serveur
+  const restartScriptPath = path.join(__dirname, '..', '..', 'control_pad_restart.ps1');
+
+  // Commande pour exécuter le script PowerShell
+  const command = `powershell.exe -ExecutionPolicy Bypass -File "${restartScriptPath}"`;
+
+  // Exécuter le script PowerShell
+  exec(command, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Erreur lors du redémarrage du serveur: ${error.message}`);
+      return;
+    }
+    if (stderr) {
+      console.error(`Erreur lors du redémarrage du serveur: ${stderr}`);
+    }
+    console.log(`Sortie du script de redémarrage: ${stdout}`);
+  });
+
+  // Arrêter le serveur actuel
+  setTimeout(() => {
+    console.log("Fermeture du serveur actuel...");
+    process.exit(0);
+  }, 100);
 });
+
+
+  
+  app.post("/api/stop-server", (req, res) => {
+    res.status(200).json({ message: "Serveur en cours d'arrêt..." });
+    console.log("Fermeture du serveur...");
+    process.exit(0); // Arrête le processus Node.js
+  });
+
 
   app.post("/api/set-master-volume", (req, res) => {
     const { value } = req.body;
