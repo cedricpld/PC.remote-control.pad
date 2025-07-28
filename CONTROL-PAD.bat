@@ -11,7 +11,8 @@ if not exist "node.exe" (
 )
 
 :: Lance le serveur en mode production dans la même fenêtre cmd
-npm run start
+.\node.exe .\node_modules\npm\bin\npm-cli.js run start
+
 
 :: Une fois que le serveur est arrêté, la fenêtre cmd se fermera automatiquement
 exit
