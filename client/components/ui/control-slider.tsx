@@ -4,12 +4,13 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { ControlBlockConfig } from "@/types/stream-deck";
 import * as Icons from "lucide-react";
+import { fetchWithAuth } from '@/utils/api';
 
 interface ControlSliderProps {
   config: ControlBlockConfig;
   onValueChange?: (value: number) => void;
   className?: string;
-  isEditing?: boolean; // Ajout de la prop
+  isEditing?: boolean;
   [key: string]: any;
 }
 
@@ -21,16 +22,35 @@ export const ControlSlider = React.forwardRef<HTMLDivElement, ControlSliderProps
       setSliderValue(config.sliderConfig?.initialValue || 0);
     }, [config.sliderConfig?.initialValue]);
 
-    const handleSliderChange = (value: number[]) => {
+    const handleSliderChange = async (value: number[]) => {
       const newValue = value[0];
       setSliderValue(newValue);
       if (onValueChange) {
         onValueChange(newValue);
       }
+
+      if (config.sliderConfig?.apiEndpoint) {
+        try {
+          const response = await fetchWithAuth(config.sliderConfig.apiEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ value: newValue }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Erreur lors de la mise à jour du slider:', errorData.error || 'Erreur serveur');
+          } else {
+            console.log('Volume mis à jour avec succès');
+          }
+        } catch (error) {
+          console.error('Erreur réseau lors de la mise à jour du slider:', error);
+        }
+      }
     };
 
-    const IconComponent = config.icon ? (Icons as any)[config.icon] : null;
 
+    const IconComponent = config.icon ? (Icons as any)[config.icon] : null;
     const min = config.sliderConfig?.min || 0;
     const max = config.sliderConfig?.max || 100;
     const displayValueAsPercent = max === 65535;
@@ -44,18 +64,18 @@ export const ControlSlider = React.forwardRef<HTMLDivElement, ControlSliderProps
         ref={ref}
         className={cn(
           "flex flex-col items-center justify-center p-2 rounded-lg sm:rounded-xl border-2 border-border/50 bg-card/50 backdrop-blur-sm space-y-1 h-full transition-all",
-          isEditing && "ring-2 ring-primary/50 cursor-move hover:ring-primary", // Ligne ajoutée
+          isEditing && "ring-2 ring-primary/50 cursor-move hover:ring-primary",
           className
         )}
-        style={{ 
+        style={{
           backgroundColor: config.color ? `${config.color}20` : undefined,
-          borderColor: config.color ? `${config.color}40` : undefined 
+          borderColor: config.color ? `${config.color}40` : undefined
         }}
         {...props}
       >
         <div className="flex items-center justify-center gap-2 w-full">
-            {IconComponent && <IconComponent className="h-4 w-4 shrink-0" style={{ color: config.color || "currentColor" }}/>}
-            <Label className="text-xs font-medium text-center leading-tight truncate">{config.label}</Label>
+          {IconComponent && <IconComponent className="h-4 w-4 shrink-0" style={{ color: config.color || "currentColor" }} />}
+          <Label className="text-xs font-medium text-center leading-tight truncate">{config.label}</Label>
         </div>
         <Slider
           defaultValue={[sliderValue]}

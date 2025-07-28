@@ -16,7 +16,7 @@ import { Yeelight } from 'node-yeelight-wifi';
 
 // --- SECTION DE SÉCURITÉ ---
 // IMPORTANT : Changez ce mot de passe pour quelque chose de personnel et de complexe !
-const SUPER_SECRET_PASSWORD = "password123"; 
+const SUPER_SECRET_PASSWORD = "1973"; 
 // Ce token secret sert de "ticket d'entrée" pour le client une fois connecté.
 // Il n'a pas besoin d'être changé, mais il doit rester secret.
 const AUTH_TOKEN = "un-token-secret-tres-long-et-aleatoire-pour-la-session";
@@ -260,15 +260,30 @@ app.get("/api/config", async (req, res) => {
   // Route pour le volume (INCHANGÉE, mais maintenant protégée)
   app.post("/api/set-master-volume", (req, res) => {
     const { value } = req.body;
-    if (value === undefined) return res.status(400).json({ error: "Valeur de volume manquante." });
+
+    if (value === undefined) {
+      console.log("Valeur de volume manquante.");
+      return res.status(400).json({ error: "Valeur de volume manquante." });
+    }
+
     const volumeCommand = `"${NIRCMD_PATH}" setsysvolume ${Math.min(Math.max(0, value), 65535)}`;
+    console.log(`Définition du volume à ${value} avec la commande : ${volumeCommand}`);
+
     exec(volumeCommand, (error, stdout, stderr) => {
       if (error) {
+        console.error(`Erreur de la commande volume : ${error.message}`);
+        console.error(`Stderr: ${stderr}`);
         return res.status(500).json({ error: `Échec de la commande volume : ${error.message}`, stderr });
       }
+
+      console.log(`Volume défini à ${value} avec succès.`);
+      console.log(`Sortie standard: ${stdout}`);
+
       res.status(200).json({ message: `Volume défini à ${value}.` });
     });
   });
+
+
 
   // Routes de monitoring (INCHANGÉES, mais maintenant protégées)
   app.get("/api/get-cpu-usage", (_req, res) => {

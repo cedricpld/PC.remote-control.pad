@@ -14,6 +14,21 @@ interface StreamDeckProps {
   className?: string;
 }
 
+// Définir fetchWithAuth ici
+const fetchWithAuth = async (input: RequestInfo | URL, init?: RequestInit) => {
+  const token = sessionStorage.getItem('control-pad-auth-token');
+  const headers = new Headers(init?.headers);
+
+  if (token) {
+    headers.append('Authorization', `Bearer ${token}`);
+  }
+
+  return fetch(input, {
+    ...init,
+    headers,
+  });
+};
+
 export function StreamDeck({ className }: StreamDeckProps) {
   const [pages, setPages] = React.useState<StreamDeckPage[]>([]);
   const [currentPageId, setCurrentPageId] = React.useState<string>("");
@@ -42,7 +57,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
   const saveConfigToServer = React.useCallback(async (currentPages: StreamDeckPage[]) => {
     try {
       const pagesToSave = currentPages.map(({ buttons, ...page }) => page);
-      const response = await fetch("/api/config", {
+      const response = await fetchWithAuth("/api/config", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(pagesToSave),
@@ -72,45 +87,40 @@ export function StreamDeck({ className }: StreamDeckProps) {
   }, [saveConfigToServer]);
 
   React.useEffect(() => {
-    const isAuthenticated = !!sessionStorage.getItem('control-pad-auth-token');
-    if (isAuthenticated) {
-      const loadConfig = async () => {
-        try {
-          const response = await fetchWithAuth("/api/config");
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-          const data = await response.json();
+    const loadConfig = async () => {
+      try {
+        const response = await fetchWithAuth("/api/config");
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
 
-          const migratedData = data.map((page: any) => {
-            const newBlocks = (page.blocks || page.buttons || []).map((block: any) => {
-              if (!block.actionType) {
-                if (block.shortcut) {
-                  return { ...block, actionType: 'shortcut' };
-                }
-                return { ...block, actionType: 'command' };
+        const migratedData = data.map((page: any) => {
+          const newBlocks = (page.blocks || page.buttons || []).map((block: any) => {
+            if (!block.actionType) {
+              if (block.shortcut) {
+                return { ...block, actionType: 'shortcut' };
               }
-              return block;
-            });
-            return { ...page, blocks: newBlocks, buttons: undefined };
+              return { ...block, actionType: 'command' };
+            }
+            return block;
           });
+          return { ...page, blocks: newBlocks, buttons: undefined };
+        });
 
-          console.log('Données migrées :', migratedData);
+        console.log('Données migrées :', migratedData);
 
-          if (migratedData && migratedData.length > 0) {
-            setPages(migratedData);
-            setCurrentPageId(migratedData[0].id);
-          } else {
-            createDefaultPages();
-          }
-        } catch (error) {
-          console.error("Échec du chargement de la config, création par défaut:", error);
+        if (migratedData && migratedData.length > 0) {
+          setPages(migratedData);
+          setCurrentPageId(migratedData[0].id);
+        } else {
           createDefaultPages();
         }
-      };
-      loadConfig();
-    }
+      } catch (error) {
+        console.error("Échec du chargement de la config, création par défaut:", error);
+        createDefaultPages();
+      }
+    };
+    loadConfig();
   }, [createDefaultPages]);
-
-
 
   React.useEffect(() => {
     if (pages.length > 0 && currentPageId) {
