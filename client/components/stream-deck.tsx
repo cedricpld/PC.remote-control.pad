@@ -14,6 +14,21 @@ interface StreamDeckProps {
   className?: string;
 }
 
+// Définir fetchWithAuth ici
+const fetchWithAuth = async (input: RequestInfo | URL, init?: RequestInit) => {
+  const token = sessionStorage.getItem('control-pad-auth-token');
+  const headers = new Headers(init?.headers);
+
+  if (token) {
+    headers.append('Authorization', `Bearer ${token}`);
+  }
+
+  return fetch(input, {
+    ...init,
+    headers,
+  });
+};
+
 export function StreamDeck({ className }: StreamDeckProps) {
   const [pages, setPages] = React.useState<StreamDeckPage[]>([]);
   const [currentPageId, setCurrentPageId] = React.useState<string>("");
@@ -41,12 +56,8 @@ export function StreamDeck({ className }: StreamDeckProps) {
 
   const saveConfigToServer = React.useCallback(async (currentPages: StreamDeckPage[]) => {
     try {
-      const pagesToSave = currentPages.map(({ buttons, ...page }: any) => {
-        const cleanedBlocks = (page.blocks || []).filter((b: ControlBlockConfig) => b.actionType);
-        return {...page, blocks: cleanedBlocks};
-      });
-
-      await fetch("/api/config", {
+      const pagesToSave = currentPages.map(({ buttons, ...page }) => page);
+      const response = await fetchWithAuth("/api/config", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(pagesToSave),
@@ -56,41 +67,45 @@ export function StreamDeck({ className }: StreamDeckProps) {
       console.error("Échec de la sauvegarde :", error);
     }
   }, []);
-  
+
   const createDefaultPages = React.useCallback(() => {
     const defaultPages: StreamDeckPage[] = [
       {
         id: "main", name: "Principal", color: "#3b82f6", icon: "Home",
         blocks: [
-            { id: "cmd-mic", label: "Couper Micro", icon: "Mic", color: "#ef4444", width: 1, actionType: "command", command: "nircmd.exe mutesysvolume 2" },
-            { id: "slider-volume", label: "Volume PC", icon: "Volume2", color: "#3b82f6", width: 2, actionType: "slider", sliderConfig: { apiEndpoint: "/api/set-master-volume", min: 0, max: 65535, initialValue: 32767, unit: "" } },
-            { id: "status-cpu", label: "CPU", icon: "Cpu", color: "#ef4444", width: 1, actionType: "statusDisplay", statusDisplayConfig: { apiEndpoint: "/api/get-cpu-usage", dataType: "cpu", updateIntervalMs: 2000, labelUnit: "%" } },
-            { id: "status-ram", label: "RAM", icon: "MemoryStick", color: "#22c55e", width: 1, actionType: "statusDisplay", statusDisplayConfig: { apiEndpoint: "/api/get-ram-usage", dataType: "ram", updateIntervalMs: 3000, labelUnit: "%" } },
+          { id: "cmd-mic", label: "Couper Micro", icon: "Mic", color: "#ef4444", width: 1, height: 1, actionType: "command", command: "nircmd.exe mutesysvolume 2" },
+          { id: "slider-volume", label: "Volume PC", icon: "Volume2", color: "#3b82f6", width: 3, height: 1, actionType: "slider", sliderConfig: { apiEndpoint: "/api/set-master-volume", min: 0, max: 65535, initialValue: 32767, unit: "" } },
+          { id: "status-cpu", label: "CPU", icon: "Cpu", color: "#ef4444", width: 2, height: 1, actionType: "statusDisplay", statusDisplayConfig: { apiEndpoint: "/api/get-cpu-usage", dataType: "cpu", updateIntervalMs: 2000, labelUnit: "%" } },
+          { id: "status-ram", label: "RAM", icon: "MemoryStick", color: "#22c55e", width: 2, height: 1, actionType: "statusDisplay", statusDisplayConfig: { apiEndpoint: "/api/get-ram-usage", dataType: "ram", updateIntervalMs: 3000, labelUnit: "%" } },
         ],
       },
     ];
     setPages(defaultPages);
     if (defaultPages.length > 0) setCurrentPageId(defaultPages[0].id);
-  }, []);
+    saveConfigToServer(defaultPages);
+  }, [saveConfigToServer]);
 
   React.useEffect(() => {
     const loadConfig = async () => {
       try {
-        const response = await fetch("/api/config");
+        const response = await fetchWithAuth("/api/config");
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
-        
+
         const migratedData = data.map((page: any) => {
-            const newBlocks = (page.blocks || page.buttons || []).map((block: any) => {
-                if (!block.actionType) {
-                    if (block.shortcut) return {...block, actionType: 'shortcut'};
-                    return {...block, actionType: 'command'};
-                }
-                return block;
-            });
-            const { buttons, ...restOfPage } = page;
-            return { ...restOfPage, blocks: newBlocks };
+          const newBlocks = (page.blocks || page.buttons || []).map((block: any) => {
+            if (!block.actionType) {
+              if (block.shortcut) {
+                return { ...block, actionType: 'shortcut' };
+              }
+              return { ...block, actionType: 'command' };
+            }
+            return block;
+          });
+          return { ...page, blocks: newBlocks, buttons: undefined };
         });
+
+        console.log('Données migrées :', migratedData);
 
         if (migratedData && migratedData.length > 0) {
           setPages(migratedData);
@@ -143,16 +158,16 @@ export function StreamDeck({ className }: StreamDeckProps) {
     );
     setDialogOpen(false);
   };
-  
+
   const handleDeleteControl = () => {
-      if (!editingControl) return;
-      setPages(prev => prev.map(page => {
-          if (page.id === currentPageId) {
-              return { ...page, blocks: (page.blocks || []).filter(b => b.id !== editingControl.id) };
-          }
-          return page;
-      }));
-      setDialogOpen(false);
+    if (!editingControl) return;
+    setPages(prev => prev.map(page => {
+      if (page.id === currentPageId) {
+        return { ...page, blocks: (page.blocks || []).filter(b => b.id !== editingControl.id) };
+      }
+      return page;
+    }));
+    setDialogOpen(false);
   };
 
   const handleAddPage = () => {
@@ -203,18 +218,18 @@ export function StreamDeck({ className }: StreamDeckProps) {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
   };
-  
+
   const handleControlDrop = (e: React.DragEvent, targetControlId: string) => {
     e.preventDefault();
     if (!draggedControl || draggedControl === targetControlId) return;
-  
+
     setPages((prev) =>
       prev.map((page) => {
         if (page.id === currentPageId) {
           const controls = [...page.blocks];
           const draggedIndex = controls.findIndex((ctrl) => ctrl.id === draggedControl);
           const targetIndex = controls.findIndex((ctrl) => ctrl.id === targetControlId);
-  
+
           if (draggedIndex > -1 && targetIndex > -1) {
             const [draggedItem] = controls.splice(draggedIndex, 1);
             controls.splice(targetIndex, 0, draggedItem);
@@ -226,7 +241,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
     );
     setDraggedControl(null);
   };
-  
+
   const handlePageReorder = (sourceId: string, targetId: string) => {
     setPages((prev) => {
       const newPages = [...prev];
@@ -244,7 +259,6 @@ export function StreamDeck({ className }: StreamDeckProps) {
     if (clickSound) clickSound.play();
     let apiUrl = '';
     let body: any = {};
-
     switch (config.actionType) {
       case 'command':
         if (!config.command) return alert("Commande non configurée.");
@@ -264,9 +278,8 @@ export function StreamDeck({ className }: StreamDeckProps) {
       default:
         return;
     }
-
     try {
-      const response = await fetch(apiUrl, {
+      const response = await fetchWithAuth(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -278,6 +291,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
       alert(`Erreur: ${error.message}`);
     }
   };
+
 
   const handleSliderValueChange = React.useCallback(async (config: ControlBlockConfig, value: number) => {
     if (!config.sliderConfig?.apiEndpoint) return console.error("Endpoint API du slider non configuré.");
@@ -307,22 +321,24 @@ export function StreamDeck({ className }: StreamDeckProps) {
       alert(`Échec du redémarrage : ${error.message}`);
     }
   };
-  
+
   const handleStopServer = async () => {
-  if (clickSound) clickSound.play();
-  try {
-    const response = await fetch("/api/stop-server", { method: "POST" });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || 'Erreur serveur');
-    alert("Le serveur s'arrête...");
-  } catch (error: any) {
-    console.error("Erreur lors de l'arrêt du serveur :", error);
-    alert(`Échec de l'arrêt du serveur : ${error.message}`);
-  }
-};
+    if (clickSound) clickSound.play();
+    try {
+      const response = await fetch("/api/stop-server", { method: "POST" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Erreur serveur');
+      alert("Le serveur s'arrête...");
+    } catch (error: any) {
+      console.error("Erreur lors de l'arrêt du serveur :", error);
+      alert(`Échec de l'arrêt du serveur : ${error.message}`);
+    }
+  };
+
+
 
   const [screenSize, setScreenSize] = React.useState<"mobile" | "tablet" | "desktop">("desktop");
-  
+
   React.useEffect(() => {
     const checkScreenSize = () => {
       const width = window.innerWidth;
@@ -356,7 +372,6 @@ export function StreamDeck({ className }: StreamDeckProps) {
           </Button>
         </div>
       </div>
-
       <PageTabs
         pages={pages}
         currentPageId={currentPageId}
@@ -367,7 +382,6 @@ export function StreamDeck({ className }: StreamDeckProps) {
         onReorderPages={handlePageReorder}
         isEditing={isEditing}
       />
-
       <div className="flex-1 p-3 sm:p-6 overflow-auto">
         {isEditing && (
           <div className="text-center text-sm text-muted-foreground mb-4 p-2 bg-primary/10 rounded-lg border border-primary/20">
@@ -378,9 +392,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
           className="grid gap-2 sm:gap-4 justify-center"
           style={{
             gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
-            maxWidth: screenSize === "mobile" ? `${cols * 90}px`
-                      : screenSize === "tablet" ? `${cols * 106}px`
-                      : `${cols * 122}px`,
+            maxWidth: screenSize === "mobile" ? `${cols * 90}px` : screenSize === "tablet" ? `${cols * 106}px` : `${cols * 122}px`,
             margin: "0 auto",
           }}
         >
@@ -410,7 +422,6 @@ export function StreamDeck({ className }: StreamDeckProps) {
           </div>
         )}
       </div>
-
       <ControlDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
