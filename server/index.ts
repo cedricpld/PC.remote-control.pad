@@ -51,6 +51,7 @@ const CONFIG_FILE = path.join(process.cwd(), 'config.json');
 // CORRECTION : Chemin direct vers le nircmd.exe local pour la portabilité
 const NIRCMD_PATH = path.join(__dirname, 'scripts', 'nircmd.exe');
 
+
 // Fonction pour lire la configuration depuis config.json
 async function readConfig() {
   try {
