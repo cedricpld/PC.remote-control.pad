@@ -13,13 +13,14 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
 // Import de la bibliothèque Yeelight
 import { Yeelight } from 'node-yeelight-wifi';
 
 
 // --- SECTION DE SÉCURITÉ ---
 // IMPORTANT : Changez ce mot de passe pour quelque chose de personnel et de complexe !
-const HASHED_PASSWORD = "$2a$12$QbJCQCnCozJp6UVvkYzZteOrK.fgELViltca6534m3RLh0XtqU08S"; // Mot de passe haché pour la sécurité
+//const HASHED_PASSWORD = "$2a$12$QbJCQCnCozJp6UVvkYzZteOrK.fgELViltca6534m3RLh0XtqU08S"; // Mot de passe haché pour la sécurité
 // Ce mot de passe est haché avec bcrypt. Vous pouvez le générer avec bcrypt
 // Ce token secret sert de "ticket d'entrée" pour le client une fois connecté.
 // Il n'a pas besoin d'être changé, mais il doit rester secret.
@@ -29,14 +30,14 @@ const AUTH_TOKEN = "$2y$10$GOYC7PD5VZDvLaf8u29DTe52oHW7SFaTtAj2bQP28I6iFoiBkipOa
  * Middleware de sécurité : le "garde du corps" de vos API.
  * Il vérifie si le client envoie le bon "ticket d'entrée" (token) dans les en-têtes de sa requête.
  */
-const ensureAuthenticated = (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  const authHeader = req.headers['authorization'];
-  console.log('Authorization Header:', authHeader); // Log pour vérifier l'en-tête d'autorisation
-  if (authHeader && authHeader === `Bearer ${AUTH_TOKEN}`) {
-    return next();
-  }
-  res.status(401).json({ error: 'Accès non autorisé.' });
-};
+//const ensureAuthenticated = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+//  const authHeader = req.headers['authorization'];
+//  console.log('Authorization Header:', authHeader); // Log pour vérifier l'en-tête d'autorisation
+//  if (authHeader && authHeader === `Bearer ${AUTH_TOKEN}`) {
+//    return next();
+//  }
+//  res.status(401).json({ error: 'Accès non autorisé.' });
+//};
 
 // --- FIN DE LA SECTION SÉCURITÉ ---
 
@@ -59,8 +60,8 @@ async function readConfig() {
     return JSON.parse(data);
   } catch (error: any) {
     if (error.code === 'ENOENT') {
-      console.warn(`Fichier de configuration non trouvé à ${CONFIG_FILE}, création d'une configuration par défaut.`);
-      return []; // Retourne un tableau vide si le fichier n'existe pas
+      console.warn(`Fichier de configuration non trouvé à ${CONFIG_FILE}`);
+      return null; // Retourne null si le fichier n'existe pas
     }
     console.error("Erreur lors de la lecture du fichier de configuration :", error);
     throw error;
@@ -146,7 +147,7 @@ export function createServer() {
   // Cette route est placée avant le middleware de sécurité pour être accessible publiquement.
   app.post("/api/login", async (req, res) => {
     const { password } = req.body;
-    const saltRounds = 12; // Nombre de tours de salage
+    //const saltRounds = 12; // Nombre de tours de salage
 
     try {
       //console.log("Mot de passe reçu :", password);
@@ -154,7 +155,10 @@ export function createServer() {
       //const hashedPassword = await bcrypt.hash(password, saltRounds);
       //console.log("Mot de passe reçu haché :", hashedPassword);
 
-      const isMatch = await bcrypt.compare(password, HASHED_PASSWORD);
+      const config = await readConfig();
+      const hashedPassword = config.hashedPassword;
+
+      const isMatch = await bcrypt.compare(password, hashedPassword);
 
 
       console.log("Résultat de la comparaison :", isMatch);
@@ -190,11 +194,6 @@ export function createServer() {
 
 
 
-
-
-
-
-
   // Routes API
   app.get("/api/ping", (_req, res) => res.json({ message: "Hello from Express server v2!" }));
   app.get("/api/demo", handleDemo);
@@ -206,6 +205,8 @@ export function createServer() {
       res.status(500).json({ error: "Échec de la récupération de la configuration." });
     }
   });
+  
+  //####################################################################################################
   app.post("/api/config", async (req, res) => {
     try {
       const newConfig = req.body;
@@ -215,6 +216,41 @@ export function createServer() {
       res.status(500).json({ error: "Échec de la sauvegarde de la configuration." });
     }
   });
+
+
+  // Route api pour modifier le Password
+  app.post("/api/update-password", async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+
+    try {
+      const config = await readConfig();
+      const hashedPassword = config.hashedPassword;
+
+      if (!hashedPassword) {
+        return res.status(500).json({ error: "Mot de passe non configuré." });
+      }
+
+      const isMatch = await bcrypt.compare(currentPassword, hashedPassword);
+
+      if (!isMatch) {
+        return res.status(401).json({ error: "Mot de passe actuel incorrect" });
+      }
+
+      const saltRounds = 12;
+      const newHashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+      config.hashedPassword = newHashedPassword;
+      await writeConfig(config);
+
+      res.status(200).json({ message: "Mot de passe mis à jour avec succès." });
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du mot de passe :", error);
+      res.status(500).json({ error: "Erreur interne du serveur" });
+    }
+  });
+
+
+
   
   // CORRIGÉ : Route API pour exécuter des actions
   app.post("/api/execute-action", (req, res) => {

@@ -1,4 +1,5 @@
 {
+  "hashedPassword": "$2a$12$QbJCQCnCozJp6UVvkYzZteOrK.fgELViltca6534m3RLh0XtqU08S",
   "pages": [
   {
     "id": "main",
@@ -704,8 +705,5 @@
         }
       ]
     }
-  ],
-  "auth": {
-    "hashedPassword": "$2a$12$QbJCQCnCozJp6UVvkYzZteOrK.fgELViltca6534m3RLh0XtqU08S"
-  }
+  ]
 }

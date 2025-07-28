@@ -14,15 +14,12 @@ interface StreamDeckProps {
   className?: string;
 }
 
-// Définir fetchWithAuth ici
 const fetchWithAuth = async (input: RequestInfo | URL, init?: RequestInit) => {
   const token = sessionStorage.getItem('control-pad-auth-token');
   const headers = new Headers(init?.headers);
-
   if (token) {
     headers.append('Authorization', `Bearer ${token}`);
   }
-
   return fetch(input, {
     ...init,
     headers,
@@ -90,25 +87,23 @@ export function StreamDeck({ className }: StreamDeckProps) {
     const loadConfig = async () => {
       try {
         const response = await fetchWithAuth("/api/config");
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
-
-        const migratedData = data.map((page: any) => {
-          const newBlocks = (page.blocks || page.buttons || []).map((block: any) => {
-            if (!block.actionType) {
-              if (block.shortcut) {
-                return { ...block, actionType: 'shortcut' };
+        if (data && data.length > 0) {
+          const migratedData = data.map((page: any) => {
+            const newBlocks = (page.blocks || page.buttons || []).map((block: any) => {
+              if (!block.actionType) {
+                if (block.shortcut) {
+                  return { ...block, actionType: 'shortcut' };
+                }
+                return { ...block, actionType: 'command' };
               }
-              return { ...block, actionType: 'command' };
-            }
-            return block;
+              return block;
+            });
+            return { ...page, blocks: newBlocks, buttons: undefined };
           });
-          return { ...page, blocks: newBlocks, buttons: undefined };
-        });
-
-        console.log('Données migrées :', migratedData);
-
-        if (migratedData && migratedData.length > 0) {
           setPages(migratedData);
           setCurrentPageId(migratedData[0].id);
         } else {
@@ -119,6 +114,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
         createDefaultPages();
       }
     };
+
     loadConfig();
   }, [createDefaultPages]);
 
@@ -232,14 +228,12 @@ export function StreamDeck({ className }: StreamDeckProps) {
   const handleControlDrop = (e: React.DragEvent, targetControlId: string) => {
     e.preventDefault();
     if (!draggedControl || draggedControl === targetControlId) return;
-
     setPages((prev) =>
       prev.map((page) => {
         if (page.id === currentPageId) {
           const controls = [...page.blocks];
           const draggedIndex = controls.findIndex((ctrl) => ctrl.id === draggedControl);
           const targetIndex = controls.findIndex((ctrl) => ctrl.id === targetControlId);
-
           if (draggedIndex > -1 && targetIndex > -1) {
             const [draggedItem] = controls.splice(draggedIndex, 1);
             controls.splice(targetIndex, 0, draggedItem);
@@ -302,7 +296,6 @@ export function StreamDeck({ className }: StreamDeckProps) {
     }
   };
 
-
   const handleSliderValueChange = React.useCallback(async (config: ControlBlockConfig, value: number) => {
     if (!config.sliderConfig?.apiEndpoint) return console.error("Endpoint API du slider non configuré.");
     try {
@@ -345,10 +338,26 @@ export function StreamDeck({ className }: StreamDeckProps) {
     }
   };
 
-
+  const handleChangePassword = async (currentPassword: string, newPassword: string) => {
+    try {
+      const response = await fetchWithAuth('/api/update-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      if (!response.ok) {
+        throw new Error('Échec de la mise à jour du mot de passe');
+      }
+      return response.json();
+    } catch (error) {
+      console.error("Erreur lors du changement de mot de passe :", error);
+      throw error;
+    }
+  };
 
   const [screenSize, setScreenSize] = React.useState<"mobile" | "tablet" | "desktop">("desktop");
-
   React.useEffect(() => {
     const checkScreenSize = () => {
       const width = window.innerWidth;
@@ -446,7 +455,13 @@ export function StreamDeck({ className }: StreamDeckProps) {
         onSave={handleSavePage}
         onDelete={editingPage ? () => handleDeletePage(editingPage.id) : undefined}
       />
-      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} onRestartServer={handleRestartServer} onStopServer={handleStopServer} />
+      <SettingsDialog
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        onRestartServer={handleRestartServer}
+        onStopServer={handleStopServer}
+        onChangePassword={handleChangePassword}
+      />
     </div>
   );
 }
