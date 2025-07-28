@@ -349,7 +349,75 @@
         "width": 1,
         "height": 1,
         "actionType": "command",
+<<<<<<< Updated upstream
         "command": "schtasks /run /tn \"CONTROL-PAD-sleep\"",
+=======
+        "command": "taskkill /IM python.exe /F",
+        "shortcut": "",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": ""
+        }
+      },
+      {
+        "id": "81075665-2190-4154-8474-14617c6a1e30",
+        "label": "start thales.com",
+        "icon": "Monitor",
+        "color": "#3b82f6",
+        "width": 1,
+        "height": 1,
+        "actionType": "command",
+        "command": "start https://www.thalesgroup.com/fr",
+        "shortcut": "",
+        "yeelightConfig": {
+          "ip": "",
+          "action": "toggle"
+        },
+        "sliderConfig": {
+          "apiEndpoint": "",
+          "min": 0,
+          "max": 100,
+          "initialValue": 50,
+          "unit": ""
+        },
+        "statusDisplayConfig": {
+          "apiEndpoint": "",
+          "dataType": "cpu",
+          "updateIntervalMs": 2000,
+          "labelUnit": ""
+        }
+      }
+    ]
+  },
+  {
+    "id": "a3982ce3-4b3f-4516-8d61-443d54c9591e",
+    "name": "Media",
+    "color": "#8b5cf6",
+    "icon": "Music",
+    "blocks": [
+      {
+        "id": "080924e8-0042-4666-a801-6cbf182fa975",
+        "label": "Couper",
+        "icon": "Volume",
+        "color": "#ef4444",
+        "width": 1,
+        "height": 1,
+        "actionType": "command",
+        "command": "nircmd.exe mutesysvolume 2",
+>>>>>>> Stashed changes
         "shortcut": "",
         "yeelightConfig": {
           "ip": "",
