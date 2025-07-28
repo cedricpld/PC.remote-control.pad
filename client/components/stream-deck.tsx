@@ -145,7 +145,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
         config.height = 1;
         break;
       case "statusDisplay":
-        config.width = 2;
+        config.width = 3;
         config.height = 1;
         break;
       default:
