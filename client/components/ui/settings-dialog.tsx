@@ -8,28 +8,47 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { RotateCcw, Server } from "lucide-react";
+import { RotateCcw, Server, Power } from "lucide-react";
 
 interface SettingsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onRestartServer: () => void; // Ajout de la prop pour la fonction de redémarrage
+  onRestartServer: () => Promise<void>; // Fonction pour redémarrer le serveur
+  onStopServer: () => Promise<void>; // Nouvelle fonction pour arrêter le serveur
 }
 
-export function SettingsDialog({ open, onOpenChange, onRestartServer }: SettingsDialogProps) {
+export function SettingsDialog({
+  open,
+  onOpenChange,
+  onRestartServer,
+  onStopServer,
+}: SettingsDialogProps) {
   const [isRestarting, setIsRestarting] = React.useState(false);
+  const [isStopping, setIsStopping] = React.useState(false);
 
   // Fonction appelée lorsque l'utilisateur clique sur le bouton "Restart Server"
   const handleRestartServerClick = async () => {
     setIsRestarting(true);
     try {
-      await onRestartServer(); // Appelle la fonction passée par la prop
-      // L'alerte de succès ou d'échec sera gérée par la fonction dans stream-deck.tsx
+      await onRestartServer();
     } catch (error) {
       console.error("Échec du déclenchement du redémarrage du serveur :", error);
       alert("Échec du déclenchement du redémarrage du serveur.");
     } finally {
       setIsRestarting(false);
+    }
+  };
+
+  // Fonction appelée lorsque l'utilisateur clique sur le bouton "Stop Server"
+  const handleStopServerClick = async () => {
+    setIsStopping(true);
+    try {
+      await onStopServer();
+    } catch (error) {
+      console.error("Échec de l'arrêt du serveur :", error);
+      alert("Échec de l'arrêt du serveur.");
+    } finally {
+      setIsStopping(false);
     }
   };
 
@@ -45,16 +64,15 @@ export function SettingsDialog({ open, onOpenChange, onRestartServer }: Settings
             Configurez les paramètres de votre CONTROL PAD.
           </DialogDescription>
         </DialogHeader>
-
         <div className="grid gap-6 py-4">
           <div className="space-y-4">
             <h4 className="text-sm font-medium">Gestion du Serveur</h4>
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">
-                Redémarrez le serveur de contrôle à distance si vous rencontrez des problèmes de connexion.
+                Redémarrez ou arrêtez le serveur de contrôle à distance si vous rencontrez des problèmes de connexion.
               </p>
               <Button
-                onClick={handleRestartServerClick} // Utilise la nouvelle fonction
+                onClick={handleRestartServerClick}
                 disabled={isRestarting}
                 className="w-full gap-2"
                 variant="outline"
@@ -64,9 +82,19 @@ export function SettingsDialog({ open, onOpenChange, onRestartServer }: Settings
                 />
                 {isRestarting ? "Redémarrage..." : "Redémarrer le Serveur"}
               </Button>
+              <Button
+                onClick={handleStopServerClick}
+                disabled={isStopping}
+                className="w-full gap-2"
+                variant="outline"
+              >
+                <Power
+                  className={`h-4 w-4 ${isStopping ? "animate-pulse" : ""}`}
+                />
+                {isStopping ? "Arrêt en cours..." : "Arrêter le Serveur"}
+              </Button>
             </div>
           </div>
-
           <div className="space-y-4">
             <h4 className="text-sm font-medium">Informations sur l'application</h4>
             <div className="text-sm text-muted-foreground space-y-1">
@@ -76,7 +104,6 @@ export function SettingsDialog({ open, onOpenChange, onRestartServer }: Settings
             </div>
           </div>
         </div>
-
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Fermer
