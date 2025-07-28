@@ -13,13 +13,38 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 // Import de la bibliothèque Yeelight
 import { Yeelight } from 'node-yeelight-wifi';
+
+// --- SECTION DE SÉCURITÉ ---
+// IMPORTANT : Changez ce mot de passe pour quelque chose de personnel et de complexe !
+const SUPER_SECRET_PASSWORD = "password123"; 
+// Ce token secret sert de "ticket d'entrée" pour le client une fois connecté.
+// Il n'a pas besoin d'être changé, mais il doit rester secret.
+const AUTH_TOKEN = "un-token-secret-tres-long-et-aleatoire-pour-la-session";
+
+/**
+ * Middleware de sécurité : le "garde du corps" de vos API.
+ * Il vérifie si le client envoie le bon "ticket d'entrée" (token) dans les en-têtes de sa requête.
+ */
+const ensureAuthenticated = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  // On récupère l'en-tête "Authorization" qui doit contenir le token.
+  const authHeader = req.headers['authorization'];
+  // On vérifie si le token correspond à celui attendu (format "Bearer VOTRE_TOKEN").
+  if (authHeader && authHeader === `Bearer ${AUTH_TOKEN}`) {
+    return next(); // L'utilisateur a le bon ticket, il peut continuer vers la route demandée.
+  }
+  // Si le token est manquant ou incorrect, on bloque l'accès avec une erreur 401 (Non autorisé).
+  res.status(401).json({ error: 'Accès non autorisé.' });
+};
+// --- FIN DE LA SECTION SÉCURITÉ ---
+
+
 // Chemin de configuration: utilise process.cwd() pour la compatibilité avec le .exe packagé.
 const CONFIG_FILE = path.join(process.cwd(), 'config.json');
 // CORRECTION : Chemin direct vers le nircmd.exe local pour la portabilité
 const NIRCMD_PATH = path.join(__dirname, 'scripts', 'nircmd.exe');
 
 
-// Fonction pour lire la configuration depuis config.json
+// Fonction pour lire la configuration depuis config.json (INCHANGÉE)
 async function readConfig() {
   try {
     const data = await fs.readFile(CONFIG_FILE, 'utf-8');
@@ -33,7 +58,7 @@ async function readConfig() {
     throw error;
   }
 }
-// Fonction pour écrire la configuration dans config.json
+// Fonction pour écrire la configuration dans config.json (INCHANGÉE)
 async function writeConfig(config: any) {
   try {
     await fs.writeFile(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf-8');
@@ -44,7 +69,7 @@ async function writeConfig(config: any) {
   }
 }
 
-// Fonction pour contrôler l'ampoule Yeelight
+// Fonction pour contrôler l'ampoule Yeelight (INCHANGÉE)
 async function controlYeelight(action: 'toggle' | 'on' | 'off', ip: string) {
   if (!ip || !/^(\d{1,3}\.){3}\d{1,3}$/.test(ip)) {
     throw new Error('Adresse IP de l\'ampoule Yeelight invalide ou manquante.');
@@ -97,13 +122,45 @@ async function controlYeelight(action: 'toggle' | 'on' | 'off', ip: string) {
 }
 export function createServer() {
   const app = express();
-  // Middlewares
+  // Middlewares (INCHANGÉS)
   app.use(cors());
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
-  // Routes API
+
+  // --- NOUVELLE ROUTE DE CONNEXION (NON PROTÉGÉE) ---
+  // Cette route est placée avant le middleware de sécurité pour être accessible publiquement.
+  app.post("/api/login", (req, res) => {
+    const { password } = req.body;
+    // On vérifie si le mot de passe envoyé par le client correspond à celui défini sur le serveur.
+    if (password === SUPER_SECRET_PASSWORD) {
+      // Si c'est correct, on envoie le "ticket d'entrée" (token) au client.
+      console.log("Tentative de connexion réussie.");
+      res.status(200).json({ token: AUTH_TOKEN });
+    } else {
+      // Sinon, on renvoie une erreur 401 (Non autorisé).
+      console.warn("Tentative de connexion échouée : mot de passe incorrect.");
+      res.status(401).json({ error: "Mot de passe incorrect" });
+    }
+  });
+
+  // --- APPLICATION DU GARDE DU CORPS SUR LES ROUTES SENSIBLES ---
+  // Ce middleware s'appliquera à toutes les routes /api/* définies après lui, sauf /api/login.
+  app.use('/api', (req, res, next) => {
+      if (req.path === '/login') {
+          return next();
+      }
+      ensureAuthenticated(req, res, next);
+  });
+
+  // --- VOS ROUTES EXISTANTES (MAINTENANT PROTÉGÉES) ---
+
+  // Route Ping (INCHANGÉE, mais maintenant protégée)
   app.get("/api/ping", (_req, res) => res.json({ message: "Hello from Express server v2!" }));
+  
+  // Route Demo (INCHANGÉE, mais maintenant protégée)
   app.get("/api/demo", handleDemo);
+
+  // Route pour lire la config (INCHANGÉE, mais maintenant protégée)
   app.get("/api/config", async (_req, res) => {
     try {
       const config = await readConfig();
@@ -112,6 +169,8 @@ export function createServer() {
       res.status(500).json({ error: "Échec de la récupération de la configuration." });
     }
   });
+
+  // Route pour écrire la config (INCHANGÉE, mais maintenant protégée)
   app.post("/api/config", async (req, res) => {
     try {
       const newConfig = req.body;
@@ -122,21 +181,19 @@ export function createServer() {
     }
   });
   
-  // CORRIGÉ : Route API pour exécuter des actions
+  // Route pour exécuter des actions (INCHANGÉE, mais maintenant protégée)
   app.post("/api/execute-action", (req, res) => {
     const { command, shortcut } = req.body;
     let finalCommand: string | null = null;
     console.log('Requête reçue sur /api/execute-action avec :', req.body);
 
     if (command) {
-        // Si la commande commence par "nircmd.exe", on la remplace par le chemin complet
         if (command.startsWith('nircmd.exe')) {
             finalCommand = `"${NIRCMD_PATH}" ${command.substring('nircmd.exe'.length)}`;
         } else {
-            finalCommand = command; // Pour les autres commandes comme 'start vlc.exe'
+            finalCommand = command;
         }
     } else if (shortcut) {
-        // La logique pour les raccourcis via PowerShell reste inchangée, comme vous le souhaitez
         const scriptPath = path.join(__dirname, 'scripts', 'simulate-shortcut.ps1');
         finalCommand = `powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}" -Shortcut "${shortcut}"`;
     }
@@ -157,6 +214,7 @@ export function createServer() {
     });
   });
 
+  // Route Yeelight (INCHANGÉE, mais maintenant protégée)
   app.post("/api/yeelight-toggle", async (req, res) => {
     const { action, yeelightIp } = req.body;
     if (!['toggle', 'on', 'off'].includes(action)) return res.status(400).json({ error: "Action Yeelight invalide." });
@@ -168,19 +226,34 @@ export function createServer() {
       res.status(500).json({ error: `Contrôle Yeelight échoué: ${error.message}` });
     }
   });
+  
+  // Route pour redémarrer (INCHANGÉE, mais maintenant protégée)
   app.post("/api/restart-server", (req, res) => {
-    exec(`pm2 restart stream-deck-server`, (error, stdout, stderr) => {
-      if (error) {
-        console.error(`Erreur PM2 : ${error.message}`);
-        return res.status(500).json({ error: `Échec du redémarrage : ${error.message}`, stderr });
-      }
-      res.status(200).json({ message: `Serveur redémarré avec succès.` });
+    res.status(200).json({ message: "Serveur en cours de redémarrage..." });
+    const restartScriptPath = path.join(__dirname, '..', '..', 'control_pad_restart.ps1');
+    const command = `powershell.exe -ExecutionPolicy Bypass -File "${restartScriptPath}"`;
+    exec(command, (error, stdout, stderr) => {
+      if (error) console.error(`Erreur lors du redémarrage du serveur: ${error.message}`);
+      if (stderr) console.error(`Erreur lors du redémarrage du serveur: ${stderr}`);
+      console.log(`Sortie du script de redémarrage: ${stdout}`);
     });
+    setTimeout(() => {
+      console.log("Fermeture du serveur actuel...");
+      process.exit(0);
+    }, 100);
   });
+
+  // Route pour arrêter le serveur (INCHANGÉE, mais maintenant protégée)
+  app.post("/api/stop-server", (req, res) => {
+    res.status(200).json({ message: "Serveur en cours d'arrêt..." });
+    console.log("Fermeture du serveur...");
+    process.exit(0);
+  });
+
+  // Route pour le volume (INCHANGÉE, mais maintenant protégée)
   app.post("/api/set-master-volume", (req, res) => {
     const { value } = req.body;
     if (value === undefined) return res.status(400).json({ error: "Valeur de volume manquante." });
-    // Utilisation du chemin local pour nircmd
     const volumeCommand = `"${NIRCMD_PATH}" setsysvolume ${Math.min(Math.max(0, value), 65535)}`;
     exec(volumeCommand, (error, stdout, stderr) => {
       if (error) {
@@ -189,7 +262,8 @@ export function createServer() {
       res.status(200).json({ message: `Volume défini à ${value}.` });
     });
   });
-  // Routes de monitoring
+
+  // Routes de monitoring (INCHANGÉES, mais maintenant protégées)
   app.get("/api/get-cpu-usage", (_req, res) => {
     const command = "powershell.exe -Command \"(Get-WmiObject -Class Win32_PerfFormattedData_PerfOS_Processor | Where-Object {$_.Name -eq '_Total'}).PercentProcessorTime\"";
     exec(command, (error, stdout, stderr) => {
@@ -210,9 +284,7 @@ export function createServer() {
       return res.status(500).json({ error: "Réponse invalide de nvidia-smi." });
     });
   });
-  
   app.get("/api/get-gpu-usage", (_req, res) => {
-    // Cette route est un alias pour /api/get-cuda-usage
     const command = 'nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits';
     exec(command, (error, stdout, stderr) => {
       if (error || stderr) {
@@ -257,5 +329,6 @@ export function createServer() {
     const usedMemPercent = parseFloat(((usedMemBytes / totalMemBytes) * 100).toFixed(1));
     res.status(200).json({ value: usedMemPercent });
   });
+  
   return app;
 }
