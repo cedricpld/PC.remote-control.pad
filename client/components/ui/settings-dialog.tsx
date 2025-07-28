@@ -46,7 +46,7 @@ export function SettingsDialog({
       await onStopServer();
     } catch (error) {
       console.error("Échec de l'arrêt du serveur :", error);
-      alert("Échec de l'arrêt du serveur.");
+      alert("Échec de l'arrêt du serveur.", error);
     } finally {
       setIsStopping(false);
     }
