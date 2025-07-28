@@ -12,27 +12,28 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = React.useState(!!sessionStorage.getItem(SESSION_KEY));
   const [error, setError] = React.useState<string | null>(null);
 
-  const handleLogin = async (password?: string) => {
-    setError(null);
-    try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
-      });
+const handleLogin = async (password?: string) => {
+  setError(null);
+  try {
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password }),
+    });
 
-      if (response.ok) {
-        const data = await response.json();
-        // If login is successful, store the token and set authenticated to true
-        sessionStorage.setItem(SESSION_KEY, data.token);
-        setIsAuthenticated(true);
-      } else {
-        setError('Mot de passe incorrect.');
-      }
-    } catch (err) {
-      setError('Erreur de connexion au serveur.');
+    if (response.ok) {
+      const data = await response.json();
+      sessionStorage.setItem(SESSION_KEY, data.token);
+      console.log('Token stocké :', sessionStorage.getItem(SESSION_KEY)); // Log pour vérifier le token
+      setIsAuthenticated(true);
+    } else {
+      setError('Mot de passe incorrect.');
     }
-  };
+  } catch (err) {
+    setError('Erreur de connexion au serveur.');
+  }
+};
+
 
   // If authenticated, render the children (your StreamDeck page)
   // Otherwise, render the login page

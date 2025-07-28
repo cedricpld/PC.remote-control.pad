@@ -105,7 +105,7 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
             height = 1;
             break;
         case 'statusDisplay':
-            width = 3;
+            width = 2;
             height = 1;
             break;
         default: // command, shortcut, yeelight

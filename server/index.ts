@@ -26,15 +26,14 @@ const AUTH_TOKEN = "un-token-secret-tres-long-et-aleatoire-pour-la-session";
  * Il vérifie si le client envoie le bon "ticket d'entrée" (token) dans les en-têtes de sa requête.
  */
 const ensureAuthenticated = (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  // On récupère l'en-tête "Authorization" qui doit contenir le token.
   const authHeader = req.headers['authorization'];
-  // On vérifie si le token correspond à celui attendu (format "Bearer VOTRE_TOKEN").
+  console.log('Authorization Header:', authHeader); // Log pour vérifier l'en-tête d'autorisation
   if (authHeader && authHeader === `Bearer ${AUTH_TOKEN}`) {
-    return next(); // L'utilisateur a le bon ticket, il peut continuer vers la route demandée.
+    return next();
   }
-  // Si le token est manquant ou incorrect, on bloque l'accès avec une erreur 401 (Non autorisé).
   res.status(401).json({ error: 'Accès non autorisé.' });
 };
+
 // --- FIN DE LA SECTION SÉCURITÉ ---
 
 
@@ -44,10 +43,12 @@ const CONFIG_FILE = path.join(process.cwd(), 'config.json');
 const NIRCMD_PATH = path.join(__dirname, 'scripts', 'nircmd.exe');
 
 
-// Fonction pour lire la configuration depuis config.json (INCHANGÉE)
+// Fonction pour lire la configuration depuis config.json
 async function readConfig() {
   try {
+    console.log(`Tentative de lecture du fichier de configuration à ${CONFIG_FILE}`);
     const data = await fs.readFile(CONFIG_FILE, 'utf-8');
+    console.log('Fichier de configuration lu avec succès');
     return JSON.parse(data);
   } catch (error: any) {
     if (error.code === 'ENOENT') {
@@ -58,6 +59,8 @@ async function readConfig() {
     throw error;
   }
 }
+
+
 // Fonction pour écrire la configuration dans config.json (INCHANGÉE)
 async function writeConfig(config: any) {
   try {
@@ -160,15 +163,19 @@ export function createServer() {
   // Route Demo (INCHANGÉE, mais maintenant protégée)
   app.get("/api/demo", handleDemo);
 
-  // Route pour lire la config (INCHANGÉE, mais maintenant protégée)
-  app.get("/api/config", async (_req, res) => {
-    try {
-      const config = await readConfig();
-      res.status(200).json(config);
-    } catch (error) {
-      res.status(500).json({ error: "Échec de la récupération de la configuration." });
-    }
-  });
+  // Route pour lire la config
+app.get("/api/config", async (req, res) => {
+  try {
+    console.log('Tentative de récupération de la configuration');
+    const config = await readConfig();
+    console.log('Configuration récupérée avec succès:', config);
+    res.status(200).json(config);
+  } catch (error) {
+    console.error("Erreur lors de la récupération de la configuration:", error);
+    res.status(500).json({ error: "Échec de la récupération de la configuration." });
+  }
+});
+
 
   // Route pour écrire la config (INCHANGÉE, mais maintenant protégée)
   app.post("/api/config", async (req, res) => {
