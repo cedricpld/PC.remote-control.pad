@@ -7,6 +7,7 @@ import { exec } from "child_process";
 import fs from "fs/promises";
 import path from "path";
 import { exec } from 'child_process';
+import bcrypt from 'bcrypt'; // Import de bcrypt pour le hachage des mots de passe
 // Importations et définitions pour __dirname en ES Modules
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -18,10 +19,11 @@ import { Yeelight } from 'node-yeelight-wifi';
 
 // --- SECTION DE SÉCURITÉ ---
 // IMPORTANT : Changez ce mot de passe pour quelque chose de personnel et de complexe !
-const SUPER_SECRET_PASSWORD = "1973"; 
+const HASHED_PASSWORD = "$2a$12$QbJCQCnCozJp6UVvkYzZteOrK.fgELViltca6534m3RLh0XtqU08S"; // Mot de passe haché pour la sécurité
+// Ce mot de passe est haché avec bcrypt. Vous pouvez le générer avec bcrypt
 // Ce token secret sert de "ticket d'entrée" pour le client une fois connecté.
 // Il n'a pas besoin d'être changé, mais il doit rester secret.
-const AUTH_TOKEN = "un-token-secret-tres-long-et-aleatoire-pour-la-session";
+const AUTH_TOKEN = "$2y$10$GOYC7PD5VZDvLaf8u29DTe52oHW7SFaTtAj2bQP28I6iFoiBkipOa";
 
 /**
  * Middleware de sécurité : le "garde du corps" de vos API.
@@ -141,17 +143,31 @@ export function createServer() {
 
   // --- NOUVELLE ROUTE DE CONNEXION (NON PROTÉGÉE) ---
   // Cette route est placée avant le middleware de sécurité pour être accessible publiquement.
-  app.post("/api/login", (req, res) => {
+  app.post("/api/login", async (req, res) => {
     const { password } = req.body;
-    // On vérifie si le mot de passe envoyé par le client correspond à celui défini sur le serveur.
-    if (password === SUPER_SECRET_PASSWORD) {
-      // Si c'est correct, on envoie le "ticket d'entrée" (token) au client.
-      console.log("Tentative de connexion réussie.");
-      res.status(200).json({ token: AUTH_TOKEN });
-    } else {
-      // Sinon, on renvoie une erreur 401 (Non autorisé).
-      console.warn("Tentative de connexion échouée : mot de passe incorrect.");
-      res.status(401).json({ error: "Mot de passe incorrect" });
+    const saltRounds = 12; // Nombre de tours de salage
+
+    try {
+      //console.log("Mot de passe reçu :", password);
+      //console.log("Mot de passe haché stocké :", HASHED_PASSWORD);
+      //const hashedPassword = await bcrypt.hash(password, saltRounds);
+      //console.log("Mot de passe reçu haché :", hashedPassword);
+
+      const isMatch = await bcrypt.compare(password, HASHED_PASSWORD);
+
+
+      console.log("Résultat de la comparaison :", isMatch);
+
+      if (isMatch) {
+        console.log("Tentative de connexion réussie.");
+        res.status(200).json({ token: AUTH_TOKEN });
+      } else {
+        console.warn("Tentative de connexion échouée : mot de passe incorrect.");
+        res.status(401).json({ error: "Mot de passe incorrect" });
+      }
+    } catch (error) {
+      console.error("Erreur lors de la vérification du mot de passe :", error);
+      res.status(500).json({ error: "Erreur interne du serveur" });
     }
   });
 
