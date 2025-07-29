@@ -1,4 +1,4 @@
-# 🎮 CONTROL PAD - Votre télécommande de PC personnalisable
+# **CONTROL PAD** - Votre télécommande de PC personnalisable
 
 **CONTROL PAD** est une application web qui transforme votre téléphone, tablette ou tout autre appareil disposant d'un navigateur en une télécommande puissante et entièrement personnalisable pour votre PC Windows. Lancez des applications, exécutez des raccourcis complexes, contrôlez le volume, surveillez en temps réel les performances de votre système, et bien plus, le tout depuis une interface simple, réactive et élégante.
 
@@ -20,6 +20,32 @@
     * **Statut :** Affichez des informations système en temps réel.
 * **Portable :** Créez une version auto-exécutable qui fonctionne sur n'importe quel PC Windows sans installation préalable de Node.js.
 * **Open Source :** Basé sur une stack moderne avec React, Vite, Node.js et Express.
+
+---
+## 🔑 Gestion des Mots de Passe
+
+Cette section décrit comment configurer et gérer les mots de passe pour votre application.
+
+### Configuration Initiale
+
+À l'installation, le mot de passe par défaut est ```admin```
+Le mot de passe haché est situé dans le fichier ```config.json```
+
+1. Ouvrez le fichier `config.json` situé dans le répertoire racine de votre projet.
+2. Trouvez la section `auth` et vous pourrez voir votre mot de passe haché dans le champ `hashedPassword`.
+
+```json
+{
+  "pages": [...], // Vos configurations de pages ici
+  "auth": {
+    "hashedPassword": "votre_mot_de_passe_haché_ici"
+  }
+}
+```
+
+Vous pouvez le modifier depuis l'interface du **Control Pad**, dans les paramètres, sous la section ```Sécurité```, bouton ```Changer le mot de passe```
+Ou alors directement dans votre fichier ```config.json``` à condition de le haché manuellement avec ```bcrypt```, il existe des sites internet pour haché et tester du texte avec bcrypt, par exemple [Bcrypt Generator](https://bcrypt-generator.com/). Assurez vous de laisser les ```Rounds (Cost Factor)``` à 12
+
 
 ---
 ## 🚀 Installation et Lancement
