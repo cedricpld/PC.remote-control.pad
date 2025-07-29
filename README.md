@@ -5,7 +5,7 @@
 
 <img width="775" height="256" alt="image" src="https://github.com/user-attachments/assets/a76cde3b-f191-49e3-9330-41f390e9866e" />
 
-
+Visitez la section [releases](https://github.com/cedricpld/PC.remote-control.pad/releases) pour télécharger la dernière version de ```installer``` ou la dernière version ```portable```
 
 ---
 ## ✨ Fonctionnalités
@@ -20,6 +20,7 @@
     * **Statut :** Affichez des informations système en temps réel.
 * **Portable :** Créez une version auto-exécutable qui fonctionne sur n'importe quel PC Windows sans installation préalable de Node.js.
 * **Open Source :** Basé sur une stack moderne avec React, Vite, Node.js et Express.
+* **Système d'authentification :** Un mot de passe est demandé avant d'acceder à votre interface. Cryptage haute sécurité avec un hash ```bcrypt``` 12 rounds
 
 ---
 ## 🔑 Gestion des Mots de Passe
@@ -49,6 +50,11 @@ Ou alors directement dans votre fichier ```config.json``` à condition de le hac
 
 ---
 ## 🚀 Installation et Lancement
+
+Possibilité d'installation facile avec [l'installer](https://github.com/cedricpld/PC.remote-control.pad/releases/download/v1.2.2/Control-Pad-Setup_1.2.2.msi) ou en version [portable](https://github.com/cedricpld/PC.remote-control.pad/releases/download/v1.2.2/Control-Pad-Portable_1.2.2.rar). 
+ Tout deux disponibles dans la section [releases](https://github.com/cedricpld/PC.remote-control.pad/releases).
+
+
 
 ### Lancement en mode Développement
 
