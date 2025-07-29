@@ -58,7 +58,7 @@ async function readConfig() {
   try {
     const data = await fs.readFile(CONFIG_FILE, 'utf-8');
     const config = JSON.parse(data);
-    console.log("Configuration lue depuis le fichier:", config); // Ajoutez ce log
+    console.log("Configuration lue depuis le fichier:"); // Ajoutez ce log
     return config;
   } catch (error: any) {
     if (error.code === 'ENOENT') {
@@ -77,7 +77,7 @@ async function readConfig() {
 async function writeConfig(config: any) {
   try {
     // Ajouter un log pour vérification
-    console.log("Sauvegarde de la configuration:", config);
+    console.log("Sauvegarde de la configuration:");
 
     await fs.writeFile(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf-8');
     console.log(`Configuration sauvegardée avec succès à ${CONFIG_FILE}.`);
@@ -227,7 +227,7 @@ export function createServer() {
 
 
   app.post("/api/update-password", async (req, res) => {
-    console.log("Données reçues pour changement de mot de passe:", req.body); // Log des données reçues
+    //console.log("Données reçues pour changement de mot de passe:", req.body); // Log des données reçues
 
     const { currentPassword, newPassword } = req.body;
     if (!currentPassword || !newPassword) {
