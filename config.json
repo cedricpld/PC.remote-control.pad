@@ -525,34 +525,6 @@
             "updateIntervalMs": 2000,
             "labelUnit": ""
           }
-        },
-        {
-          "id": "81075665-2190-4154-8474-14617c6a1e30",
-          "label": "start thales.com",
-          "icon": "Monitor",
-          "color": "#3b82f6",
-          "width": 1,
-          "height": 1,
-          "actionType": "command",
-          "command": "start https://www.thalesgroup.com/fr",
-          "shortcut": "",
-          "yeelightConfig": {
-            "ip": "",
-            "action": "toggle"
-          },
-          "sliderConfig": {
-            "apiEndpoint": "",
-            "min": 0,
-            "max": 100,
-            "initialValue": 50,
-            "unit": ""
-          },
-          "statusDisplayConfig": {
-            "apiEndpoint": "",
-            "dataType": "cpu",
-            "updateIntervalMs": 2000,
-            "labelUnit": ""
-          }
         }
       ]
     },
