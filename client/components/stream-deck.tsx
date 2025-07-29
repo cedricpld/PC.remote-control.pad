@@ -129,12 +129,16 @@ export function StreamDeck({ className }: StreamDeckProps) {
   }, [createDefaultPages]);
 
 
-
+  // **CORRECTION APPLIQUÉE ICI**
+  // Ce `useEffect` est maintenant plus simple et plus fiable pour la sauvegarde.
   React.useEffect(() => {
-    if (pages.length > 0 && currentPageId) {
+    // On s'assure que l'état initial n'est pas vide avant de sauvegarder,
+    // pour éviter d'écraser la config avec un tableau vide au premier rendu.
+    const isInitialLoad = pages.length === 0 && !currentPageId;
+    if (!isInitialLoad) {
       saveConfigToServer(pages);
     }
-  }, [pages, currentPageId, saveConfigToServer]);
+  }, [pages, saveConfigToServer]);
 
   const handleAddControl = () => {
     setEditingControl(undefined);
@@ -161,6 +165,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
         config.height = 1;
         break;
     }
+
     setPages((prev) =>
       prev.map((page) => {
         if (page.id === currentPageId) {
@@ -201,7 +206,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
   const handleSavePage = (pageData: StreamDeckPage) => {
     setPages((prev) => {
       if (editingPage) {
-        return prev.map((page) => (page.id === pageData.id ? pageData : page));
+        return prev.map((page) => (page.id === pageData.id ? { ...page, ...pageData } : page));
       } else {
         const newPages = [...prev, pageData];
         setCurrentPageId(pageData.id);
