@@ -96,12 +96,12 @@ Voici quelques exemples pour vous aider à configurer vos blocs d'action.
 
 | Action | Commande à insérer |
 | :--- | :--- |
-| **Couper/Rétablir le son** | `nircmd.exe mutesysvolume 2` |
-| **Lancer VLC** | `start "" "C:\Program Files\VideoLAN\VLC\vlc.exe"` *(pensez à vérifier le chemin)* |
-| **Lancer le Bloc-notes** | `start notepad.exe` |
-| **Ouvrir un site web** | `start https://www.google.com` |
+| **Lancer des applications système** | `start notepad.exe` |
+| **Lancer des logiciels** | `start "" "E:\Programmes\Plex Media Server\Plex Media Server.exe"` *(pensez à vérifier le chemin)* |
+| **Ouvrir un site web** | `start https://github.com/cedricpld/PC.remote-control.pad` |
 | **Simuler des touches** | `nircmd.exe sendkeypress 179` *(Play/Pause)* [Keys Énumération for Windows](https://learn.microsoft.com/fr-fr/dotnet/api/system.windows.forms.keys?view=windowsdesktop-8.0)|
 | **Raccourci avec privilèges** | `nircmd.exe sendkeypress elevate shift+ctrl+esc` |
+| **Couper/Rétablir le son** | `nircmd.exe mutesysvolume 2` |
 | **Mettre le PC en veille** | `nircmd.exe standby` |
 
 ### Type : `Raccourci`
