@@ -12,7 +12,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = React.useState(!!sessionStorage.getItem(SESSION_KEY));
   const [error, setError] = React.useState<string | null>(null);
 
-<<<<<<< Updated upstream
+
 const handleLogin = async (password?: string) => {
   setError(null);
   try {
@@ -35,29 +35,7 @@ const handleLogin = async (password?: string) => {
   }
 };
 
-=======
-  const handleLogin = async (password?: string) => {
-    setError(null);
-    try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
-      });
 
-      if (response.ok) {
-        const data = await response.json();
-        // If login is successful, store the token and set authenticated to true
-        sessionStorage.setItem(SESSION_KEY, data.token);
-        setIsAuthenticated(true);
-      } else {
-        setError('Mot de passe incorrect.');
-      }
-    } catch (err) {
-      setError('Erreur de connexion au serveur.');
-    }
-  };
->>>>>>> Stashed changes
 
   // If authenticated, render the children (your StreamDeck page)
   // Otherwise, render the login page
