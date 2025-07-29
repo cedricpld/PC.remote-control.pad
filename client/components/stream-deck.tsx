@@ -53,18 +53,27 @@ export function StreamDeck({ className }: StreamDeckProps) {
 
   const saveConfigToServer = React.useCallback(async (currentPages: StreamDeckPage[]) => {
     try {
-      const pagesToSave = currentPages.map(({ buttons, ...page }) => page);
-      const response = await fetchWithAuth("/api/config", {
+      const response = await fetchWithAuth("/api/config");
+      const currentConfig = await response.json();
+
+      const updatedConfig = {
+        ...currentConfig,
+        pages: currentPages
+      };
+
+      const saveResponse = await fetchWithAuth("/api/config", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(pagesToSave),
+        body: JSON.stringify(updatedConfig),
       });
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+      if (!saveResponse.ok) throw new Error(`HTTP error! status: ${saveResponse.status}`);
       console.log("Configuration sauvegardée sur le serveur.");
     } catch (error: any) {
       console.error("Échec de la sauvegarde :", error);
     }
   }, []);
+
 
   const createDefaultPages = React.useCallback(() => {
     const defaultPages: StreamDeckPage[] = [
@@ -91,8 +100,10 @@ export function StreamDeck({ className }: StreamDeckProps) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        if (data && data.length > 0) {
-          const migratedData = data.map((page: any) => {
+        console.log("Configuration reçue du serveur:", data); // Ajoutez ce log pour vérifier les données reçues
+
+        if (data && data.pages && data.pages.length > 0) {
+          const migratedData = data.pages.map((page: any) => {
             const newBlocks = (page.blocks || page.buttons || []).map((block: any) => {
               if (!block.actionType) {
                 if (block.shortcut) {
@@ -114,9 +125,10 @@ export function StreamDeck({ className }: StreamDeckProps) {
         createDefaultPages();
       }
     };
-
     loadConfig();
   }, [createDefaultPages]);
+
+
 
   React.useEffect(() => {
     if (pages.length > 0 && currentPageId) {
@@ -347,15 +359,23 @@ export function StreamDeck({ className }: StreamDeckProps) {
         },
         body: JSON.stringify({ currentPassword, newPassword }),
       });
+
       if (!response.ok) {
-        throw new Error('Échec de la mise à jour du mot de passe');
+        const errorData = await response.json();
+        console.error("Erreur du serveur :", errorData.error);
+        throw new Error(errorData.error || 'Échec de la mise à jour du mot de passe');
       }
-      return response.json();
+
+      const data = await response.json();
+      console.log("Réponse du serveur :", data.message);
+      return data;
     } catch (error) {
       console.error("Erreur lors du changement de mot de passe :", error);
       throw error;
     }
   };
+
+
 
   const [screenSize, setScreenSize] = React.useState<"mobile" | "tablet" | "desktop">("desktop");
   React.useEffect(() => {

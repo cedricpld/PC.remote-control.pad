@@ -1,711 +1,711 @@
 {
   "pages": [
-  {
-    "id": "main",
-    "name": "Monitor",
-    "color": "#3b82f6",
-    "icon": "Monitor",
-    "blocks": [
-      {
-        "id": "0eef8f20-7103-4095-ad79-ba21a976e0bf",
-        "label": "CPU",
-        "icon": "Cpu",
-        "color": "#3b82f6",
-        "width": 3,
-        "height": 1,
-        "actionType": "statusDisplay",
-        "command": "",
-        "shortcut": "",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
+    {
+      "id": "main",
+      "name": "Monitor",
+      "color": "#3b82f6",
+      "icon": "Monitor",
+      "blocks": [
+        {
+          "id": "0eef8f20-7103-4095-ad79-ba21a976e0bf",
+          "label": "CPU",
+          "icon": "Cpu",
+          "color": "#3b82f6",
+          "width": 3,
+          "height": 1,
+          "actionType": "statusDisplay",
+          "command": "",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "/api/get-cpu-usage",
+            "dataType": "cpu",
+            "updateIntervalMs": 1000,
+            "labelUnit": "%"
+          }
         },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
+        {
+          "id": "acf17886-c135-45e3-8517-f5cd877a20cd",
+          "label": "RAM",
+          "icon": "MemoryStick",
+          "color": "#3b82f6",
+          "width": 3,
+          "height": 1,
+          "actionType": "statusDisplay",
+          "command": "",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "/api/get-ram-usage",
+            "dataType": "cpu",
+            "updateIntervalMs": 1000,
+            "labelUnit": "%"
+          }
         },
-        "statusDisplayConfig": {
-          "apiEndpoint": "/api/get-cpu-usage",
-          "dataType": "cpu",
-          "updateIntervalMs": 1000,
-          "labelUnit": "%"
+        {
+          "id": "d9006582-0732-4a30-823e-3d9df489e27d",
+          "label": "CUDA",
+          "icon": "Cpu",
+          "color": "#ef4444",
+          "width": 3,
+          "height": 1,
+          "actionType": "statusDisplay",
+          "command": "",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "/api/get-cuda-usage",
+            "dataType": "cpu",
+            "updateIntervalMs": 1000,
+            "labelUnit": "%"
+          }
+        },
+        {
+          "id": "4ce714f9-ba1c-4128-b703-ed3b84798867",
+          "label": "VRAM",
+          "icon": "MemoryStick",
+          "color": "#ef4444",
+          "width": 3,
+          "height": 1,
+          "actionType": "statusDisplay",
+          "command": "",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "/api/get-vram-usage-percent",
+            "dataType": "cpu",
+            "updateIntervalMs": 1000,
+            "labelUnit": "%"
+          }
         }
-      },
-      {
-        "id": "acf17886-c135-45e3-8517-f5cd877a20cd",
-        "label": "RAM",
-        "icon": "MemoryStick",
-        "color": "#3b82f6",
-        "width": 3,
-        "height": 1,
-        "actionType": "statusDisplay",
-        "command": "",
-        "shortcut": "",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
+      ]
+    },
+    {
+      "id": "0f201d11-6c86-4703-8d9f-165d33a2d82d",
+      "name": "Actions",
+      "color": "#6b7280",
+      "icon": "Terminal",
+      "blocks": [
+        {
+          "id": "9c56fc75-278c-428e-a03d-9a270e39f7c5",
+          "label": " ",
+          "icon": "Undo2",
+          "color": "#f97316",
+          "width": 1,
+          "height": 1,
+          "actionType": "shortcut",
+          "command": "",
+          "shortcut": "Ctrl+Z",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
+          }
         },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
+        {
+          "id": "268eae49-1c57-4dd6-abcb-be134dba3aa5",
+          "label": " ",
+          "icon": "MonitorX",
+          "color": "#ef4444",
+          "width": 1,
+          "height": 1,
+          "actionType": "shortcut",
+          "command": "",
+          "shortcut": "Alt+F4",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
+          }
         },
-        "statusDisplayConfig": {
-          "apiEndpoint": "/api/get-ram-usage",
-          "dataType": "cpu",
-          "updateIntervalMs": 1000,
-          "labelUnit": "%"
+        {
+          "id": "c1621bb0-4cb6-4a38-b7c3-9aeec01e49de",
+          "label": " ",
+          "icon": "SquareDashed",
+          "color": "#22c55e",
+          "width": 1,
+          "height": 1,
+          "actionType": "shortcut",
+          "command": "",
+          "shortcut": "Ctrl+A",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
+          }
+        },
+        {
+          "id": "9b935a73-a8bf-4e2e-9a74-fca066f09d2e",
+          "label": "admin",
+          "icon": "Monitor",
+          "color": "#3b82f6",
+          "width": 1,
+          "height": 1,
+          "actionType": "command",
+          "command": "nircmd.exe sendkeypress elevate shift+ctrl+esc",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
+          }
+        },
+        {
+          "id": "10306d62-3fec-4e75-9cbc-b49468fdbb10",
+          "label": "Veille",
+          "icon": "Moon",
+          "color": "#ec4899",
+          "width": 1,
+          "height": 1,
+          "actionType": "command",
+          "command": "nircmd.exe standby",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
+          }
+        },
+        {
+          "id": "f0da5452-dd84-45a8-b087-054473083b8b",
+          "label": "Veille ⛔",
+          "icon": "Eclipse",
+          "color": "#ef4444",
+          "width": 1,
+          "height": 1,
+          "actionType": "command",
+          "command": "schtasks /run /tn \"CONTROL-PAD-sleep\"",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
+          }
         }
-      },
-      {
-        "id": "d9006582-0732-4a30-823e-3d9df489e27d",
-        "label": "CUDA",
-        "icon": "Cpu",
-        "color": "#ef4444",
-        "width": 3,
-        "height": 1,
-        "actionType": "statusDisplay",
-        "command": "",
-        "shortcut": "",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
+      ]
+    },
+    {
+      "id": "67d022d2-bdf3-4f3e-aaa0-527ae5699877",
+      "name": "App",
+      "color": "#22c55e",
+      "icon": "LayoutGrid",
+      "blocks": [
+        {
+          "id": "ef45aeaa-b487-4f9b-a940-c46d46c86f2d",
+          "label": "Calc",
+          "icon": "Calculator",
+          "color": "#3b82f6",
+          "width": 1,
+          "height": 1,
+          "actionType": "command",
+          "command": "start calc.exe",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
+          }
         },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
+        {
+          "id": "a0776947-0d1a-405a-957c-15fe7684b2eb",
+          "label": "VLC",
+          "icon": "TrafficCone",
+          "color": "#f97316",
+          "width": 1,
+          "height": 1,
+          "actionType": "command",
+          "command": "start vlc.exe",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
+          }
         },
-        "statusDisplayConfig": {
-          "apiEndpoint": "/api/get-cuda-usage",
-          "dataType": "cpu",
-          "updateIntervalMs": 1000,
-          "labelUnit": "%"
+        {
+          "id": "f1bb26b9-3999-4356-bc03-284c67596e35",
+          "label": "Plex",
+          "icon": "ChevronRight",
+          "color": "#eab308",
+          "width": 1,
+          "height": 1,
+          "actionType": "command",
+          "command": "start \"\" \"E:\\Programmes\\Plex Media Server\\Plex Media Server.exe\"",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
+          }
+        },
+        {
+          "id": "a0922007-de08-4c18-a5e7-6ad8ca1f8a19",
+          "label": "ProtonVPN",
+          "icon": "GlobeLock",
+          "color": "#8b5cf6",
+          "width": 1,
+          "height": 1,
+          "actionType": "command",
+          "command": "start \"\" \"E:\\Programmes\\ProtonVPN\\ProtonVPN.Launcher.exe\"",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
+          }
+        },
+        {
+          "id": "345d7263-8496-4887-9d3c-0e9755227508",
+          "label": "TeamViewer",
+          "icon": "ScreenShare",
+          "color": "#281fff",
+          "width": 1,
+          "height": 1,
+          "actionType": "command",
+          "command": "start \"\" \"C:\\Program Files\\TeamViewer\\TeamViewer.exe\"",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
+          }
+        },
+        {
+          "id": "2a2e451a-90da-4a49-9d91-55b67b302f9b",
+          "label": "RustDesk",
+          "icon": "ScreenShare",
+          "color": "#1fc7ff",
+          "width": 1,
+          "height": 1,
+          "actionType": "command",
+          "command": "start \"\" \"E:\\Programmes\\RustDesk\\rustdesk.exe\"",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
+          }
+        },
+        {
+          "id": "189afeab-2ecc-4b5c-9961-26663d957b3b",
+          "label": "ComfyUI",
+          "icon": "Cpu",
+          "color": "#22c55e",
+          "width": 1,
+          "height": 1,
+          "actionType": "command",
+          "command": "start \"\" \"E:\\Programmes\\ComfyUI\\run_nvidia_gpu_CONTROL-PAD.bat\"\n",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
+          }
+        },
+        {
+          "id": "6d8c7e85-ff7b-45b7-b345-bbe99787706a",
+          "label": "STOP ComfyUI",
+          "icon": "Ban",
+          "color": "#ef4444",
+          "width": 1,
+          "height": 1,
+          "actionType": "command",
+          "command": "taskkill /IM python.exe /F",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
+          }
+        },
+        {
+          "id": "81075665-2190-4154-8474-14617c6a1e30",
+          "label": "start thales.com",
+          "icon": "Monitor",
+          "color": "#3b82f6",
+          "width": 1,
+          "height": 1,
+          "actionType": "command",
+          "command": "start https://www.thalesgroup.com/fr",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
+          }
         }
-      },
-      {
-        "id": "4ce714f9-ba1c-4128-b703-ed3b84798867",
-        "label": "VRAM",
-        "icon": "MemoryStick",
-        "color": "#ef4444",
-        "width": 3,
-        "height": 1,
-        "actionType": "statusDisplay",
-        "command": "",
-        "shortcut": "",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
+      ]
+    },
+    {
+      "id": "a3982ce3-4b3f-4516-8d61-443d54c9591e",
+      "name": "Media",
+      "color": "#8b5cf6",
+      "icon": "Music",
+      "blocks": [
+        {
+          "id": "080924e8-0042-4666-a801-6cbf182fa975",
+          "label": "Couper",
+          "icon": "Volume",
+          "color": "#ef4444",
+          "width": 1,
+          "height": 1,
+          "actionType": "command",
+          "command": "nircmd.exe mutesysvolume 2",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
+          }
         },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
+        {
+          "id": "31c1768a-8976-4425-8b84-f56e3b877a14",
+          "label": "Previous",
+          "icon": "SkipBack",
+          "color": "#8b5cf6",
+          "width": 1,
+          "height": 1,
+          "actionType": "command",
+          "command": "nircmd.exe sendkeypress 177",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
+          }
         },
-        "statusDisplayConfig": {
-          "apiEndpoint": "/api/get-vram-usage-percent",
-          "dataType": "cpu",
-          "updateIntervalMs": 1000,
-          "labelUnit": "%"
-        }
-      }
-    ]
-  },
-  {
-    "id": "0f201d11-6c86-4703-8d9f-165d33a2d82d",
-    "name": "Actions",
-    "color": "#6b7280",
-    "icon": "Terminal",
-    "blocks": [
-      {
-        "id": "9c56fc75-278c-428e-a03d-9a270e39f7c5",
-        "label": " ",
-        "icon": "Undo2",
-        "color": "#f97316",
-        "width": 1,
-        "height": 1,
-        "actionType": "shortcut",
-        "command": "",
-        "shortcut": "Ctrl+Z",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
+        {
+          "id": "88418860-eaf0-452a-9f26-1bec22d1b63f",
+          "label": "Play/Pause",
+          "icon": "Play",
+          "color": "#22c55e",
+          "width": 1,
+          "height": 1,
+          "actionType": "command",
+          "command": "nircmd.exe sendkeypress 179",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
+          }
         },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
+        {
+          "id": "663d939f-fce8-4c46-917c-4afa7740b613",
+          "label": "Next",
+          "icon": "SkipForward",
+          "color": "#8b5cf6",
+          "width": 1,
+          "height": 1,
+          "actionType": "command",
+          "command": "nircmd.exe sendkeypress 176",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
+          }
         },
-        "statusDisplayConfig": {
-          "apiEndpoint": "",
-          "dataType": "cpu",
-          "updateIntervalMs": 2000,
-          "labelUnit": ""
-        }
-      },
-      {
-        "id": "268eae49-1c57-4dd6-abcb-be134dba3aa5",
-        "label": " ",
-        "icon": "MonitorX",
-        "color": "#ef4444",
-        "width": 1,
-        "height": 1,
-        "actionType": "shortcut",
-        "command": "",
-        "shortcut": "Alt+F4",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
-        },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
-        },
-        "statusDisplayConfig": {
-          "apiEndpoint": "",
-          "dataType": "cpu",
-          "updateIntervalMs": 2000,
-          "labelUnit": ""
-        }
-      },
-      {
-        "id": "c1621bb0-4cb6-4a38-b7c3-9aeec01e49de",
-        "label": " ",
-        "icon": "SquareDashed",
-        "color": "#22c55e",
-        "width": 1,
-        "height": 1,
-        "actionType": "shortcut",
-        "command": "",
-        "shortcut": "Ctrl+A",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
-        },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
-        },
-        "statusDisplayConfig": {
-          "apiEndpoint": "",
-          "dataType": "cpu",
-          "updateIntervalMs": 2000,
-          "labelUnit": ""
-        }
-      },
-      {
-        "id": "9b935a73-a8bf-4e2e-9a74-fca066f09d2e",
-        "label": "admin",
-        "icon": "Monitor",
-        "color": "#3b82f6",
-        "width": 1,
-        "height": 1,
-        "actionType": "command",
-        "command": "nircmd.exe sendkeypress elevate shift+ctrl+esc",
-        "shortcut": "",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
-        },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
-        },
-        "statusDisplayConfig": {
-          "apiEndpoint": "",
-          "dataType": "cpu",
-          "updateIntervalMs": 2000,
-          "labelUnit": ""
-        }
-      },
-      {
-        "id": "10306d62-3fec-4e75-9cbc-b49468fdbb10",
-        "label": "Veille",
-        "icon": "Moon",
-        "color": "#ec4899",
-        "width": 1,
-        "height": 1,
-        "actionType": "command",
-        "command": "nircmd.exe standby",
-        "shortcut": "",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
-        },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
-        },
-        "statusDisplayConfig": {
-          "apiEndpoint": "",
-          "dataType": "cpu",
-          "updateIntervalMs": 2000,
-          "labelUnit": ""
-        }
-      },
-      {
-        "id": "f0da5452-dd84-45a8-b087-054473083b8b",
-        "label": "Veille ⛔",
-        "icon": "Eclipse",
-        "color": "#ef4444",
-        "width": 1,
-        "height": 1,
-        "actionType": "command",
-        "command": "schtasks /run /tn \"CONTROL-PAD-sleep\"",
-        "shortcut": "",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
-        },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
-        },
-        "statusDisplayConfig": {
-          "apiEndpoint": "",
-          "dataType": "cpu",
-          "updateIntervalMs": 2000,
-          "labelUnit": ""
-        }
-      }
-    ]
-  },
-  {
-    "id": "67d022d2-bdf3-4f3e-aaa0-527ae5699877",
-    "name": "App",
-    "color": "#22c55e",
-    "icon": "LayoutGrid",
-    "blocks": [
-      {
-        "id": "ef45aeaa-b487-4f9b-a940-c46d46c86f2d",
-        "label": "Calc",
-        "icon": "Calculator",
-        "color": "#3b82f6",
-        "width": 1,
-        "height": 1,
-        "actionType": "command",
-        "command": "start calc.exe",
-        "shortcut": "",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
-        },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
-        },
-        "statusDisplayConfig": {
-          "apiEndpoint": "",
-          "dataType": "cpu",
-          "updateIntervalMs": 2000,
-          "labelUnit": ""
-        }
-      },
-      {
-        "id": "a0776947-0d1a-405a-957c-15fe7684b2eb",
-        "label": "VLC",
-        "icon": "TrafficCone",
-        "color": "#f97316",
-        "width": 1,
-        "height": 1,
-        "actionType": "command",
-        "command": "start vlc.exe",
-        "shortcut": "",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
-        },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
-        },
-        "statusDisplayConfig": {
-          "apiEndpoint": "",
-          "dataType": "cpu",
-          "updateIntervalMs": 2000,
-          "labelUnit": ""
-        }
-      },
-      {
-        "id": "f1bb26b9-3999-4356-bc03-284c67596e35",
-        "label": "Plex",
-        "icon": "ChevronRight",
-        "color": "#eab308",
-        "width": 1,
-        "height": 1,
-        "actionType": "command",
-        "command": "start \"\" \"E:\\Programmes\\Plex Media Server\\Plex Media Server.exe\"",
-        "shortcut": "",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
-        },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
-        },
-        "statusDisplayConfig": {
-          "apiEndpoint": "",
-          "dataType": "cpu",
-          "updateIntervalMs": 2000,
-          "labelUnit": ""
-        }
-      },
-      {
-        "id": "a0922007-de08-4c18-a5e7-6ad8ca1f8a19",
-        "label": "ProtonVPN",
-        "icon": "GlobeLock",
-        "color": "#8b5cf6",
-        "width": 1,
-        "height": 1,
-        "actionType": "command",
-        "command": "start \"\" \"E:\\Programmes\\ProtonVPN\\ProtonVPN.Launcher.exe\"",
-        "shortcut": "",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
-        },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
-        },
-        "statusDisplayConfig": {
-          "apiEndpoint": "",
-          "dataType": "cpu",
-          "updateIntervalMs": 2000,
-          "labelUnit": ""
-        }
-      },
-      {
-        "id": "345d7263-8496-4887-9d3c-0e9755227508",
-        "label": "TeamViewer",
-        "icon": "ScreenShare",
-        "color": "#281fff",
-        "width": 1,
-        "height": 1,
-        "actionType": "command",
-        "command": "start \"\" \"C:\\Program Files\\TeamViewer\\TeamViewer.exe\"",
-        "shortcut": "",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
-        },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
-        },
-        "statusDisplayConfig": {
-          "apiEndpoint": "",
-          "dataType": "cpu",
-          "updateIntervalMs": 2000,
-          "labelUnit": ""
-        }
-      },
-      {
-        "id": "2a2e451a-90da-4a49-9d91-55b67b302f9b",
-        "label": "RustDesk",
-        "icon": "ScreenShare",
-        "color": "#1fc7ff",
-        "width": 1,
-        "height": 1,
-        "actionType": "command",
-        "command": "start \"\" \"E:\\Programmes\\RustDesk\\rustdesk.exe\"",
-        "shortcut": "",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
-        },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
-        },
-        "statusDisplayConfig": {
-          "apiEndpoint": "",
-          "dataType": "cpu",
-          "updateIntervalMs": 2000,
-          "labelUnit": ""
-        }
-      },
-      {
-        "id": "189afeab-2ecc-4b5c-9961-26663d957b3b",
-        "label": "ComfyUI",
-        "icon": "Cpu",
-        "color": "#22c55e",
-        "width": 1,
-        "height": 1,
-        "actionType": "command",
-        "command": "start \"\" \"E:\\Programmes\\ComfyUI\\run_nvidia_gpu_CONTROL-PAD.bat\"\n",
-        "shortcut": "",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
-        },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
-        },
-        "statusDisplayConfig": {
-          "apiEndpoint": "",
-          "dataType": "cpu",
-          "updateIntervalMs": 2000,
-          "labelUnit": ""
-        }
-      },
-      {
-        "id": "6d8c7e85-ff7b-45b7-b345-bbe99787706a",
-        "label": "STOP ComfyUI",
-        "icon": "Ban",
-        "color": "#ef4444",
-        "width": 1,
-        "height": 1,
-        "actionType": "command",
-        "command": "taskkill /IM python.exe /F",
-        "shortcut": "",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
-        },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
-        },
-        "statusDisplayConfig": {
-          "apiEndpoint": "",
-          "dataType": "cpu",
-          "updateIntervalMs": 2000,
-          "labelUnit": ""
-        }
-      },
-      {
-        "id": "81075665-2190-4154-8474-14617c6a1e30",
-        "label": "start thales.com",
-        "icon": "Monitor",
-        "color": "#3b82f6",
-        "width": 1,
-        "height": 1,
-        "actionType": "command",
-        "command": "start https://www.thalesgroup.com/fr",
-        "shortcut": "",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
-        },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
-        },
-        "statusDisplayConfig": {
-          "apiEndpoint": "",
-          "dataType": "cpu",
-          "updateIntervalMs": 2000,
-          "labelUnit": ""
-        }
-      }
-    ]
-  },
-  {
-    "id": "a3982ce3-4b3f-4516-8d61-443d54c9591e",
-    "name": "Media",
-    "color": "#8b5cf6",
-    "icon": "Music",
-    "blocks": [
-      {
-        "id": "080924e8-0042-4666-a801-6cbf182fa975",
-        "label": "Couper",
-        "icon": "Volume",
-        "color": "#ef4444",
-        "width": 1,
-        "height": 1,
-        "actionType": "command",
-        "command": "nircmd.exe mutesysvolume 2",
-        "shortcut": "",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
-        },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
-        },
-        "statusDisplayConfig": {
-          "apiEndpoint": "",
-          "dataType": "cpu",
-          "updateIntervalMs": 2000,
-          "labelUnit": ""
-        }
-      },
-      {
-        "id": "31c1768a-8976-4425-8b84-f56e3b877a14",
-        "label": "Previous",
-        "icon": "SkipBack",
-        "color": "#8b5cf6",
-        "width": 1,
-        "height": 1,
-        "actionType": "command",
-        "command": "nircmd.exe sendkeypress 177",
-        "shortcut": "",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
-        },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
-        },
-        "statusDisplayConfig": {
-          "apiEndpoint": "",
-          "dataType": "cpu",
-          "updateIntervalMs": 2000,
-          "labelUnit": ""
-        }
-      },
-      {
-        "id": "88418860-eaf0-452a-9f26-1bec22d1b63f",
-        "label": "Play/Pause",
-        "icon": "Play",
-        "color": "#22c55e",
-        "width": 1,
-        "height": 1,
-        "actionType": "command",
-        "command": "nircmd.exe sendkeypress 179",
-        "shortcut": "",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
-        },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
-        },
-        "statusDisplayConfig": {
-          "apiEndpoint": "",
-          "dataType": "cpu",
-          "updateIntervalMs": 2000,
-          "labelUnit": ""
-        }
-      },
-      {
-        "id": "663d939f-fce8-4c46-917c-4afa7740b613",
-        "label": "Next",
-        "icon": "SkipForward",
-        "color": "#8b5cf6",
-        "width": 1,
-        "height": 1,
-        "actionType": "command",
-        "command": "nircmd.exe sendkeypress 176",
-        "shortcut": "",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
-        },
-        "sliderConfig": {
-          "apiEndpoint": "",
-          "min": 0,
-          "max": 100,
-          "initialValue": 50,
-          "unit": ""
-        },
-        "statusDisplayConfig": {
-          "apiEndpoint": "",
-          "dataType": "cpu",
-          "updateIntervalMs": 2000,
-          "labelUnit": ""
-        }
-      },
-      {
-        "id": "slider-volume",
-        "label": "Volume",
-        "icon": "Volume2",
-        "color": "#3b82f6",
-        "width": 3,
-        "height": 1,
-        "actionType": "slider",
-        "command": "",
-        "shortcut": "",
-        "yeelightConfig": {
-          "ip": "",
-          "action": "toggle"
-        },
-        "sliderConfig": {
-          "apiEndpoint": "/api/set-master-volume",
-          "min": 0,
-          "max": 65535,
-          "initialValue": 65535,
-          "unit": "%"
-        },
-        "statusDisplayConfig": {
-          "apiEndpoint": "",
-          "dataType": "cpu",
-          "updateIntervalMs": 2000,
-          "labelUnit": ""
+        {
+          "id": "slider-volume",
+          "label": "Volume",
+          "icon": "Volume2",
+          "color": "#3b82f6",
+          "width": 3,
+          "height": 1,
+          "actionType": "slider",
+          "command": "",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "/api/set-master-volume",
+            "min": 0,
+            "max": 65535,
+            "initialValue": 65535,
+            "unit": "%"
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
           }
         }
       ]
     }
   ],
   "auth": {
-    "hashedPassword": "$2a$12$QbJCQCnCozJp6UVvkYzZteOrK.fgELViltca6534m3RLh0XtqU08S"
+    "hashedPassword": "$2b$12$qGq0gAH23eV0aQLvO3Aze.Vc4xsUMC4RllYYnwUlpc2AVJmXTtBrC"
   }
 }

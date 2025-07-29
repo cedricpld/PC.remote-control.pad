@@ -57,19 +57,28 @@ const NIRCMD_PATH = path.join(__dirname, 'scripts', 'nircmd.exe');
 async function readConfig() {
   try {
     const data = await fs.readFile(CONFIG_FILE, 'utf-8');
-    return JSON.parse(data);
+    const config = JSON.parse(data);
+    console.log("Configuration lue depuis le fichier:", config); // Ajoutez ce log
+    return config;
   } catch (error: any) {
     if (error.code === 'ENOENT') {
       console.warn(`Fichier de configuration non trouvé à ${CONFIG_FILE}`);
-      return null; // Retourne null si le fichier n'existe pas
+      return null;
     }
-    console.error("Erreur lors de la lecture du fichier de configuration :", error);
+    console.error("Erreur lors de la lecture du fichier de configuration :", error.message);
     throw error;
   }
 }
+
+
+
+
 // Fonction pour écrire la configuration dans config.json
 async function writeConfig(config: any) {
   try {
+    // Ajouter un log pour vérification
+    console.log("Sauvegarde de la configuration:", config);
+
     await fs.writeFile(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf-8');
     console.log(`Configuration sauvegardée avec succès à ${CONFIG_FILE}.`);
   } catch (error) {
@@ -77,6 +86,7 @@ async function writeConfig(config: any) {
     throw error;
   }
 }
+
 
 // Fonction pour contrôler l'ampoule Yeelight
 async function controlYeelight(action: 'toggle' | 'on' | 'off', ip: string) {
@@ -156,18 +166,16 @@ export function createServer() {
       //console.log("Mot de passe reçu haché :", hashedPassword);
 
       const config = await readConfig();
-      const hashedPassword = config.hashedPassword;
+      if (!config || !config.auth || !config.auth.hashedPassword) {
+        return res.status(500).json({ error: "Configuration de l'authentification manquante." });
+      }
 
+      const hashedPassword = config.auth.hashedPassword;
       const isMatch = await bcrypt.compare(password, hashedPassword);
 
-
-      console.log("Résultat de la comparaison :", isMatch);
-
       if (isMatch) {
-        console.log("Tentative de connexion réussie.");
         res.status(200).json({ token: AUTH_TOKEN });
       } else {
-        console.warn("Tentative de connexion échouée : mot de passe incorrect.");
         res.status(401).json({ error: "Mot de passe incorrect" });
       }
     } catch (error) {
@@ -206,7 +214,7 @@ export function createServer() {
     }
   });
   
-  //####################################################################################################
+  //#################################    Configuration sauvegardée avec succès à
   app.post("/api/config", async (req, res) => {
     try {
       const newConfig = req.body;
@@ -218,19 +226,23 @@ export function createServer() {
   });
 
 
-  // Route api pour modifier le Password
   app.post("/api/update-password", async (req, res) => {
+    console.log("Données reçues pour changement de mot de passe:", req.body); // Log des données reçues
+
     const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: "Mot de passe actuel ou nouveau mot de passe manquant." });
+    }
 
     try {
       const config = await readConfig();
-      const hashedPassword = config.hashedPassword;
-
+      const hashedPassword = config.auth?.hashedPassword;
       if (!hashedPassword) {
         return res.status(500).json({ error: "Mot de passe non configuré." });
       }
 
       const isMatch = await bcrypt.compare(currentPassword, hashedPassword);
+      console.log("Correspondance du mot de passe actuel :", isMatch); // Log du résultat de la comparaison
 
       if (!isMatch) {
         return res.status(401).json({ error: "Mot de passe actuel incorrect" });
@@ -239,7 +251,7 @@ export function createServer() {
       const saltRounds = 12;
       const newHashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
-      config.hashedPassword = newHashedPassword;
+      config.auth.hashedPassword = newHashedPassword;
       await writeConfig(config);
 
       res.status(200).json({ message: "Mot de passe mis à jour avec succès." });
@@ -248,6 +260,8 @@ export function createServer() {
       res.status(500).json({ error: "Erreur interne du serveur" });
     }
   });
+
+
 
 
 
