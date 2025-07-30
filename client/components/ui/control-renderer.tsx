@@ -17,9 +17,9 @@ interface ControlRendererProps {
   onDrop?: (e: React.DragEvent, id: string) => void;
 }
 
-export const ControlRenderer: React.FC<ControlRendererProps> = ({ 
-  config, 
-  onExecute, 
+export const ControlRenderer: React.FC<ControlRendererProps> = ({
+  config,
+  onExecute,
   onSliderValueChange,
   isEditing,
   onEdit,
@@ -28,7 +28,16 @@ export const ControlRenderer: React.FC<ControlRendererProps> = ({
   onDragOver,
   onDrop,
 }) => {
-  const gridClasses = `col-span-${config.width || 1} row-span-${config.height || 1}`;
+  // Déterminez la largeur et la hauteur en fonction du type de contrôle
+  const width = config.actionType === 'yeelight' && config.yeelightConfig?.controlType === 'slider'
+    ? 3
+    : config.width || 1;
+
+  const height = config.actionType === 'slider' || config.actionType === 'statusDisplay'
+    ? 1
+    : config.height || 1;
+
+  const gridClasses = `col-span-${width} row-span-${height}`;
 
   const interactiveProps = {
     draggable: isEditing,
@@ -38,10 +47,37 @@ export const ControlRenderer: React.FC<ControlRendererProps> = ({
     onDrop: (e: React.DragEvent) => onDrop && onDrop(e, config.id),
   };
 
+
+  // Déterminez le type de rendu en fonction du type de contrôle
+  if (config.actionType === 'yeelight') {
+    if (config.yeelightConfig?.controlType === 'slider') {
+      return (
+        <ControlSlider
+          config={config}
+          onValueChange={(value) => onSliderValueChange && onSliderValueChange(config, value)}
+          isEditing={isEditing}
+          onClick={isEditing ? onEdit : undefined}
+          className={`w-full h-full ${gridClasses}`}
+          {...interactiveProps}
+        />
+      );
+    } else {
+      return (
+        <ActionButton
+          config={config}
+          onExecute={() => onExecute && onExecute(config)}
+          isEditing={isEditing}
+          onEdit={onEdit}
+          className={`w-full h-full ${gridClasses}`}
+          {...interactiveProps}
+        />
+      );
+    }
+  }
+
   switch (config.actionType) {
     case 'command':
     case 'shortcut':
-    case 'yeelight':
       return (
         <ActionButton
           config={config}
@@ -58,7 +94,7 @@ export const ControlRenderer: React.FC<ControlRendererProps> = ({
           config={config}
           onValueChange={(value) => onSliderValueChange && onSliderValueChange(config, value)}
           isEditing={isEditing}
-          onClick={isEditing ? onEdit : undefined} // Ligne corrigée
+          onClick={isEditing ? onEdit : undefined}
           className={`w-full h-full ${gridClasses}`}
           {...interactiveProps}
         />
@@ -68,14 +104,14 @@ export const ControlRenderer: React.FC<ControlRendererProps> = ({
         <StatusDisplay
           config={config}
           isEditing={isEditing}
-          onClick={isEditing ? onEdit : undefined} // Ligne corrigée
+          onClick={isEditing ? onEdit : undefined}
           className={`w-full h-full ${gridClasses}`}
           {...interactiveProps}
         />
       );
     default:
       return (
-        <div 
+        <div
           className={`flex items-center justify-center p-2 rounded-lg border border-red-500 text-red-500 w-full h-full ${gridClasses}`}
           {...interactiveProps}
         >

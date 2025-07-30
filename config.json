@@ -415,14 +415,14 @@
           }
         },
         {
-          "id": "345d7263-8496-4887-9d3c-0e9755227508",
-          "label": "TeamViewer",
+          "id": "2a2e451a-90da-4a49-9d91-55b67b302f9b",
+          "label": "RustDesk",
           "icon": "ScreenShare",
-          "color": "#281fff",
+          "color": "#1fc7ff",
           "width": 1,
           "height": 1,
           "actionType": "command",
-          "command": "start \"\" \"C:\\Program Files\\TeamViewer\\TeamViewer.exe\"",
+          "command": "start \"\" \"E:\\Programmes\\RustDesk\\rustdesk.exe\"",
           "shortcut": "",
           "yeelightConfig": {
             "ip": "",
@@ -443,14 +443,14 @@
           }
         },
         {
-          "id": "2a2e451a-90da-4a49-9d91-55b67b302f9b",
-          "label": "RustDesk",
+          "id": "345d7263-8496-4887-9d3c-0e9755227508",
+          "label": "TeamViewer",
           "icon": "ScreenShare",
-          "color": "#1fc7ff",
+          "color": "#281fff",
           "width": 1,
           "height": 1,
           "actionType": "command",
-          "command": "start \"\" \"E:\\Programmes\\RustDesk\\rustdesk.exe\"",
+          "command": "start \"\" \"C:\\Program Files\\TeamViewer\\TeamViewer.exe\"",
           "shortcut": "",
           "yeelightConfig": {
             "ip": "",
@@ -675,9 +675,76 @@
           }
         }
       ]
+    },
+    {
+      "id": "22dc882f-4725-45fc-bf1f-e97325ebfd58",
+      "name": "Light",
+      "color": "#eab308",
+      "icon": "Lightbulb",
+      "blocks": [
+        {
+          "id": "b537cbab-1a9c-407b-a6df-903b64b8acd0",
+          "label": "Yeelight",
+          "icon": "Lightbulb",
+          "color": "#fcfcfc",
+          "width": 1,
+          "height": 1,
+          "actionType": "yeelight",
+          "command": "",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "192.168.1.75",
+            "action": "toggle"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
+          }
+        },
+        {
+          "id": "05059baa-19f0-4b72-8edb-fbcf22eab1ba",
+          "label": "Brightness",
+          "icon": "Lightbulb",
+          "color": "#eab308",
+          "width": 1,
+          "height": 1,
+          "actionType": "yeelight",
+          "command": "",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "192.168.1.75",
+            "action": "toggle",
+            "controlType": "slider",
+            "apiEndpoint": "/api/yeelight-brightness",
+            "max": 100
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
+          }
+        }
+      ]
     }
   ],
   "auth": {
-    "hashedPassword": "$2b$12$qGq0gAH23eV0aQLvO3Aze.Vc4xsUMC4RllYYnwUlpc2AVJmXTtBrC"
+    "hashedPassword": "$2b$12$KeGmXvdA.azhkAbJW4lbaOaoH..zBimZncm7WenjUzILspRU16iJC"
   }
 }

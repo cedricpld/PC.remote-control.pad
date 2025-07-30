@@ -58,7 +58,7 @@ async function readConfig() {
   try {
     const data = await fs.readFile(CONFIG_FILE, 'utf-8');
     const config = JSON.parse(data);
-    console.log("Configuration lue depuis le fichier:", config); // Ajoutez ce log
+    console.log("Configuration lue depuis le fichier:"); // Ajoutez ce log
     return config;
   } catch (error: any) {
     if (error.code === 'ENOENT') {
@@ -77,7 +77,7 @@ async function readConfig() {
 async function writeConfig(config: any) {
   try {
     // Ajouter un log pour vérification
-    console.log("Sauvegarde de la configuration:", config);
+    console.log("Sauvegarde de la configuration:");
 
     await fs.writeFile(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf-8');
     console.log(`Configuration sauvegardée avec succès à ${CONFIG_FILE}.`);
@@ -139,6 +139,75 @@ async function controlYeelight(action: 'toggle' | 'on' | 'off', ip: string) {
     yeelight.connect();
   });
 }
+
+
+
+// Fonction pour contrôler la luminosité de l'ampoule Yeelight
+async function controlYeelightBrightness(ip: string, brightness: number) {
+  if (!ip || !/^(\d{1,3}\.){3}\d{1,3}$/.test(ip)) {
+    throw new Error('Adresse IP de l\'ampoule Yeelight invalide ou manquante.');
+  }
+
+  // Vérifier que la luminosité est dans la plage valide (1-100)
+  if (brightness < 1 || brightness > 100) {
+    throw new Error('La luminosité doit être comprise entre 1 et 100.');
+  }
+
+  return new Promise((resolve, reject) => {
+    const yeelight = new Yeelight({ ip: ip, port: 55443 });
+    let connected = false;
+    let timeoutId: NodeJS.Timeout;
+
+    const cleanup = () => {
+      clearTimeout(timeoutId);
+      yeelight.removeAllListeners();
+      yeelight.disconnect();
+    };
+
+    yeelight.on('connected', () => {
+      connected = true;
+      console.log(`Yeelight: Connecté à ${ip}. Réglage de la luminosité à ${brightness}%`);
+      yeelight.setBrightness(brightness)
+        .then(() => {
+          console.log(`Yeelight: Luminosité réglée à ${brightness}% avec succès.`);
+          cleanup();
+          resolve(`Luminosité de l'ampoule Yeelight réglée à ${brightness}% avec succès.`);
+        })
+        .catch((err: any) => {
+          console.error(`Yeelight: Échec du réglage de la luminosité à ${brightness}%:`, err);
+          cleanup();
+          reject(`Réglage de la luminosité échoué: ${err.message}`);
+        });
+    });
+
+    yeelight.on('disconnected', () => {
+      console.log('Yeelight: Déconnecté.');
+      if (!connected) {
+        cleanup();
+        reject('Réglage de la luminosité échoué: Déconnecté avant que la commande ne puisse être envoyée. L\'ampoule est-elle en ligne et le mode développeur activé ?');
+      }
+    });
+
+    yeelight.on('error', (err: any) => {
+      console.error('Yeelight: Erreur lors du réglage de la luminosité:', err);
+      cleanup();
+      reject(`Réglage de la luminosité échoué: ${err.message}`);
+    });
+
+    timeoutId = setTimeout(() => {
+      if (!connected) {
+        console.warn('Yeelight: Connexion expirée.');
+        cleanup();
+        reject('Réglage de la luminosité échoué: Connexion expirée. L\'ampoule est-elle en ligne et le mode développeur activé ?');
+      }
+    }, 5000);
+
+    yeelight.connect();
+  });
+}
+
+
+
 
 
 
@@ -227,7 +296,7 @@ export function createServer() {
 
 
   app.post("/api/update-password", async (req, res) => {
-    console.log("Données reçues pour changement de mot de passe:", req.body); // Log des données reçues
+    //console.log("Données reçues pour changement de mot de passe:", req.body); // Log des données reçues
 
     const { currentPassword, newPassword } = req.body;
     if (!currentPassword || !newPassword) {
@@ -312,6 +381,35 @@ export function createServer() {
       res.status(500).json({ error: `Contrôle Yeelight échoué: ${error.message}` });
     }
   });
+
+
+
+// Nouvelle route pour contrôler la luminosité de l'ampoule Yeelight
+app.post("/api/yeelight-brightness", async (req, res) => {
+  const { brightness, yeelightIp } = req.body;
+
+  if (!yeelightIp) {
+    return res.status(400).json({ error: "L'adresse IP de Yeelight est manquante." });
+  }
+
+  if (brightness === undefined || brightness < 1 || brightness > 100) {
+    return res.status(400).json({ error: "La luminosité doit être comprise entre 1 et 100." });
+  }
+
+  try {
+    const message = await controlYeelightBrightness(yeelightIp, brightness);
+    res.status(200).json({ message });
+  } catch (error: any) {
+    res.status(500).json({ error: `Réglage de la luminosité échoué: ${error.message}` });
+  }
+});
+
+
+
+
+
+
+
   
 app.post("/api/restart-server", (req, res) => {
   res.status(200).json({ message: "Serveur en cours de redémarrage..." });
