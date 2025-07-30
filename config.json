@@ -686,7 +686,7 @@
           "id": "b537cbab-1a9c-407b-a6df-903b64b8acd0",
           "label": "Yeelight",
           "icon": "Lightbulb",
-          "color": "#f97316",
+          "color": "#fcfcfc",
           "width": 1,
           "height": 1,
           "actionType": "yeelight",
@@ -724,7 +724,8 @@
             "ip": "192.168.1.75",
             "action": "toggle",
             "controlType": "slider",
-            "apiEndpoint": "/api/yeelight-brightness"
+            "apiEndpoint": "/api/yeelight-brightness",
+            "max": 100
           },
           "sliderConfig": {
             "apiEndpoint": "",

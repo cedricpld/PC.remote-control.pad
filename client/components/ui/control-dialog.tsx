@@ -53,7 +53,7 @@ const colorOptions = [
   { value: "#eab308", label: "Yellow" },
   { value: "#ec4899", label: "Pink" },
   { value: "#6b7280", label: "Gray" },
-  { value: "#ffffffff", label: "White" },
+  { value: "#fcfcfc", label: "White" },
 ];
 
 const DEFAULT_FORM_DATA: Partial<ControlBlockConfig> = {
