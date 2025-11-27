@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ControlBlockConfig } from "@/types/stream-deck";
+import { ControlBlockConfig, YeelightConfig, AudioConfig } from "@/types/stream-deck";
 import * as Icons from "lucide-react";
 import { Trash2 } from "lucide-react";
 
@@ -63,9 +63,10 @@ const DEFAULT_FORM_DATA: Partial<ControlBlockConfig> = {
   actionType: "command",
   command: "",
   shortcut: "",
-  yeelightConfig: { ip: "", action: "toggle", controlType: "button" },
+  yeelightConfig: { ip: "", action: "toggle", controlType: "button", color: "#ffffff" },
   sliderConfig: { apiEndpoint: "", min: 0, max: 100, initialValue: 50, unit: "" },
   statusDisplayConfig: { apiEndpoint: "", dataType: "cpu", updateIntervalMs: 2000, labelUnit: "" },
+  audioConfig: { action: "stopAll" }
 };
 
 interface ControlDialogProps {
@@ -96,6 +97,24 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
     }
   }, [config, open]);
 
+  React.useEffect(() => {
+    if (formData.actionType === 'yeelight' && formData.yeelightConfig?.controlType) {
+      let newSliderConfig = { ...DEFAULT_FORM_DATA.sliderConfig! };
+      switch (formData.yeelightConfig.controlType) {
+        case 'brightness_slider':
+          newSliderConfig = { ...newSliderConfig, min: 1, max: 100, initialValue: 50, unit: '%' };
+          break;
+        case 'color_temperature_slider':
+          newSliderConfig = { ...newSliderConfig, min: 1700, max: 6500, initialValue: 4000, unit: 'K' };
+          break;
+        case 'hue_slider':
+          newSliderConfig = { ...newSliderConfig, min: 0, max: 359, initialValue: 180, unit: '°' };
+          break;
+      }
+      setFormData(prev => ({ ...prev, sliderConfig: newSliderConfig }));
+    }
+  }, [formData.actionType, formData.yeelightConfig?.controlType]);
+
   const handleSave = () => {
     if (!formData.label) return;
     let width = 1, height = 1;
@@ -121,11 +140,12 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
       width: width,
       height: height,
       actionType: formData.actionType!,
-      command: formData.actionType === 'command' ? formData.command : "",
-      shortcut: formData.actionType === 'shortcut' ? formData.shortcut : "",
-      yeelightConfig: formData.actionType === 'yeelight' ? formData.yeelightConfig : { ip: "", action: "toggle", controlType: "button" },
-      sliderConfig: formData.actionType === 'slider' ? formData.sliderConfig : { apiEndpoint: "", min: 0, max: 100, initialValue: 50, unit: "" },
-      statusDisplayConfig: formData.actionType === 'statusDisplay' ? formData.statusDisplayConfig : { apiEndpoint: "", dataType: "cpu", updateIntervalMs: 2000, labelUnit: "" },
+      command: formData.actionType === 'command' ? formData.command : undefined,
+      shortcut: formData.actionType === 'shortcut' ? formData.shortcut : undefined,
+      yeelightConfig: formData.actionType === 'yeelight' ? formData.yeelightConfig : undefined,
+      sliderConfig: formData.actionType === 'slider' ? formData.sliderConfig : undefined,
+      statusDisplayConfig: formData.actionType === 'statusDisplay' ? formData.statusDisplayConfig : undefined,
+      audioConfig: formData.actionType === 'audio' ? formData.audioConfig : undefined,
     };
     onSave(newConfig);
     onOpenChange(false);
@@ -137,7 +157,8 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
     shortcut: "Raccourci",
     yeelight: "Yeelight",
     slider: "Slider",
-    statusDisplay: "Afficheur Statut"
+    statusDisplay: "Afficheur Statut",
+    audio: "Audio"
   }[formData.actionType || "command"];
 
   return (
@@ -189,6 +210,7 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
                 <SelectItem value="yeelight">Yeelight</SelectItem>
                 <SelectItem value="slider">Slider</SelectItem>
                 <SelectItem value="statusDisplay">Afficheur Statut</SelectItem>
+                <SelectItem value="audio">Audio</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -213,11 +235,15 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
                 <Label htmlFor="yeelightIp" className="text-right">IP Ampoule</Label>
                 <Input id="yeelightIp" value={formData.yeelightConfig?.ip || ""} onChange={e => setFormData({ ...formData, yeelightConfig: { ...formData.yeelightConfig!, ip: e.target.value }})} className="col-span-3" />
               </div>
+
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="controlType" className="text-right">Type de Contrôle</Label>
-                <Select value={formData.yeelightConfig?.controlType || "button"} onValueChange={(value: 'button' | 'slider') => setFormData({ ...formData, yeelightConfig: { ...formData.yeelightConfig!, controlType: value }})}>
+                <Label htmlFor="yeelightMainType" className="text-right">Type</Label>
+                <Select value={formData.yeelightConfig?.controlType?.includes('slider') ? 'slider' : 'button'} onValueChange={(value) => {
+                  const newControlType = value === 'slider' ? 'brightness_slider' : 'button';
+                  setFormData({ ...formData, yeelightConfig: { ...formData.yeelightConfig!, controlType: newControlType }});
+                }}>
                   <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Choisir un type de contrôle" />
+                    <SelectValue placeholder="Choisir un type" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="button">Bouton</SelectItem>
@@ -226,10 +252,39 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
                 </Select>
               </div>
 
+              {formData.yeelightConfig?.controlType?.includes('slider') ? (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="yeelightSliderType" className="text-right">Action Slider</Label>
+                  <Select value={formData.yeelightConfig?.controlType} onValueChange={(value) => setFormData({ ...formData, yeelightConfig: { ...formData.yeelightConfig!, controlType: value }})}>
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Choisir un type de slider" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="brightness_slider">Luminosité</SelectItem>
+                      <SelectItem value="color_temperature_slider">Température</SelectItem>
+                      <SelectItem value="hue_slider">Teinte</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="yeelightButtonType" className="text-right">Action Bouton</Label>
+                  <Select value={formData.yeelightConfig?.controlType} onValueChange={(value) => setFormData({ ...formData, yeelightConfig: { ...formData.yeelightConfig!, controlType: value }})}>
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Choisir une action" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="button">Toggle/On/Off</SelectItem>
+                      <SelectItem value="color_picker">Définir une couleur</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
               {formData.yeelightConfig?.controlType === 'button' && (
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="yeelightAction" className="text-right">Action</Label>
-                  <Select value={formData.yeelightConfig?.action} onValueChange={(value: 'toggle' | 'on' | 'off') => setFormData({ ...formData, yeelightConfig: { ...formData.yeelightConfig!, action: value }})}>
+                  <Select value={formData.yeelightConfig?.action} onValueChange={(value) => setFormData({ ...formData, yeelightConfig: { ...formData.yeelightConfig!, action: value }})}>
                     <SelectTrigger className="col-span-3">
                       <SelectValue placeholder="Choisir une action" />
                     </SelectTrigger>
@@ -242,23 +297,27 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
                 </div>
               )}
 
-              {formData.yeelightConfig?.controlType === 'slider' && (
-                <>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="sliderApiEndpoint" className="text-right">Endpoint API</Label>
-                    <Input id="sliderApiEndpoint" value={formData.yeelightConfig?.apiEndpoint || ""} onChange={e => setFormData({ ...formData, yeelightConfig: { ...formData.yeelightConfig!, apiEndpoint: e.target.value }})} className="col-span-3" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="sliderMin" className="text-right">Min</Label>
-                    <Input id="sliderMin" type="number" value={formData.yeelightConfig?.min || 0} onChange={e => setFormData({ ...formData, yeelightConfig: { ...formData.yeelightConfig!, min: parseInt(e.target.value) || 0 }})} className="col-span-3" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="sliderMax" className="text-right">Max</Label>
-                    <Input id="sliderMax" type="number" value={formData.yeelightConfig?.max || 100} onChange={e => setFormData({ ...formData, yeelightConfig: { ...formData.yeelightConfig!, max: parseInt(e.target.value) || 100 }})} className="col-span-3" />
-                  </div>
-                </>
+              {formData.yeelightConfig?.controlType === 'color_picker' && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="yeelightColor" className="text-right">Couleur</Label>
+                  <Input id="yeelightColor" type="color" value={formData.yeelightConfig?.color || "#ffffff"} onChange={e => setFormData({ ...formData, yeelightConfig: { ...formData.yeelightConfig!, color: e.target.value }})} className="col-span-3" />
+                </div>
               )}
             </>
+          )}
+
+          {formData.actionType === 'audio' && (
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="audioAction" className="text-right">Action</Label>
+              <Select value={formData.audioConfig?.action} onValueChange={(value) => setFormData({ ...formData, audioConfig: { ...formData.audioConfig!, action: value }})}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Choisir une action" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="stopAll">Stop All Sounds</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           )}
 
           {formData.actionType === 'slider' && (
