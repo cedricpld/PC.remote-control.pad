@@ -1,47 +1,49 @@
 export interface StreamDeckPage {
   id: string;
   name: string;
-  // 'buttons' est renommé en 'blocks' pour être plus générique
+  color: string;
+  icon: string;
   blocks: ControlBlockConfig[];
-  color?: string;
-  icon?: string;
 }
 
-// Configuration générique pour tous les types de blocs
 export interface ControlBlockConfig {
   id: string;
   label: string;
   icon?: string;
   color?: string;
-
-  // Propriétés de taille pour la grille
-  width?: number; // en unités de grille (ex: 1, 2)
-  height?: number; // en unités de grille (ex: 1, 2)
-
-  // Type de l'action ou du comportement du bloc
-  actionType: 'command' | 'shortcut' | 'yeelight' | 'slider' | 'statusDisplay';
-
-  // --- Propriétés spécifiques à chaque type ---
+  width: number;
+  height: number;
+  actionType: 'command' | 'shortcut' | 'yeelight' | 'slider' | 'statusDisplay' | 'audio';
   command?: string;
   shortcut?: string;
-  
-  yeelightConfig?: {
-    ip: string;
-    action: 'toggle' | 'on' | 'off';
-  };
+  yeelightConfig?: YeelightConfig;
+  sliderConfig?: SliderConfig;
+  statusDisplayConfig?: StatusDisplayConfig;
+  audioConfig?: AudioConfig;
+}
 
-  sliderConfig?: {
-    apiEndpoint: string;
-    min: number;
-    max: number;
-    initialValue: number;
-    unit?: string;
-  };
+export interface YeelightConfig {
+  ip: string;
+  action?: 'toggle' | 'on' | 'off';
+  controlType: 'button' | 'brightness_slider' | 'color_temperature_slider' | 'color_picker' | 'hue_slider';
+  color?: string;
+}
 
-  statusDisplayConfig?: {
-    apiEndpoint: string;
-    dataType: 'cpu' | 'ram' | 'disk' | 'network' | 'custom';
-    updateIntervalMs?: number;
-    labelUnit?: string;
-  };
+export interface SliderConfig {
+  apiEndpoint: string;
+  min: number;
+  max: number;
+  initialValue: number;
+  unit: string;
+}
+
+export interface StatusDisplayConfig {
+  apiEndpoint: string;
+  dataType: 'cpu' | 'ram';
+  updateIntervalMs: number;
+  labelUnit: string;
+}
+
+export interface AudioConfig {
+  action: 'stopAll';
 }
