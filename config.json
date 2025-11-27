@@ -293,6 +293,93 @@
             "updateIntervalMs": 2000,
             "labelUnit": ""
           }
+        },
+        {
+          "id": "43f9e623-b655-4217-93ae-604130c5cb3d",
+          "label": "Play Song",
+          "icon": "Volume2",
+          "color": "#8b5cf6",
+          "width": 1,
+          "height": 1,
+          "actionType": "command",
+          "command": "PLAY_AUDIO C:\\Users\\cedri\\Documents\\GitHub\\PC.remote-control.pad\\public\\There_There.mp3",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle",
+            "controlType": "button"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
+          }
+        },
+        {
+          "id": "5e1bc345-a261-48e2-9db5-e773038fb819",
+          "label": "STOP AUDIO",
+          "icon": "Volume2",
+          "color": "#ef4444",
+          "width": 1,
+          "height": 1,
+          "actionType": "command",
+          "command": "STOP_AUDIO",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle",
+            "controlType": "button"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
+          }
+        },
+        {
+          "id": "78ab053b-e957-464e-a343-212238f621e4",
+          "label": "AUDIO_EXT",
+          "icon": "Monitor",
+          "color": "#3b82f6",
+          "width": 1,
+          "height": 1,
+          "actionType": "command",
+          "command": "PLAY_AUDIO G:\\Autres ordinateurs\\Mon ordinateur\\MEGA\\ARTFX\\Projets\\Demoreel\\musique\\RADIOHEAD\\Radiohead - There There.mp3",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle",
+            "controlType": "button"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
+          }
         }
       ]
     },
@@ -673,6 +760,35 @@
             "updateIntervalMs": 2000,
             "labelUnit": ""
           }
+        },
+        {
+          "id": "3f6a747e-76b9-4939-9b8a-51c0a58f4562",
+          "label": "re",
+          "icon": "Monitor",
+          "color": "#3b82f6",
+          "width": 1,
+          "height": 1,
+          "actionType": "command",
+          "command": "",
+          "shortcut": "",
+          "yeelightConfig": {
+            "ip": "",
+            "action": "toggle",
+            "controlType": "button"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 0,
+            "max": 100,
+            "initialValue": 50,
+            "unit": ""
+          },
+          "statusDisplayConfig": {
+            "apiEndpoint": "",
+            "dataType": "cpu",
+            "updateIntervalMs": 2000,
+            "labelUnit": ""
+          }
         }
       ]
     },
@@ -693,7 +809,7 @@
           "command": "",
           "shortcut": "",
           "yeelightConfig": {
-            "ip": "192.168.1.75",
+            "ip": "192.168.1.176",
             "action": "toggle"
           },
           "sliderConfig": {
@@ -745,6 +861,6 @@
     }
   ],
   "auth": {
-    "hashedPassword": "$2b$12$KeGmXvdA.azhkAbJW4lbaOaoH..zBimZncm7WenjUzILspRU16iJC"
+    "hashedPassword": "$2b$12$bFKVy2Aty6RO08iUA5LrNu0PHVB31V09d5kjd.r9zTDDHQeg2wDom"
   }
 }

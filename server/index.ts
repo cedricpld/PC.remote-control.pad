@@ -94,7 +94,7 @@ async function controlYeelight(action: 'toggle' | 'on' | 'off', ip: string) {
     throw new Error('Adresse IP de l\'ampoule Yeelight invalide ou manquante.');
   }
   return new Promise((resolve, reject) => {
-    const yeelight = new Yeelight({ ip: ip, port: 55443 });
+    const yeelight = new Yeelight({ ip: ip, port: 43210 }); //og 55443
     let connected = false;
     let timeoutId: NodeJS.Timeout;
     const cleanup = () => {
@@ -154,7 +154,7 @@ async function controlYeelightBrightness(ip: string, brightness: number) {
   }
 
   return new Promise((resolve, reject) => {
-    const yeelight = new Yeelight({ ip: ip, port: 55443 });
+    const yeelight = new Yeelight({ ip: ip, port: 43210 }); //og 55443
     let connected = false;
     let timeoutId: NodeJS.Timeout;
 
@@ -339,34 +339,53 @@ export function createServer() {
   app.post("/api/execute-action", (req, res) => {
     const { command, shortcut } = req.body;
     let finalCommand: string | null = null;
-    console.log('Requête reçue sur /api/execute-action avec :', req.body);
-
+    
     if (command) {
-        // Si la commande commence par "nircmd.exe", on la remplace par le chemin complet
-        if (command.startsWith('nircmd.exe')) {
-            finalCommand = `"${NIRCMD_PATH}" ${command.substring('nircmd.exe'.length)}`;
-        } else {
-            finalCommand = command; // Pour les autres commandes comme 'start vlc.exe'
+      const trimmedCommand = command.trim();
+
+      // **LOGIQUE AMÉLIORÉE POUR LES COMMANDES SPÉCIALES**
+
+      // 1. Gère la commande pour jouer un son
+      if (trimmedCommand.startsWith('PLAY_AUDIO')) {
+        const filePath = trimmedCommand.substring('PLAY_AUDIO'.length).trim();
+        if (!filePath) {
+          return res.status(400).json({ error: "Chemin du fichier audio manquant après PLAY_AUDIO." });
         }
-    } else if (shortcut) {
-        // La logique pour les raccourcis via PowerShell reste inchangée, comme vous le souhaitez
-        const scriptPath = path.join(__dirname, 'scripts', 'simulate-shortcut.ps1');
-        finalCommand = `powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}" -Shortcut "${shortcut}"`;
+        const scriptPath = path.join(__dirname, 'scripts', 'play-audio.ps1');
+        finalCommand = `powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}" -FilePath "${filePath}"`;
+        console.log(`Lancement du script audio : ${finalCommand}`);
+      }
+      
+      // 2. NOUVEAU : Gère la commande pour arrêter tous les sons
+      else if (trimmedCommand.startsWith('STOP_AUDIO')) {
+        const scriptPath = path.join(__dirname, 'scripts', 'stop-audio.ps1');
+        finalCommand = `powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}"`;
+        console.log(`Lancement du script d'arrêt audio : ${finalCommand}`);
+      }
+
+      // 3. Gère les autres commandes (logique existante)
+      else if (trimmedCommand.startsWith('nircmd.exe')) {
+        finalCommand = `"${NIRCMD_PATH}" ${trimmedCommand.substring('nircmd.exe'.length)}`;
+      } else {
+        finalCommand = trimmedCommand;
+      }
+    } 
+    else if (shortcut) {
+      const scriptPath = path.join(__dirname, 'scripts', 'simulate-shortcut.ps1');
+      finalCommand = `powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}" -Shortcut "${shortcut}"`;
     }
     
     if (!finalCommand) {
         return res.status(400).json({ error: "Aucune commande ou raccourci fourni." });
     }
 
-    console.log(`Exécution de la commande finale : ${finalCommand}`);
     exec(finalCommand, (error, stdout, stderr) => {
         if (error) {
-            console.error(`Erreur d'exécution de la commande : ${error.message}`);
-            return res.status(500).json({ error: `Échec de l'exécution : ${error.message}`, stderr });
+            console.error(`Erreur d'exécution : ${error.message}\nStderr: ${stderr}`);
+            return res.status(500).json({ error: `Échec de l'exécution`, details: error.message, stderr });
         }
         if (stderr) console.warn(`Stderr : ${stderr}`);
-        console.log(`Stdout : ${stdout}`);
-        res.status(200).json({ message: `Action exécutée avec succès`, stdout, stderr });
+        res.status(200).json({ message: `Action exécutée avec succès`, stdout });
     });
   });
 

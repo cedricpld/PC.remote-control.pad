@@ -37,6 +37,10 @@ export function StreamDeck({ className }: StreamDeckProps) {
   const [editingPage, setEditingPage] = React.useState<StreamDeckPage | undefined>();
   const [draggedControl, setDraggedControl] = React.useState<string | null>(null);
 
+
+
+  //const isInitialMount = React.useRef(true);
+
   const clickSound = React.useMemo(() => {
     try {
       const audio = new Audio('/button.wav');
@@ -131,13 +135,18 @@ export function StreamDeck({ className }: StreamDeckProps) {
 
   // **CORRECTION APPLIQUÉE ICI**
   // Ce `useEffect` est maintenant plus simple et plus fiable pour la sauvegarde.
+  // Ref pour suivre si c'est le premier chargement, afin d'éviter une sauvegarde inutile
+  const isInitialMount = React.useRef(true);
+
   React.useEffect(() => {
-    // On s'assure que l'état initial n'est pas vide avant de sauvegarder,
-    // pour éviter d'écraser la config avec un tableau vide au premier rendu.
-    const isInitialLoad = pages.length === 0 && !currentPageId;
-    if (!isInitialLoad) {
-      saveConfigToServer(pages);
+    // On ne sauvegarde pas au tout premier rendu (qui est souvent un état vide)
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
     }
+    // Pour toute modification ultérieure du tableau `pages`, on sauvegarde.
+    // Cela inclut l'ajout, la suppression, la modification de pages ou de blocs.
+    saveConfigToServer(pages);
   }, [pages, saveConfigToServer]);
 
   const handleAddControl = () => {
