@@ -28,16 +28,7 @@ export const ControlRenderer: React.FC<ControlRendererProps> = ({
   onDragOver,
   onDrop,
 }) => {
-  // Déterminez la largeur et la hauteur en fonction du type de contrôle
-  const width = config.actionType === 'yeelight' && config.yeelightConfig?.controlType === 'slider'
-    ? 3
-    : config.width || 1;
-
-  const height = config.actionType === 'slider' || config.actionType === 'statusDisplay'
-    ? 1
-    : config.height || 1;
-
-  const gridClasses = `col-span-${width} row-span-${height}`;
+  const gridClasses = `col-span-${config.width} row-span-${config.height}`;
 
   const interactiveProps = {
     draggable: isEditing,
@@ -49,35 +40,24 @@ export const ControlRenderer: React.FC<ControlRendererProps> = ({
 
 
   // Déterminez le type de rendu en fonction du type de contrôle
-  if (config.actionType === 'yeelight') {
-    if (config.yeelightConfig?.controlType === 'slider') {
-      return (
-        <ControlSlider
-          config={config}
-          onValueChange={(value) => onSliderValueChange && onSliderValueChange(config, value)}
-          isEditing={isEditing}
-          onClick={isEditing ? onEdit : undefined}
-          className={`w-full h-full ${gridClasses}`}
-          {...interactiveProps}
-        />
-      );
-    } else {
-      return (
-        <ActionButton
-          config={config}
-          onExecute={() => onExecute && onExecute(config)}
-          isEditing={isEditing}
-          onEdit={onEdit}
-          className={`w-full h-full ${gridClasses}`}
-          {...interactiveProps}
-        />
-      );
-    }
+  if (config.actionType === 'yeelight' && config.yeelightConfig?.controlType?.includes('slider')) {
+    return (
+      <ControlSlider
+        config={config}
+        onValueChange={(value) => onSliderValueChange && onSliderValueChange(config, value)}
+        isEditing={isEditing}
+        onClick={isEditing ? onEdit : undefined}
+        className={`w-full h-full ${gridClasses}`}
+        {...interactiveProps}
+      />
+    );
   }
 
   switch (config.actionType) {
     case 'command':
     case 'shortcut':
+    case 'yeelight':
+    case 'audio':
       return (
         <ActionButton
           config={config}
