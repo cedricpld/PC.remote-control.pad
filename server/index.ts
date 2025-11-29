@@ -8,6 +8,7 @@ import fs from "fs/promises";
 import path from "path";
 import { exec } from 'child_process';
 import bcrypt from 'bcrypt'; // Import de bcrypt pour le hachage des mots de passe
+import axios from 'axios';
 // Importations et définitions pour __dirname en ES Modules
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -596,5 +597,57 @@ app.post("/api/restart-server", (req, res) => {
     const usedMemPercent = parseFloat(((usedMemBytes / totalMemBytes) * 100).toFixed(1));
     res.status(200).json({ value: usedMemPercent });
   });
+
+  // --- Nouvelle approche pour Xiaomi via API JSON ---
+  const XIAOMI_API_URL = 'http://192.168.1.76:5000/api/current';
+  let xiaomiCache: { data: any; timestamp: number } | null = null;
+
+  async function getXiaomiApiData() {
+    const now = Date.now();
+    // Utiliser le cache si les données ont moins de 5 secondes
+    if (xiaomiCache && now - xiaomiCache.timestamp < 5000) {
+      console.log("Utilisation du cache Xiaomi.");
+      return xiaomiCache.data;
+    }
+
+    try {
+      console.log("Récupération des données depuis l'API Xiaomi...");
+      const { data } = await axios.get(XIAOMI_API_URL, { timeout: 5000 });
+      xiaomiCache = { data, timestamp: now };
+      return data;
+    } catch (error: any) {
+      console.error("Erreur détaillée lors de l'appel à l'API Xiaomi:", error.message);
+      throw new Error("Impossible de contacter l'API de l'appareil Xiaomi.");
+    }
+  }
+
+  // --- Routes pour Xiaomi ---
+  app.get("/api/get-xiaomi-temperature", async (_req, res) => {
+    try {
+      const data = await getXiaomiApiData();
+      res.status(200).json({ value: data.temperature });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/get-xiaomi-humidity", async (_req, res) => {
+    try {
+      const data = await getXiaomiApiData();
+      res.status(200).json({ value: data.humidity });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/get-xiaomi-battery", async (_req, res) => {
+    try {
+      const data = await getXiaomiApiData();
+      res.status(200).json({ value: data.battery });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   return app;
 }
