@@ -22,62 +22,17 @@ export const ControlSlider = React.forwardRef<HTMLDivElement, ControlSliderProps
       setSliderValue(config.sliderConfig?.initialValue || 0);
     }, [config.sliderConfig?.initialValue]);
 
-    const handleSliderChange = async (value: number[]) => {
+    const handleSliderCommit = (value: number[]) => {
       const newValue = value[0];
-      setSliderValue(newValue);
       if (onValueChange) {
         onValueChange(newValue);
-      }
-
-      // Vérifiez si le bloc est de type Yeelight et utilisez l'endpoint approprié
-      if (config.actionType === 'yeelight' && config.yeelightConfig?.controlType === 'slider') {
-        try {
-          const response = await fetchWithAuth('/api/yeelight-brightness', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              brightness: newValue,
-              yeelightIp: config.yeelightConfig?.ip
-            }),
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            console.error('Erreur lors de la mise à jour de la luminosité:', errorData.error || 'Erreur serveur');
-          } else {
-            console.log('Luminosité mise à jour avec succès');
-          }
-        } catch (error) {
-          console.error('Erreur réseau lors de la mise à jour de la luminosité:', error);
-        }
-      } else if (config.sliderConfig?.apiEndpoint) {
-        try {
-          const response = await fetchWithAuth(config.sliderConfig.apiEndpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ value: newValue }),
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            console.error('Erreur lors de la mise à jour du slider:', errorData.error || 'Erreur serveur');
-          } else {
-            console.log('Volume mis à jour avec succès');
-          }
-        } catch (error) {
-          console.error('Erreur réseau lors de la mise à jour du slider:', error);
-        }
       }
     };
 
     const IconComponent = config.icon ? (Icons as any)[config.icon] : null;
     const min = config.sliderConfig?.min || 0;
     const max = config.sliderConfig?.max || 100;
-    const displayValueAsPercent = max === 65535;
-    const displayValue = displayValueAsPercent
-      ? Math.round((sliderValue / max) * 100)
-      : sliderValue;
-    const displayUnit = displayValueAsPercent ? '%' : config.sliderConfig?.unit || '';
+    const displayValue = config.sliderConfig?.unit === '%' ? Math.round((sliderValue / max) * 100) : sliderValue;
 
     return (
       <div
@@ -103,11 +58,11 @@ export const ControlSlider = React.forwardRef<HTMLDivElement, ControlSliderProps
           max={max}
           step={1}
           onValueChange={(value) => setSliderValue(value[0])}
-          onValueCommit={handleSliderChange}
+          onValueCommit={handleSliderCommit}
           className="w-full px-2"
         />
         <span className="text-xs text-muted-foreground pt-1">
-          {displayValue}{displayUnit}
+          {displayValue}{config.sliderConfig?.unit}
         </span>
       </div>
     );
