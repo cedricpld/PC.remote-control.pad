@@ -901,7 +901,7 @@
             "ip": "192.168.1.166",
             "action": "toggle",
             "controlType": "color_picker",
-            "color": "#00ffbf"
+            "color": "#ff0000"
           }
         },
         {
