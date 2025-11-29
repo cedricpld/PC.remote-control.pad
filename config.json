@@ -10,23 +10,10 @@
           "id": "0eef8f20-7103-4095-ad79-ba21a976e0bf",
           "label": "CPU",
           "icon": "Cpu",
-          "color": "#3b82f6",
+          "color": "#6b7280",
           "width": 3,
           "height": 1,
           "actionType": "statusDisplay",
-          "command": "",
-          "shortcut": "",
-          "yeelightConfig": {
-            "ip": "",
-            "action": "toggle"
-          },
-          "sliderConfig": {
-            "apiEndpoint": "",
-            "min": 0,
-            "max": 100,
-            "initialValue": 50,
-            "unit": ""
-          },
           "statusDisplayConfig": {
             "apiEndpoint": "/api/get-cpu-usage",
             "dataType": "cpu",
@@ -38,23 +25,10 @@
           "id": "acf17886-c135-45e3-8517-f5cd877a20cd",
           "label": "RAM",
           "icon": "MemoryStick",
-          "color": "#3b82f6",
+          "color": "#6b7280",
           "width": 3,
           "height": 1,
           "actionType": "statusDisplay",
-          "command": "",
-          "shortcut": "",
-          "yeelightConfig": {
-            "ip": "",
-            "action": "toggle"
-          },
-          "sliderConfig": {
-            "apiEndpoint": "",
-            "min": 0,
-            "max": 100,
-            "initialValue": 50,
-            "unit": ""
-          },
           "statusDisplayConfig": {
             "apiEndpoint": "/api/get-ram-usage",
             "dataType": "cpu",
@@ -117,6 +91,51 @@
             "updateIntervalMs": 1000,
             "labelUnit": "%"
           }
+        },
+        {
+          "id": "08db3df6-04e3-4467-b5cc-650f678f52ae",
+          "label": "Home Temperature",
+          "icon": "Home",
+          "color": "#f97316",
+          "width": 3,
+          "height": 1,
+          "actionType": "statusDisplay",
+          "statusDisplayConfig": {
+            "apiEndpoint": "/api/get-xiaomi-temperature",
+            "dataType": "cpu",
+            "updateIntervalMs": 20000,
+            "labelUnit": "°C"
+          }
+        },
+        {
+          "id": "f5b8fa0f-9e16-43c3-9e6b-a70ffd1e5c94",
+          "label": "Home Humidity",
+          "icon": "Home",
+          "color": "#3b82f6",
+          "width": 3,
+          "height": 1,
+          "actionType": "statusDisplay",
+          "statusDisplayConfig": {
+            "apiEndpoint": "/api/get-xiaomi-humidity",
+            "dataType": "cpu",
+            "updateIntervalMs": 20000,
+            "labelUnit": "%"
+          }
+        },
+        {
+          "id": "3ed87e40-15c0-4b5b-b561-8314264921e9",
+          "label": "Sensor Battery",
+          "icon": "Cpu",
+          "color": "#3b82f6",
+          "width": 3,
+          "height": 1,
+          "actionType": "statusDisplay",
+          "statusDisplayConfig": {
+            "apiEndpoint": "/api/get-xiaomi-battery",
+            "dataType": "cpu",
+            "updateIntervalMs": 20000,
+            "labelUnit": "%"
+          }
         }
       ]
     },
@@ -124,7 +143,7 @@
       "id": "0f201d11-6c86-4703-8d9f-165d33a2d82d",
       "name": "Actions",
       "color": "#6b7280",
-      "icon": "Terminal",
+      "icon": "Zap",
       "blocks": [
         {
           "id": "9c56fc75-278c-428e-a03d-9a270e39f7c5",
@@ -379,6 +398,18 @@
             "dataType": "cpu",
             "updateIntervalMs": 2000,
             "labelUnit": ""
+          }
+        },
+        {
+          "id": "33074e40-d8d4-4adb-b9d9-6d2f14cdfcb8",
+          "label": "STOP ALL",
+          "icon": "Square",
+          "color": "#ef4444",
+          "width": 1,
+          "height": 1,
+          "actionType": "audio",
+          "audioConfig": {
+            "action": "stopAll"
           }
         }
       ]
@@ -760,35 +791,6 @@
             "updateIntervalMs": 2000,
             "labelUnit": ""
           }
-        },
-        {
-          "id": "3f6a747e-76b9-4939-9b8a-51c0a58f4562",
-          "label": "re",
-          "icon": "Monitor",
-          "color": "#3b82f6",
-          "width": 1,
-          "height": 1,
-          "actionType": "command",
-          "command": "",
-          "shortcut": "",
-          "yeelightConfig": {
-            "ip": "",
-            "action": "toggle",
-            "controlType": "button"
-          },
-          "sliderConfig": {
-            "apiEndpoint": "",
-            "min": 0,
-            "max": 100,
-            "initialValue": 50,
-            "unit": ""
-          },
-          "statusDisplayConfig": {
-            "apiEndpoint": "",
-            "dataType": "cpu",
-            "updateIntervalMs": 2000,
-            "labelUnit": ""
-          }
         }
       ]
     },
@@ -799,62 +801,129 @@
       "icon": "Lightbulb",
       "blocks": [
         {
-          "id": "b537cbab-1a9c-407b-a6df-903b64b8acd0",
-          "label": "Yeelight",
+          "id": "2a497e67-56f6-4209-b8cd-974124962280",
+          "label": "Brightness",
           "icon": "Lightbulb",
           "color": "#fcfcfc",
-          "width": 1,
+          "width": 3,
           "height": 1,
           "actionType": "yeelight",
-          "command": "",
-          "shortcut": "",
           "yeelightConfig": {
-            "ip": "192.168.1.176",
-            "action": "toggle"
+            "ip": "192.168.1.166",
+            "action": "toggle",
+            "controlType": "brightness_slider",
+            "color": "#ffffff"
           },
           "sliderConfig": {
             "apiEndpoint": "",
-            "min": 0,
+            "min": 1,
             "max": 100,
             "initialValue": 50,
-            "unit": ""
-          },
-          "statusDisplayConfig": {
-            "apiEndpoint": "",
-            "dataType": "cpu",
-            "updateIntervalMs": 2000,
-            "labelUnit": ""
+            "unit": "%"
           }
         },
         {
-          "id": "05059baa-19f0-4b72-8edb-fbcf22eab1ba",
-          "label": "Brightness",
+          "id": "fc9b9b5e-e960-4a23-ba7d-80ba25150065",
+          "label": "Switch",
           "icon": "Lightbulb",
-          "color": "#eab308",
+          "color": "#3b82f6",
           "width": 1,
           "height": 1,
           "actionType": "yeelight",
-          "command": "",
-          "shortcut": "",
           "yeelightConfig": {
-            "ip": "192.168.1.75",
+            "ip": "192.168.1.166",
             "action": "toggle",
-            "controlType": "slider",
-            "apiEndpoint": "/api/yeelight-brightness",
-            "max": 100
+            "controlType": "button",
+            "color": "#ffffff"
+          }
+        },
+        {
+          "id": "94557173-0b3b-4261-a637-381fb80e74d0",
+          "label": "On",
+          "icon": "Play",
+          "color": "#22c55e",
+          "width": 1,
+          "height": 1,
+          "actionType": "yeelight",
+          "yeelightConfig": {
+            "ip": "192.168.1.166",
+            "action": "on",
+            "controlType": "button",
+            "color": "#ffffff"
+          }
+        },
+        {
+          "id": "15c6919c-9726-42b0-a017-412116fbb1d6",
+          "label": "Off",
+          "icon": "Square",
+          "color": "#ef4444",
+          "width": 1,
+          "height": 1,
+          "actionType": "yeelight",
+          "yeelightConfig": {
+            "ip": "192.168.1.166",
+            "action": "off",
+            "controlType": "button",
+            "color": "#ffffff"
+          }
+        },
+        {
+          "id": "9d5ea062-db40-4ee7-a66a-a0f352fd9635",
+          "label": "Temperature",
+          "icon": "Lightbulb",
+          "color": "#f97316",
+          "width": 3,
+          "height": 1,
+          "actionType": "yeelight",
+          "yeelightConfig": {
+            "ip": "192.168.1.166",
+            "action": "toggle",
+            "controlType": "color_temperature_slider",
+            "color": "#ffffff"
+          },
+          "sliderConfig": {
+            "apiEndpoint": "",
+            "min": 1700,
+            "max": 6500,
+            "initialValue": 4000,
+            "unit": "K"
+          }
+        },
+        {
+          "id": "b8d197bd-e672-4c28-9990-95e5bcdc0f48",
+          "label": "Color",
+          "icon": "Settings",
+          "color": "#ec4899",
+          "width": 1,
+          "height": 1,
+          "actionType": "yeelight",
+          "yeelightConfig": {
+            "ip": "192.168.1.166",
+            "action": "toggle",
+            "controlType": "color_picker",
+            "color": "#00ffbf"
+          }
+        },
+        {
+          "id": "33adc4e5-4a05-4eef-855e-e088e88d9341",
+          "label": "Hue",
+          "icon": "Lightbulb",
+          "color": "#8b5cf6",
+          "width": 3,
+          "height": 1,
+          "actionType": "yeelight",
+          "yeelightConfig": {
+            "ip": "192.168.1.166",
+            "action": "toggle",
+            "controlType": "hue_slider",
+            "color": "#ffffff"
           },
           "sliderConfig": {
             "apiEndpoint": "",
             "min": 0,
-            "max": 100,
-            "initialValue": 50,
-            "unit": ""
-          },
-          "statusDisplayConfig": {
-            "apiEndpoint": "",
-            "dataType": "cpu",
-            "updateIntervalMs": 2000,
-            "labelUnit": ""
+            "max": 359,
+            "initialValue": 180,
+            "unit": "°"
           }
         }
       ]
