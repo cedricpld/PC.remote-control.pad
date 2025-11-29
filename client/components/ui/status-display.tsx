@@ -65,10 +65,10 @@ export const StatusDisplay = React.forwardRef<HTMLDivElement, StatusDisplayProps
         ) : currentValue !== null ? (
           <>
             <span className="text-base font-bold text-foreground">
-              {currentValue.toFixed(config.statusDisplayConfig?.dataType === 'cpu' ? 1 : 0)}
+              {currentValue.toFixed(config.statusDisplayConfig?.labelUnit === '°C' ? 1 : 0)}
               {config.statusDisplayConfig?.labelUnit}
             </span>
-            {(config.statusDisplayConfig?.dataType === 'cpu' || config.statusDisplayConfig?.dataType === 'ram') && (
+            {config.statusDisplayConfig?.labelUnit !== '°C' && (
               <Progress value={currentValue} className="w-full h-1.5" />
             )}
           </>

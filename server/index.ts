@@ -13,6 +13,8 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+import axios from 'axios';
+import cheerio from 'cheerio';
 
 // Import de la bibliothèque Yeelight
 import { Yeelight } from 'node-yeelight-wifi';
@@ -88,127 +90,112 @@ async function writeConfig(config: any) {
 }
 
 
-// Fonction pour contrôler l'ampoule Yeelight
-async function controlYeelight(action: 'toggle' | 'on' | 'off', ip: string) {
-  if (!ip || !/^(\d{1,3}\.){3}\d{1,3}$/.test(ip)) {
-    throw new Error('Adresse IP de l\'ampoule Yeelight invalide ou manquante.');
-  }
-  return new Promise((resolve, reject) => {
-    const yeelight = new Yeelight({ ip: ip, port: 43210 }); //og 55443
-    let connected = false;
-    let timeoutId: NodeJS.Timeout;
-    const cleanup = () => {
-      clearTimeout(timeoutId);
-      yeelight.removeAllListeners();
-      yeelight.disconnect();
-    };
-    yeelight.on('connected', () => {
-      connected = true;
-      console.log(`Yeelight: Connecté à ${ip}. Exécution de l'action: ${action}`);
-      yeelight.setPower(action)
-        .then(() => {
-          console.log(`Yeelight: Ampoule ${action} avec succès.`);
-          cleanup();
-          resolve(`Ampoule Yeelight ${action} avec succès.`);
-        })
-        .catch((err: any) => {
-          console.error(`Yeelight: Échec de l'action ${action}:`, err);
-          cleanup();
-          reject(`Contrôle Yeelight échoué: ${err.message}`);
+// Yeelight connection cache
+const yeelightConnections = new Map<string, { light: any; timeoutId: NodeJS.Timeout }>();
+
+async function getManagedYeelight(ip: string): Promise<any> {
+    if (yeelightConnections.has(ip)) {
+        const existing = yeelightConnections.get(ip)!;
+        clearTimeout(existing.timeoutId);
+        return existing.light;
+    }
+
+    return new Promise((resolve, reject) => {
+        const light = new Yeelight();
+        light.host = ip;
+        light.port = 55443;
+
+        const connectionTimeout = setTimeout(() => {
+            light.disconnect();
+            reject(new Error('Connection timed out'));
+        }, 5000);
+
+        light.on('connected', () => {
+            clearTimeout(connectionTimeout);
+            const timeoutId = setTimeout(() => {
+                light.disconnect();
+                yeelightConnections.delete(ip);
+            }, 60000); // 60 seconds inactivity timeout
+            yeelightConnections.set(ip, { light, timeoutId });
+            resolve(light);
         });
+
+        light.on('error', (err: any) => {
+            clearTimeout(connectionTimeout);
+            reject(err);
+        });
+
+        light.connect();
     });
-    yeelight.on('disconnected', () => {
-      console.log('Yeelight: Déconnecté.');
-      if (!connected) {
-        cleanup();
-        reject('Contrôle Yeelight échoué: Déconnecté avant que la commande ne puisse être envoyée. L\'ampoule est-elle en ligne et le mode développeur activé ?');
-      }
-    });
-    yeelight.on('error', (err: any) => {
-      console.error('Yeelight: Erreur lors du contrôle:', err);
-      cleanup();
-      reject(`Contrôle Yeelight échoué: ${err.message}`);
-    });
-    timeoutId = setTimeout(() => {
-      if (!connected) {
-        console.warn('Yeelight: Connexion expirée.');
-        cleanup();
-        reject('Contrôle Yeelight échoué: Connexion expirée. L\'ampoule est-elle en ligne et le mode développeur activé ?');
-      }
-    }, 5000);
-    yeelight.connect();
-  });
 }
 
+async function executeYeelightCommand(ip: string, command: (light: any) => Promise<any>) {
+    const light = await getManagedYeelight(ip);
+    // Reset the inactivity timeout for the connection
+    const connection = yeelightConnections.get(ip)!;
+    clearTimeout(connection.timeoutId);
+    connection.timeoutId = setTimeout(() => {
+        light.disconnect();
+        yeelightConnections.delete(ip);
+    }, 60000);
+    return command(light);
+}
 
+// Fonction pour contrôler l'ampoule Yeelight
+async function controlYeelight(action: 'toggle' | 'on' | 'off', ip: string) {
+    return executeYeelightCommand(ip, async (light) => {
+        if (action === 'toggle') {
+            await light.updateState();
+            await light.setPower(!light.power);
+        } else {
+            await light.setPower(action === 'on');
+        }
+        return `Ampoule Yeelight ${action} avec succès.`;
+    });
+}
 
 // Fonction pour contrôler la luminosité de l'ampoule Yeelight
 async function controlYeelightBrightness(ip: string, brightness: number) {
-  if (!ip || !/^(\d{1,3}\.){3}\d{1,3}$/.test(ip)) {
-    throw new Error('Adresse IP de l\'ampoule Yeelight invalide ou manquante.');
-  }
-
-  // Vérifier que la luminosité est dans la plage valide (1-100)
-  if (brightness < 1 || brightness > 100) {
-    throw new Error('La luminosité doit être comprise entre 1 et 100.');
-  }
-
-  return new Promise((resolve, reject) => {
-    const yeelight = new Yeelight({ ip: ip, port: 43210 }); //og 55443
-    let connected = false;
-    let timeoutId: NodeJS.Timeout;
-
-    const cleanup = () => {
-      clearTimeout(timeoutId);
-      yeelight.removeAllListeners();
-      yeelight.disconnect();
-    };
-
-    yeelight.on('connected', () => {
-      connected = true;
-      console.log(`Yeelight: Connecté à ${ip}. Réglage de la luminosité à ${brightness}%`);
-      yeelight.setBrightness(brightness)
-        .then(() => {
-          console.log(`Yeelight: Luminosité réglée à ${brightness}% avec succès.`);
-          cleanup();
-          resolve(`Luminosité de l'ampoule Yeelight réglée à ${brightness}% avec succès.`);
-        })
-        .catch((err: any) => {
-          console.error(`Yeelight: Échec du réglage de la luminosité à ${brightness}%:`, err);
-          cleanup();
-          reject(`Réglage de la luminosité échoué: ${err.message}`);
-        });
+    if (brightness < 1 || brightness > 100) {
+        throw new Error('La luminosité doit être comprise entre 1 et 100.');
+    }
+    return executeYeelightCommand(ip, async (light) => {
+        await light.setBright(brightness);
+        return `Luminosité de l'ampoule Yeelight réglée à ${brightness}% avec succès.`;
     });
-
-    yeelight.on('disconnected', () => {
-      console.log('Yeelight: Déconnecté.');
-      if (!connected) {
-        cleanup();
-        reject('Réglage de la luminosité échoué: Déconnecté avant que la commande ne puisse être envoyée. L\'ampoule est-elle en ligne et le mode développeur activé ?');
-      }
-    });
-
-    yeelight.on('error', (err: any) => {
-      console.error('Yeelight: Erreur lors du réglage de la luminosité:', err);
-      cleanup();
-      reject(`Réglage de la luminosité échoué: ${err.message}`);
-    });
-
-    timeoutId = setTimeout(() => {
-      if (!connected) {
-        console.warn('Yeelight: Connexion expirée.');
-        cleanup();
-        reject('Réglage de la luminosité échoué: Connexion expirée. L\'ampoule est-elle en ligne et le mode développeur activé ?');
-      }
-    }, 5000);
-
-    yeelight.connect();
-  });
 }
 
+// Fonction pour contrôler la température de couleur de l'ampoule Yeelight
+async function controlYeelightColorTemperature(ip: string, colorTemp: number) {
+    return executeYeelightCommand(ip, async (light) => {
+        await light.setCT(colorTemp);
+        return `Température de couleur réglée à ${colorTemp}K.`;
+    });
+}
 
+// Fonction pour contrôler la couleur (RGB) de l'ampoule Yeelight
+async function controlYeelightRGB(ip: string, color: string) {
+    const hexToRgb = (hex: string) => {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : null;
+    };
+    const rgb = hexToRgb(color);
+    if (!rgb) {
+        throw new Error('Format de couleur hexadécimal invalide.');
+    }
+    return executeYeelightCommand(ip, async (light) => {
+        await light.setRGB(rgb);
+        return `Couleur réglée à ${color}.`;
+    });
+}
 
-
+// Fonction pour contrôler la teinte (HSV) de l'ampoule Yeelight
+async function controlYeelightHSV(ip: string, hue: number) {
+    return executeYeelightCommand(ip, async (light) => {
+        await light.setHSV([hue, 100, 100]);
+        return `Teinte réglée à ${hue}.`;
+    });
+}
 
 
 export function createServer() {
@@ -363,6 +350,13 @@ export function createServer() {
         console.log(`Lancement du script d'arrêt audio : ${finalCommand}`);
       }
 
+      // 3. NOUVEAU : Gère la commande pour arrêter TOUS les sons
+      else if (trimmedCommand.startsWith('STOP_ALL_AUDIO')) {
+        const scriptPath = path.join(__dirname, 'scripts', 'stop-all-audio.ps1');
+        finalCommand = `powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}"`;
+        console.log(`Lancement du script d'arrêt de tous les sons : ${finalCommand}`);
+      }
+
       // 3. Gère les autres commandes (logique existante)
       else if (trimmedCommand.startsWith('nircmd.exe')) {
         finalCommand = `"${NIRCMD_PATH}" ${trimmedCommand.substring('nircmd.exe'.length)}`;
@@ -421,6 +415,63 @@ app.post("/api/yeelight-brightness", async (req, res) => {
   } catch (error: any) {
     res.status(500).json({ error: `Réglage de la luminosité échoué: ${error.message}` });
   }
+});
+
+app.post("/api/yeelight-color-temp", async (req, res) => {
+  const { colorTemp, yeelightIp } = req.body;
+
+  if (!yeelightIp) {
+    return res.status(400).json({ error: "L'adresse IP de Yeelight est manquante." });
+  }
+
+  if (colorTemp === undefined || colorTemp < 1700 || colorTemp > 6500) {
+    return res.status(400).json({ error: "La température de couleur doit être comprise entre 1700 et 6500." });
+  }
+
+  try {
+    const message = await controlYeelightColorTemperature(yeelightIp, colorTemp);
+    res.status(200).json({ message });
+  } catch (error: any) {
+    res.status(500).json({ error: `Réglage de la température de couleur échoué: ${error.message}` });
+  }
+});
+
+app.post("/api/yeelight-color", async (req, res) => {
+    const { color, yeelightIp } = req.body;
+
+    if (!yeelightIp) {
+        return res.status(400).json({ error: "L'adresse IP de Yeelight est manquante." });
+    }
+
+    if (!color) {
+        return res.status(400).json({ error: "La couleur est manquante." });
+    }
+
+    try {
+        const message = await controlYeelightRGB(yeelightIp, color);
+        res.status(200).json({ message });
+    } catch (error: any) {
+        res.status(500).json({ error: `Réglage de la couleur échoué: ${error.message}` });
+    }
+});
+
+app.post("/api/yeelight-hue", async (req, res) => {
+    const { hue, yeelightIp } = req.body;
+
+    if (!yeelightIp) {
+        return res.status(400).json({ error: "L'adresse IP de Yeelight est manquante." });
+    }
+
+    if (hue === undefined || hue < 0 || hue > 359) {
+        return res.status(400).json({ error: "La teinte doit être comprise entre 0 et 359." });
+    }
+
+    try {
+        const message = await controlYeelightHSV(yeelightIp, hue);
+        res.status(200).json({ message });
+    } catch (error: any) {
+        res.status(500).json({ error: `Réglage de la teinte échoué: ${error.message}` });
+    }
 });
 
 
@@ -547,5 +598,71 @@ app.post("/api/restart-server", (req, res) => {
     const usedMemPercent = parseFloat(((usedMemBytes / totalMemBytes) * 100).toFixed(1));
     res.status(200).json({ value: usedMemPercent });
   });
+
+  // Helper function to fetch and parse Xiaomi sensor data
+  async function getXiaomiSensorData() {
+    try {
+      // Fetch HTML from the local sensor device
+      const response = await axios.get('http://192.168.1.76:5000/');
+      const $ = cheerio.load(response.data);
+
+      // Extract text content from the relevant elements
+      const temperatureStr = $('#temperature').text().trim(); // e.g., "19.7°C"
+      const humidityStr = $('#humidity').text().trim();     // e.g., "48%"
+      const batteryStr = $('#battery').text().trim();       // e.g., "88%"
+
+      // Parse the strings to get numerical values
+      const temperature = parseFloat(temperatureStr.replace('°C', ''));
+      const humidity = parseInt(humidityStr.replace('%', ''), 10);
+      const battery = parseInt(batteryStr.replace('%', ''), 10);
+
+      return { temperature, humidity, battery };
+    } catch (error) {
+      console.error("Error fetching or parsing Xiaomi sensor data:", error);
+      // This error will be caught by the route handlers
+      throw new Error('Could not fetch data from Xiaomi sensor. Is it online?');
+    }
+  }
+
+  // New API routes for Xiaomi sensor data
+  app.get("/api/get-xiaomi-temperature", async (_req, res) => {
+    try {
+      const { temperature } = await getXiaomiSensorData();
+      if (!isNaN(temperature)) {
+        res.status(200).json({ value: temperature });
+      } else {
+        res.status(500).json({ error: "Invalid or missing temperature data from sensor." });
+      }
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/get-xiaomi-humidity", async (_req, res) => {
+    try {
+      const { humidity } = await getXiaomiSensorData();
+      if (!isNaN(humidity)) {
+        res.status(200).json({ value: humidity });
+      } else {
+        res.status(500).json({ error: "Invalid or missing humidity data from sensor." });
+      }
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/get-xiaomi-battery", async (_req, res) => {
+    try {
+      const { battery } = await getXiaomiSensorData();
+      if (!isNaN(battery)) {
+        res.status(200).json({ value: battery });
+      } else {
+        res.status(500).json({ error: "Invalid or missing battery data from sensor." });
+      }
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   return app;
 }
