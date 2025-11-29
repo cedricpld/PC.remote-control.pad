@@ -7,6 +7,23 @@ echo ===========================================
 echo.
 
 REM *********************************************************
+REM ETAPE 2B: INSTALLATION DES DEPENDANCES SUPPLEMENTAIRES
+REM *********************************************************
+echo.
+echo 2B. Installation des dependances supplementaires (axios, cheerio)...
+npm install axios cheerio
+if %errorlevel% neq 0 (
+    echo ERREUR: Echec de l'installation des dependances supplementaires.
+    echo Verifiez votre connexion internet et les logs d'erreur ci-dessus.
+    echo.
+    pause
+    exit /b 1
+) else (
+    echo Dependances supplementaires installees avec succes.
+)
+echo.
+
+REM *********************************************************
 REM ETAPE 1: VERIFICATION ET INSTALLATION DE NODE.JS
 REM *********************************************************
 echo.
