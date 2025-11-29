@@ -85,7 +85,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
         id: "main", name: "Principal", color: "#3b82f6", icon: "Home",
         blocks: [
           { id: "cmd-mic", label: "Couper Micro", icon: "Mic", color: "#ef4444", width: 1, height: 1, actionType: "command", command: "nircmd.exe mutesysvolume 2" },
-          { id: "slider-volume", label: "Volume PC", icon: "Volume2", color: "#3b82f6", width: 3, height: 1, actionType: "slider", sliderConfig: { apiEndpoint: "/api/set-master-volume", min: 0, max: 65535, initialValue: 32767, unit: "" } },
+          { id: "slider-volume", label: "Volume PC", icon: "Volume2", color: "#3b82f6", width: 3, height: 1, actionType: "slider", sliderConfig: { apiEndpoint: "/api/set-master-volume", min: 0, max: 65535, initialValue: 32767, unit: "%" } },
           { id: "status-cpu", label: "CPU", icon: "Cpu", color: "#ef4444", width: 2, height: 1, actionType: "statusDisplay", statusDisplayConfig: { apiEndpoint: "/api/get-cpu-usage", dataType: "cpu", updateIntervalMs: 2000, labelUnit: "%" } },
           { id: "status-ram", label: "RAM", icon: "MemoryStick", color: "#22c55e", width: 2, height: 1, actionType: "statusDisplay", statusDisplayConfig: { apiEndpoint: "/api/get-ram-usage", dataType: "ram", updateIntervalMs: 3000, labelUnit: "%" } },
         ],
@@ -160,19 +160,13 @@ export function StreamDeck({ className }: StreamDeckProps) {
   };
 
   const handleSaveControl = (config: ControlBlockConfig) => {
-    switch (config.actionType) {
-      case "slider":
-        config.width = 3;
-        config.height = 1;
-        break;
-      case "statusDisplay":
-        config.width = 3;
-        config.height = 1;
-        break;
-      default:
-        config.width = 1;
-        config.height = 1;
-        break;
+    if (config.actionType === 'slider' || config.actionType === 'statusDisplay' ||
+        (config.actionType === 'yeelight' && config.yeelightConfig?.controlType?.includes('slider'))) {
+      config.width = 3;
+      config.height = 1;
+    } else {
+      config.width = 1;
+      config.height = 1;
     }
 
     setPages((prev) =>
@@ -302,12 +296,27 @@ export function StreamDeck({ className }: StreamDeckProps) {
         break;
       case 'yeelight':
         if (!config.yeelightConfig?.ip) return alert("IP Yeelight non configurée.");
-        apiUrl = "/api/yeelight-toggle";
-        body = { action: config.yeelightConfig.action, yeelightIp: config.yeelightConfig.ip };
+        switch (config.yeelightConfig.controlType) {
+          case 'button':
+            apiUrl = "/api/yeelight-toggle";
+            body = { action: config.yeelightConfig.action, yeelightIp: config.yeelightConfig.ip };
+            break;
+          case 'color_picker':
+            apiUrl = "/api/yeelight-color";
+            body = { color: config.yeelightConfig.color, yeelightIp: config.yeelightConfig.ip };
+            break;
+        }
+        break;
+      case 'audio':
+        if (config.audioConfig?.action === 'stopAll') {
+          apiUrl = "/api/execute-action";
+          body = { command: "STOP_ALL_AUDIO" };
+        }
         break;
       default:
         return;
     }
+    if (!apiUrl) return;
     try {
       const response = await fetchWithAuth(apiUrl, {
         method: "POST",
@@ -323,12 +332,38 @@ export function StreamDeck({ className }: StreamDeckProps) {
   };
 
   const handleSliderValueChange = React.useCallback(async (config: ControlBlockConfig, value: number) => {
-    if (!config.sliderConfig?.apiEndpoint) return console.error("Endpoint API du slider non configuré.");
+    let apiUrl = '';
+    let body: any = {};
+
+    if (config.actionType === 'slider') {
+      if (!config.sliderConfig?.apiEndpoint) return console.error("Endpoint API du slider non configuré.");
+      apiUrl = config.sliderConfig.apiEndpoint;
+      body = { value };
+    } else if (config.actionType === 'yeelight') {
+      if (!config.yeelightConfig?.ip) return;
+      switch (config.yeelightConfig.controlType) {
+        case 'brightness_slider':
+          apiUrl = '/api/yeelight-brightness';
+          body = { brightness: value, yeelightIp: config.yeelightConfig.ip };
+          break;
+        case 'color_temperature_slider':
+          apiUrl = '/api/yeelight-color-temp';
+          body = { colorTemp: value, yeelightIp: config.yeelightConfig.ip };
+          break;
+        case 'hue_slider':
+          apiUrl = '/api/yeelight-hue';
+          body = { hue: value, yeelightIp: config.yeelightConfig.ip };
+          break;
+      }
+    }
+
+    if (!apiUrl) return;
+
     try {
-      const response = await fetch(config.sliderConfig.apiEndpoint, {
+      const response = await fetchWithAuth(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ value }),
+        body: JSON.stringify(body),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Erreur serveur');
