@@ -1,11 +1,11 @@
-# 🎮 CONTROL PAD - Votre télécommande de PC personnalisable
+# **CONTROL PAD** - Votre télécommande de PC personnalisable
 
 **CONTROL PAD** est une application web qui transforme votre téléphone, tablette ou tout autre appareil disposant d'un navigateur en une télécommande puissante et entièrement personnalisable pour votre PC Windows. Lancez des applications, exécutez des raccourcis complexes, contrôlez le volume, surveillez en temps réel les performances de votre système, et bien plus, le tout depuis une interface simple, réactive et élégante.
 
 
 <img width="775" height="256" alt="image" src="https://github.com/user-attachments/assets/a76cde3b-f191-49e3-9330-41f390e9866e" />
 
-
+Visitez la section [releases](https://github.com/cedricpld/PC.remote-control.pad/releases) pour télécharger la dernière version ```setup``` ou la dernière version ```portable```
 
 ---
 ## ✨ Fonctionnalités
@@ -20,9 +20,43 @@
     * **Statut :** Affichez des informations système en temps réel.
 * **Portable :** Créez une version auto-exécutable qui fonctionne sur n'importe quel PC Windows sans installation préalable de Node.js.
 * **Open Source :** Basé sur une stack moderne avec React, Vite, Node.js et Express.
+* **Système d'authentification :** Un mot de passe est demandé avant d'acceder à votre interface. Cryptage haute sécurité avec un hash ```bcrypt``` 12 rounds
+
+---
+## 🔑 Gestion des Mots de Passe
+
+Cette section décrit comment configurer et gérer les mots de passe pour votre application.
+
+### Configuration Initiale
+
+À l'installation, le mot de passe par défaut est ```admin```
+Le mot de passe haché est situé dans le fichier ```config.json```
+
+1. Ouvrez le fichier `config.json` situé dans le répertoire racine de votre projet.
+2. Trouvez la section `auth` et vous pourrez voir votre mot de passe haché dans le champ `hashedPassword`.
+
+```json
+{
+  "pages": [...], // Vos configurations de pages ici
+  "auth": {
+    "hashedPassword": "votre_mot_de_passe_haché_ici"
+  }
+}
+```
+
+Vous pouvez le modifier depuis l'interface du **Control Pad**, dans les paramètres, sous la section ```Sécurité```, bouton ```Changer le mot de passe```
+Ou alors directement dans votre fichier ```config.json``` à condition de le haché manuellement avec ```bcrypt```, il existe des sites internet pour haché et tester du texte avec bcrypt, par exemple [Bcrypt Generator](https://bcrypt-generator.com/). Assurez vous de laisser les ```Rounds (Cost Factor)``` à 12
+
 
 ---
 ## 🚀 Installation et Lancement
+
+Possibilité d'installation simple avec [l'installer](https://github.com/cedricpld/PC.remote-control.pad/releases/download/v1.2.2/Control-Pad-Setup_1.2.2.msi) ou en version [portable](https://github.com/cedricpld/PC.remote-control.pad/releases/download/v1.2.2/Control-Pad-Portable_1.2.2.rar).
+ Tout deux disponibles dans la section [releases](https://github.com/cedricpld/PC.remote-control.pad/releases).
+
+ Sinon vous pouvez suivre le processus pour build l'app vous-même, dans ce cas vous aurez besoin d'installer [Node.js](https://nodejs.org/fr).
+
+
 
 ### Lancement en mode Développement
 
@@ -70,10 +104,13 @@ Voici quelques exemples pour vous aider à configurer vos blocs d'action.
 
 | Action | Commande à insérer |
 | :--- | :--- |
+| **Lancer des applications système** | `start notepad.exe` |
+| **Lancer des logiciels** | `start "" "E:\Programmes\Plex Media Server\Plex Media Server.exe"` *(pensez à vérifier le chemin)* |
+| **Ouvrir un site web** | `start https://github.com/cedricpld/PC.remote-control.pad` |
+| **Simuler des touches** | `nircmd.exe sendkeypress 179` *(Play/Pause)* [Keys Énumération for Windows](https://learn.microsoft.com/fr-fr/dotnet/api/system.windows.forms.keys?view=windowsdesktop-8.0)|
+| **Raccourci avec privilèges** | `nircmd.exe sendkeypress elevate shift+ctrl+esc` |
 | **Couper/Rétablir le son** | `nircmd.exe mutesysvolume 2` |
-| **Lancer VLC** | `start "" "C:\Program Files\VideoLAN\VLC\vlc.exe"` *(pensez à vérifier le chemin)* |
-| **Lancer le Bloc-notes** | `start notepad.exe` |
-| **Ouvrir un site web** | `start https://www.google.com` |
+| **Mettre le PC en veille** | `nircmd.exe standby` |
 
 ### Type : `Raccourci`
 
