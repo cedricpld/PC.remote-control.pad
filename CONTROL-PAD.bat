@@ -4,7 +4,7 @@
 setlocal enabledelayedexpansion
 
 :: Obtenir l'adresse IP locale commençant par 192.168
-for /f "tokens=*" %%a in ('ipconfig ^| findstr /C:"192.168"') do (
+for /f "tokens=*" %%a in ('ipconfig ^| findstr /C:"192.168.1"') do (
     for /f "tokens=2 delims=:" %%b in ("%%a") do (
         set ip=%%b
         set ip=!ip:~1!
