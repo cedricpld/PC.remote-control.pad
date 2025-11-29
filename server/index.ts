@@ -8,6 +8,8 @@ import fs from "fs/promises";
 import path from "path";
 import { exec } from 'child_process';
 import bcrypt from 'bcrypt'; // Import de bcrypt pour le hachage des mots de passe
+import axios from 'axios';
+import * as cheerio from 'cheerio';
 // Importations et définitions pour __dirname en ES Modules
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -596,5 +598,55 @@ app.post("/api/restart-server", (req, res) => {
     const usedMemPercent = parseFloat(((usedMemBytes / totalMemBytes) * 100).toFixed(1));
     res.status(200).json({ value: usedMemPercent });
   });
+
+  // --- Fonctions pour Xiaomi ---
+  const XIAOMI_URL = 'http://192.168.1.76:5000/';
+
+  async function getXiaomiData(selector: string) {
+    try {
+      const { data } = await axios.get(XIAOMI_URL);
+      const $ = cheerio.load(data);
+      const rawValue = $(selector).text();
+      // Garde uniquement les chiffres et le point décimal.
+      const numericValue = rawValue.replace(/[^0-9.]/g, '');
+      const value = parseFloat(numericValue);
+      if (isNaN(value)) {
+        throw new Error("Impossible de parser la valeur numérique.");
+      }
+      return value;
+    } catch (error: any) {
+      console.error(`Erreur lors de la récupération des données de Xiaomi pour le sélecteur ${selector}:`, error.message);
+      throw new Error("Impossible de contacter l'appareil Xiaomi.");
+    }
+  }
+
+  // --- Routes pour Xiaomi ---
+  app.get("/api/get-xiaomi-temperature", async (_req, res) => {
+    try {
+      const value = await getXiaomiData("#temperature");
+      res.status(200).json({ value });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/get-xiaomi-humidity", async (_req, res) => {
+    try {
+      const value = await getXiaomiData("#humidity");
+      res.status(200).json({ value });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/get-xiaomi-battery", async (_req, res) => {
+    try {
+      const value = await getXiaomiData("#battery");
+      res.status(200).json({ value });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   return app;
 }
