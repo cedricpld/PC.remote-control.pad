@@ -25,12 +25,20 @@ export const StatusDisplay = React.forwardRef<HTMLDivElement, StatusDisplayProps
       }
       try {
         const response = await fetchWithAuth(config.statusDisplayConfig.apiEndpoint);
-        if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+        if (!response.ok) {
+          // Try to parse the error message from the JSON response
+          const errorData = await response.json().catch(() => null);
+          throw new Error(errorData?.error || `Erreur HTTP: ${response.status}`);
+        }
         const data = await response.json();
+        // If data.value is null or undefined, treat as an error
+        if (data.value === null || data.value === undefined) {
+          throw new Error(data.error || "Réponse invalide du serveur");
+        }
         setCurrentValue(data.value);
         setError(null);
       } catch (err: any) {
-        setError("Erreur");
+        setError(err.message || "Erreur de connexion");
       }
     }, [config.statusDisplayConfig?.apiEndpoint]);
 
@@ -65,10 +73,10 @@ export const StatusDisplay = React.forwardRef<HTMLDivElement, StatusDisplayProps
         ) : currentValue !== null ? (
           <>
             <span className="text-base font-bold text-foreground">
-              {currentValue.toFixed(config.statusDisplayConfig?.dataType === 'cpu' ? 1 : 0)}
+              {currentValue.toFixed(config.statusDisplayConfig?.labelUnit === '°C' ? 1 : 0)}
               {config.statusDisplayConfig?.labelUnit}
             </span>
-            {(config.statusDisplayConfig?.dataType === 'cpu' || config.statusDisplayConfig?.dataType === 'ram') && (
+            {config.statusDisplayConfig?.labelUnit !== '°C' && (
               <Progress value={currentValue} className="w-full h-1.5" />
             )}
           </>

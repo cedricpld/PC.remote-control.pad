@@ -13,11 +13,14 @@
 * **Interface Intuitive :** Une grille inspirée du Stream Deck, facile à utiliser et à organiser.
 * **Entièrement Personnalisable :** Créez plusieurs pages et configurez chaque bouton avec des icônes, des couleurs et des actions spécifiques.
 * **Monitoring en Temps Réel :** Affichez l'utilisation de votre **CPU**, **RAM**, **GPU** et **VRAM** directement sur votre grille grâce à des blocs de statut dynamiques.
+* **Contrôle des appareils connectés :** Gérez vos ampoules **Yeelight** connectées sur votre réseau local (allumer, éteindre, changer la luminosité, la couleur, etc.).
 * **Types de Blocs Variés :**
     * **Commande :** Exécutez n'importe quelle commande Windows (`start vlc.exe`) ou outil externe (`nircmd.exe`).
     * **Raccourci :** Simulez des combinaisons de touches complexes (`Ctrl+Shift+S`).
-    * **Slider :** Contrôlez des valeurs de manière analogique, comme le volume principal du système.
-    * **Statut :** Affichez des informations système en temps réel.
+    * **Audio :** Jouez des fichiers sonores locaux ou arrêtez tous les sons en cours de lecture.
+    * **Yeelight :** Contrôlez vos ampoules connectées.
+    * **Slider :** Contrôlez des valeurs de manière analogique, comme le volume ou la luminosité d'une ampoule.
+    * **Statut :** Affichez des informations système en temps réel ou des données de capteurs externes.
 * **Portable :** Créez une version auto-exécutable qui fonctionne sur n'importe quel PC Windows sans installation préalable de Node.js.
 * **Open Source :** Basé sur une stack moderne avec React, Vite, Node.js et Express.
 
@@ -75,6 +78,15 @@ Voici quelques exemples pour vous aider à configurer vos blocs d'action.
 | **Lancer le Bloc-notes** | `start notepad.exe` |
 | **Ouvrir un site web** | `start https://www.google.com` |
 
+### Type : `Audio`
+
+| Action | Commande |
+| :--- | :--- |
+| **Jouer un son** | `PLAY_AUDIO C:\chemin\vers\votre\son.mp3` |
+| **Arrêter le dernier son**| `STOP_AUDIO` |
+| **Arrêter tous les sons** | `STOP_ALL_AUDIO` |
+
+
 ### Type : `Raccourci`
 
 | Action | Raccourci à insérer |
@@ -83,7 +95,20 @@ Voici quelques exemples pour vous aider à configurer vos blocs d'action.
 | **Capture d'écran Windows**| `Win+Shift+S` |
 | **Fermer la fenêtre active** | `Alt+F4` |
 
-### Type : `Slider`
+### Type : `Yeelight`
+
+*Assurez-vous d'avoir activé le "Contrôle par le LAN" dans l'application Yeelight sur votre téléphone pour chaque ampoule que vous souhaitez contrôler.*
+
+| Action | Type de Bouton/Slider |
+| :--- | :--- |
+| **Allumer / Éteindre** | Bouton -> `Toggle`, `On`, ou `Off` |
+| **Changer la luminosité**| Slider -> `Luminosité` |
+| **Changer la température**| Slider -> `Température de couleur` |
+| **Changer la couleur (preset)**| Bouton -> `Couleur` (choisir une couleur) |
+| **Changer la couleur (custom)**| Bouton -> `Couleur` (entrer un code hexa) |
+| **Changer la teinte (spectre)**| Slider -> `Teinte (Couleur)` |
+
+### Type : `Slider` (Général)
 
 | Action | Endpoint API à insérer |
 | :--- | :--- |
@@ -98,3 +123,6 @@ Voici quelques exemples pour vous aider à configurer vos blocs d'action.
 | **Utilisation GPU/CUDA**| `/api/get-gpu-usage` | `%` |
 | **Utilisation VRAM (%)**| `/api/get-vram-usage-percent` | `%` |
 | **Utilisation VRAM (Go)**| `/api/get-vram-usage-gb` | `Go` |
+| **Température (Xiaomi)** | `/api/get-xiaomi-temperature` | `°C` |
+| **Humidité (Xiaomi)** | `/api/get-xiaomi-humidity` | `%` |
+| **Batterie (Xiaomi)** | `/api/get-xiaomi-battery` | `%` |
