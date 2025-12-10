@@ -1,6 +1,6 @@
 @echo off
 REM Navigue vers le dossier de votre projet.
-cd /d "C:\Users\cedri\Documents\GitHub\PC.remote-control.pad"
+cd /d "C:\Users\cedri\Documents\GitHub\PC.remote-control.pad\client"
 
 REM Lance le serveur en mode développement dans la même fenêtre cmd
 npm run dev
