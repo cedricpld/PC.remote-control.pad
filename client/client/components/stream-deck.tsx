@@ -1,7 +1,7 @@
 import * as React from "react";
-import { Settings, Edit3, Eye, Cpu, MemoryStick, Volume2, Lightbulb, Mic, Camera, Gamepad2, Monitor, Headphones } from "lucide-react";
+import { Settings, Edit3, Eye, Cpu, MemoryStick, Volume2, Lightbulb, Mic, Camera, Gamepad2, Monitor, Headphones, Server, Power, Maximize, Minimize } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { StreamDeckPage, ControlBlockConfig } from "@/types/stream-deck";
+import { StreamDeckPage, ControlBlockConfig, PcServerConfig } from "@/types/stream-deck";
 import { Button } from "@/components/ui/button";
 import { PageTabs } from "@/components/ui/page-tabs";
 import { PageDialog } from "@/components/ui/page-dialog";
@@ -36,10 +36,40 @@ export function StreamDeck({ className }: StreamDeckProps) {
   const [editingControl, setEditingControl] = React.useState<ControlBlockConfig | undefined>();
   const [editingPage, setEditingPage] = React.useState<StreamDeckPage | undefined>();
   const [draggedControl, setDraggedControl] = React.useState<string | null>(null);
+  const [serverStatus, setServerStatus] = React.useState<'online' | 'offline'>('offline');
+  const [isFullscreen, setIsFullscreen] = React.useState(false);
+  const [pcServerConfig, setPcServerConfig] = React.useState<PcServerConfig>({ ip: "localhost", port: 8765 });
 
+  React.useEffect(() => {
+    const checkServerStatus = async () => {
+      try {
+        const res = await fetchWithAuth('/api/server-status');
+        if (res.ok) {
+           const data = await res.json();
+           setServerStatus(data.status);
+        } else {
+           setServerStatus('offline');
+        }
+      } catch {
+        setServerStatus('offline');
+      }
+    };
+    checkServerStatus();
+    const interval = setInterval(checkServerStatus, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
-
-  //const isInitialMount = React.useRef(true);
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+        setIsFullscreen(false);
+      }
+    }
+  };
 
   const clickSound = React.useMemo(() => {
     try {
@@ -105,6 +135,10 @@ export function StreamDeck({ className }: StreamDeckProps) {
         }
         const data = await response.json();
         console.log("Configuration reçue du serveur:", data); // Ajoutez ce log pour vérifier les données reçues
+
+        if (data && data.pcServer) {
+            setPcServerConfig(data.pcServer);
+        }
 
         if (data && data.pages && data.pages.length > 0) {
           const migratedData = data.pages.map((page: any) => {
@@ -313,10 +347,20 @@ export function StreamDeck({ className }: StreamDeckProps) {
           body = { command: "STOP_ALL_AUDIO" };
         }
         break;
+      case 'wol':
+        apiUrl = "/api/execute-action";
+        body = { command: "WOL", wolConfig: config.wolConfig };
+        break;
       default:
         return;
     }
     if (!apiUrl) return;
+
+    // Add target to body
+    if (config.target) {
+        body.target = config.target;
+    }
+
     try {
       const response = await fetchWithAuth(apiUrl, {
         method: "POST",
@@ -358,6 +402,10 @@ export function StreamDeck({ className }: StreamDeckProps) {
     }
 
     if (!apiUrl) return;
+
+    if (config.target) {
+        body.target = config.target;
+    }
 
     try {
       const response = await fetchWithAuth(apiUrl, {
@@ -424,6 +472,24 @@ export function StreamDeck({ className }: StreamDeckProps) {
     }
   };
 
+  const handleUpdateServerConfig = async (newConfig: PcServerConfig) => {
+    try {
+      const response = await fetchWithAuth("/api/config");
+      const currentConfig = await response.json();
+      const updatedConfig = { ...currentConfig, pcServer: newConfig };
+      const saveRes = await fetchWithAuth("/api/config", {
+         method: "POST",
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify(updatedConfig)
+      });
+      if (!saveRes.ok) throw new Error("Save failed");
+      setPcServerConfig(newConfig);
+    } catch (e) {
+      console.error(e);
+      alert("Erreur lors de la sauvegarde de la configuration du serveur PC");
+    }
+  };
+
 
 
   const [screenSize, setScreenSize] = React.useState<"mobile" | "tablet" | "desktop">("desktop");
@@ -451,6 +517,16 @@ export function StreamDeck({ className }: StreamDeckProps) {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {/* Server Status Indicator */}
+          <div className="flex items-center gap-1.5 px-2 py-1 bg-secondary/50 rounded-md border border-border/50" title={serverStatus === 'online' ? "Serveur PC Connecté" : "Serveur PC Déconnecté"}>
+             <div className={cn("h-2.5 w-2.5 rounded-full", serverStatus === 'online' ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-red-500")} />
+             <span className="text-xs font-medium hidden sm:inline">{serverStatus === 'online' ? "PC En Ligne" : "PC Hors Ligne"}</span>
+          </div>
+
+          <Button variant="ghost" size="icon" onClick={toggleFullscreen} className="h-8 w-8 ml-1" title="Plein écran">
+            {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+          </Button>
+
           <Button variant={isEditing ? "default" : "outline"} size="sm" onClick={() => setIsEditing(!isEditing)} className="gap-2 text-xs sm:text-sm">
             {isEditing ? <><Eye className="h-3 w-3 sm:h-4 sm:w-4" /> <span className="hidden sm:inline">Mode Affichage</span><span className="sm:hidden">Voir</span></> : <><Edit3 className="h-3 w-3 sm:h-4 sm:w-4" /> <span className="hidden sm:inline">Mode Édition</span><span className="sm:hidden">Éditer</span></>}
           </Button>
@@ -491,6 +567,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
               onExecute={handleExecuteAction}
               onSliderValueChange={handleSliderValueChange}
               isEditing={isEditing}
+              isDisabled={!isEditing && config.target === 'server' && serverStatus === 'offline'}
               onEdit={() => handleEditControl(config)}
               onDragStart={handleControlDragStart}
               onDragEnd={handleControlDragEnd}
@@ -530,6 +607,8 @@ export function StreamDeck({ className }: StreamDeckProps) {
         onRestartServer={handleRestartServer}
         onStopServer={handleStopServer}
         onChangePassword={handleChangePassword}
+        pcServerConfig={pcServerConfig}
+        onUpdatePcServerConfig={handleUpdateServerConfig}
       />
     </div>
   );

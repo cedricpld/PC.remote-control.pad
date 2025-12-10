@@ -2,3 +2,4 @@ websockets
 pystray
 Pillow
 pyinstaller
+psutil
