@@ -97,7 +97,7 @@ export function PageDialog({
       name: formData.name!,
       color: formData.color,
       icon: formData.icon,
-      buttons: page?.buttons || [],
+      blocks: page?.blocks || [],
     };
 
     onSave(newPage);

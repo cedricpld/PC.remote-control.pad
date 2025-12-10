@@ -10,6 +10,7 @@ interface ControlRendererProps {
   onExecute?: (config: ControlBlockConfig) => void;
   onSliderValueChange?: (config: ControlBlockConfig, value: number) => void;
   isEditing?: boolean;
+  isDisabled?: boolean;
   onEdit?: () => void;
   onDragStart?: (e: React.DragEvent, id: string) => void;
   onDragEnd?: (e: React.DragEvent) => void;
@@ -22,6 +23,7 @@ export const ControlRenderer: React.FC<ControlRendererProps> = ({
   onExecute,
   onSliderValueChange,
   isEditing,
+  isDisabled,
   onEdit,
   onDragStart,
   onDragEnd,
@@ -31,6 +33,7 @@ export const ControlRenderer: React.FC<ControlRendererProps> = ({
   const gridClasses = `col-span-${config.width} row-span-${config.height}`;
 
   const interactiveProps = {
+    disabled: isDisabled,
     draggable: isEditing,
     onDragStart: (e: React.DragEvent) => onDragStart && onDragStart(e, config.id),
     onDragEnd,
@@ -58,13 +61,14 @@ export const ControlRenderer: React.FC<ControlRendererProps> = ({
     case 'shortcut':
     case 'yeelight':
     case 'audio':
+    case 'wol':
       return (
         <ActionButton
           config={config}
           onExecute={() => onExecute && onExecute(config)}
           isEditing={isEditing}
           onEdit={onEdit}
-          className={`w-full h-full ${gridClasses}`}
+          className={`w-full h-full ${gridClasses} ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
           {...interactiveProps}
         />
       );
@@ -75,7 +79,7 @@ export const ControlRenderer: React.FC<ControlRendererProps> = ({
           onValueChange={(value) => onSliderValueChange && onSliderValueChange(config, value)}
           isEditing={isEditing}
           onClick={isEditing ? onEdit : undefined}
-          className={`w-full h-full ${gridClasses}`}
+          className={`w-full h-full ${gridClasses} ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
           {...interactiveProps}
         />
       );
@@ -85,7 +89,7 @@ export const ControlRenderer: React.FC<ControlRendererProps> = ({
           config={config}
           isEditing={isEditing}
           onClick={isEditing ? onEdit : undefined}
-          className={`w-full h-full ${gridClasses}`}
+          className={`w-full h-full ${gridClasses} ${isDisabled ? 'opacity-50' : ''}`}
           {...interactiveProps}
         />
       );

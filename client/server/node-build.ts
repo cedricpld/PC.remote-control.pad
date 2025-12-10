@@ -1,8 +1,7 @@
 import path from "path";
 import os from "os";
 import { createServer } from "./index";
-import express_namespace from "express";
-const express = express_namespace.default || express_namespace;
+import express from "express";
 import { fileURLToPath } from "url";
 
 const app = createServer();

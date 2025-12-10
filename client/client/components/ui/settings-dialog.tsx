@@ -1,5 +1,8 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { PcServerConfig } from "@/types/stream-deck";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +20,8 @@ interface SettingsDialogProps {
   onRestartServer: () => Promise<void>;
   onStopServer: () => Promise<void>;
   onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  pcServerConfig?: PcServerConfig;
+  onUpdatePcServerConfig?: (config: PcServerConfig) => Promise<void>;
 }
 
 export function SettingsDialog({
@@ -25,10 +30,31 @@ export function SettingsDialog({
   onRestartServer,
   onStopServer,
   onChangePassword,
+  pcServerConfig,
+  onUpdatePcServerConfig,
 }: SettingsDialogProps) {
   const [isRestarting, setIsRestarting] = React.useState(false);
   const [isStopping, setIsStopping] = React.useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = React.useState(false);
+  const [serverIp, setServerIp] = React.useState(pcServerConfig?.ip || "");
+  const [serverPort, setServerPort] = React.useState(pcServerConfig?.port?.toString() || "8765");
+
+  React.useEffect(() => {
+    if (open) {
+       setServerIp(pcServerConfig?.ip || "");
+       setServerPort(pcServerConfig?.port?.toString() || "8765");
+    }
+  }, [open, pcServerConfig]);
+
+  const handleSaveServerConfig = async () => {
+      if (onUpdatePcServerConfig) {
+        await onUpdatePcServerConfig({
+            ip: serverIp,
+            port: parseInt(serverPort) || 8765
+        });
+        alert("Configuration sauvegardée.");
+      }
+  };
 
   const handleRestartServerClick = async () => {
     setIsRestarting(true);
@@ -69,7 +95,20 @@ export function SettingsDialog({
           </DialogHeader>
           <div className="grid gap-6 py-4">
             <div className="space-y-4">
-              <h4 className="text-sm font-medium">Gestion du Serveur</h4>
+              <h4 className="text-sm font-medium">Connexion PC Serveur</h4>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="serverIp" className="text-right">IP</Label>
+                <Input id="serverIp" value={serverIp} onChange={e => setServerIp(e.target.value)} className="col-span-3" placeholder="192.168.1.XX" />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="serverPort" className="text-right">Port</Label>
+                <Input id="serverPort" value={serverPort} onChange={e => setServerPort(e.target.value)} className="col-span-3" placeholder="8765" />
+              </div>
+              <Button onClick={handleSaveServerConfig} size="sm" className="w-full">Sauvegarder la connexion</Button>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium">Gestion du Client (Raspberry)</h4>
               <div className="space-y-2">
                 <Button
                   onClick={handleRestartServerClick}

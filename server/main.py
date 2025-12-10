@@ -8,15 +8,20 @@ import sys
 import threading
 import tkinter as tk
 from tkinter import ttk, messagebox
+import psutil
 from pystray import Icon as TrayIcon, Menu as TrayMenu, MenuItem as TrayMenuItem
 from PIL import Image, ImageDraw
+import winreg
 
 # --- GLOBAL STATE ---
 websocket_thread = None
 websocket_server = None
 event_loop = None
 config = {}
-CONFIG_FILE = "config.json"
+BASE_PATH = os.path.dirname(os.path.abspath(__file__))
+CONFIG_FILE = os.path.join(BASE_PATH, "config.json")
+SCRIPTS_PATH = os.path.join(BASE_PATH, 'scripts')
+NIRCMD_PATH = os.path.join(SCRIPTS_PATH, 'nircmd.exe')
 
 # --- CONFIGURATION MANAGEMENT ---
 def load_config():
@@ -27,23 +32,49 @@ def load_config():
             with open(CONFIG_FILE, 'r') as f:
                 config = json.load(f)
         else:
-            # Default configuration
             config = {"port": 8765, "start_on_boot": False}
     except Exception as e:
         print(f"Error loading config: {e}")
         config = {"port": 8765, "start_on_boot": False}
 
 def save_config():
-    """Saves configuration to a JSON file."""
+    """Saves configuration to a JSON file and updates boot settings."""
     try:
         with open(CONFIG_FILE, 'w') as f:
             json.dump(config, f, indent=4)
+        update_boot_setting()
     except Exception as e:
         print(f"Error saving config: {e}")
 
+def update_boot_setting():
+    """Updates the Windows Registry to start the app on boot."""
+    app_path = sys.executable if getattr(sys, 'frozen', False) else os.path.abspath(__file__)
+    # If running as script, use python executable + script path
+    if not getattr(sys, 'frozen', False):
+        app_path = f'"{sys.executable}" "{app_path}"'
+    else:
+        app_path = f'"{app_path}"'
+
+    key_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
+    app_name = "ControlPadServer"
+
+    try:
+        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, key_path, 0, winreg.KEY_SET_VALUE)
+        if config.get("start_on_boot", False):
+            winreg.SetValueEx(key, app_name, 0, winreg.REG_SZ, app_path)
+            print("Added to startup.")
+        else:
+            try:
+                winreg.DeleteValue(key, app_name)
+                print("Removed from startup.")
+            except FileNotFoundError:
+                pass
+        winreg.CloseKey(key)
+    except Exception as e:
+        print(f"Failed to update boot setting: {e}")
+
 # --- ICON CREATION ---
 def create_image(width, height, color1, color2):
-    """Generates an image for the tray icon."""
     image = Image.new('RGB', (width, height), color1)
     dc = ImageDraw.Draw(image)
     dc.rectangle((width // 2, 0, width, height // 2), fill=color2)
@@ -52,7 +83,6 @@ def create_image(width, height, color1, color2):
 
 # --- CONFIGURATION WINDOW ---
 def show_config_window():
-    """Displays the configuration window using Tkinter."""
     def on_save():
         try:
             new_port = int(port_var.get())
@@ -78,18 +108,14 @@ def show_config_window():
     ttk.Checkbutton(window, text="Start on Windows boot", variable=boot_var).grid(row=1, columnspan=2, padx=10, pady=5, sticky="w")
 
     ttk.Button(window, text="Save", command=on_save).grid(row=2, columnspan=2, pady=10)
-    
     window.mainloop()
-
 
 # --- TRAY MENU ACTIONS ---
 def on_restart():
-    """Restarts the application."""
     print("Action: Restarting application.")
     on_quit()
 
 def on_quit(icon=None, item=None):
-    """Stops the server and exits the application."""
     print("Action: Quitting application.")
     global event_loop, websocket_server
     if event_loop and websocket_server:
@@ -100,13 +126,31 @@ def on_quit(icon=None, item=None):
         icon.stop()
     sys.exit(0)
 
-# --- WEBSOCKET SERVER LOGIC (remains unchanged) ---
-# ... (execute_pc_command and other functions are here)
-BASE_PATH = os.path.dirname(os.path.abspath(__file__))
-NIRCMD_PATH = os.path.join(BASE_PATH, 'scripts', 'nircmd.exe')
-SCRIPTS_PATH = os.path.join(BASE_PATH, 'scripts')
+# --- COMMAND EXECUTION ---
+ALLOWED_COMMANDS = ["start", "curl"] # Basic whitelist, though 'start' can launch anything
 
-ALLOWED_COMMANDS = ["start", "curl"]
+def get_cpu_usage():
+    try:
+        return {"status": "success", "value": psutil.cpu_percent(interval=None)}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+def get_ram_usage():
+    try:
+        return {"status": "success", "value": psutil.virtual_memory().percent}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+def get_gpu_usage(query):
+    # query: 'utilization.gpu' or 'memory.used,memory.total' etc
+    try:
+        cmd = ['nvidia-smi', f'--query-gpu={query}', '--format=csv,noheader,nounits']
+        result = subprocess.check_output(cmd, encoding='utf-8').strip()
+        return {"status": "success", "value": result}
+    except FileNotFoundError:
+         return {"status": "error", "message": "nvidia-smi not found"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 def execute_pc_command(action):
     command_type = action.get("type")
@@ -120,15 +164,23 @@ def execute_pc_command(action):
         if command_type == "command":
             command = action.get("command")
             args = action.get("args", [])
-            if command in ALLOWED_COMMANDS:
-                final_command = [command] + args
-            elif command.startswith("nircmd"):
+
+            # Additional checks for specific commands
+            if command == "nircmd.exe":
                 if not os.path.exists(NIRCMD_PATH):
                     return {"status": "error", "message": f"nircmd.exe not found at {NIRCMD_PATH}"}
-                nircmd_args = command.split(" ")[1:]
-                final_command = [NIRCMD_PATH] + nircmd_args
+                # Security: Only allow specific nircmd actions? For now, allow passthrough from trusted client.
+                final_command = [NIRCMD_PATH] + args
+            elif command in ALLOWED_COMMANDS:
+                final_command = [command] + args
             else:
-                return {"status": "error", "message": f"Command '{command}' is not allowed."}
+                 # Allow raw execution if configured? For now, treat 'command' as raw shell if not special
+                 # But safer to restrict. The Node backend sends 'nircmd.exe' as command.
+                 if command.startswith("nircmd"): # Backwards compat if sent as string
+                     parts = command.split(" ")
+                     final_command = [NIRCMD_PATH] + parts[1:]
+                 else:
+                     final_command = [command] + args
 
         elif command_type == "shortcut":
             shortcut = action.get("shortcut")
@@ -141,21 +193,74 @@ def execute_pc_command(action):
             if audio_action == "play":
                 script_name = "play-audio.ps1"
                 file_path = action.get("file_path")
+                if not file_path:
+                     return {"status": "error", "message": "Missing file_path for play audio"}
                 script_path = os.path.join(SCRIPTS_PATH, script_name)
                 final_command = ["powershell.exe", "-ExecutionPolicy", "Bypass", "-File", script_path, "-FilePath", file_path]
-            elif audio_action in ["stop", "stop_all"]:
-                script_name = f"{audio_action}-audio.ps1"
-                script_path = os.path.join(SCRIPTS_PATH, script_name)
-                final_command = ["powershell.exe", "-ExecutionPolicy", "Bypass", "-File", script_path]
+            elif audio_action == "stop":
+                 script_path = os.path.join(SCRIPTS_PATH, 'stop-audio.ps1')
+                 final_command = ["powershell.exe", "-ExecutionPolicy", "Bypass", "-File", script_path]
+            elif audio_action == "stop_all":
+                 script_path = os.path.join(SCRIPTS_PATH, 'stop-all-audio.ps1')
+                 final_command = ["powershell.exe", "-ExecutionPolicy", "Bypass", "-File", script_path]
+            else:
+                return {"status": "error", "message": f"Unknown audio action '{audio_action}'"}
+
+        elif command_type == "volume":
+            value = action.get("value")
+            # nircmd setsysvolume 0-65535
+            cmd = [NIRCMD_PATH, "setsysvolume", str(value)]
+            subprocess.Popen(cmd) # Fire and forget
+            return {"status": "success", "message": f"Volume set to {value}"}
+
+        # Stats commands
+        elif command_type == "get_cpu":
+            return get_cpu_usage()
+        elif command_type == "get_ram":
+            return get_ram_usage()
+        elif command_type == "get_gpu":
+             return get_gpu_usage('utilization.gpu')
+        elif command_type == "get_vram_percent":
+             res = get_gpu_usage('memory.used,memory.total')
+             if res['status'] == 'success':
+                 try:
+                    used, total = map(float, res['value'].split(','))
+                    pct = (used/total) * 100
+                    return {"status": "success", "value": round(pct, 1)}
+                 except:
+                    return {"status": "error", "message": "Parse error"}
+             return res
+        elif command_type == "get_vram_gb":
+             res = get_gpu_usage('memory.used')
+             if res['status'] == 'success':
+                 try:
+                    val = float(res['value']) / 1024
+                    return {"status": "success", "value": round(val, 2)}
+                 except:
+                    return {"status": "error", "message": "Parse error"}
+             return res
+
+        elif command_type == "restart_server":
+            # Restart THIS python server
+            on_restart()
+            return {"status": "success", "message": "Restarting..."}
+
+        elif command_type == "stop_server":
+            on_quit()
+            return {"status": "success", "message": "Stopping..."}
 
         else:
             return {"status": "error", "message": f"Unknown command type '{command_type}'."}
 
         if final_command:
-            subprocess.Popen(final_command, shell=True)
+            # Using shell=True only if necessary, but list is safer.
+            # However, for 'start https://...' on windows, shell=True is needed or use os.startfile
+            if final_command[0] == "start":
+                 os.startfile(final_command[1]) # Better for URLs
+            else:
+                 # shell=False is safer and correct when passing a list of args
+                 subprocess.Popen(final_command, shell=False)
             return {"status": "success", "message": f"Action '{command_type}' executed."}
-        else:
-            return {"status": "error", "message": "Command could not be constructed."}
 
     except Exception as e:
         return {"status": "error", "message": f"Failed to execute command: {e}"}
@@ -164,10 +269,16 @@ async def handler(websocket, path):
     print(f"Client connected from {websocket.remote_address}")
     try:
         async for message in websocket:
-            print(f"Received message: {message}")
+            print(f"Received: {message}")
             try:
                 data = json.loads(message)
+                # Ensure we handle the specific 'command' key if it comes from the old node logic
+                # The Node backend might send raw { command: "..." } or structured { type: "..." }
+                # We will standardise on { type: "...", ... }
+
                 result = execute_pc_command(data)
+                if "id" in data:
+                    result["id"] = data["id"]
                 await websocket.send(json.dumps(result))
             except json.JSONDecodeError:
                 await websocket.send(json.dumps({"status": "error", "message": "Invalid JSON format."}))
@@ -179,8 +290,9 @@ async def handler(websocket, path):
 async def start_websocket_server():
     global websocket_server
     port = config.get("port", 8765)
-    print(f"Starting websocket server on localhost:{port}...")
-    server = await websockets.serve(handler, "localhost", port)
+    print(f"Starting websocket server on 0.0.0.0:{port}...")
+    # Bind to 0.0.0.0 to allow external connections
+    server = await websockets.serve(handler, "0.0.0.0", port)
     websocket_server = server
     await server.wait_closed()
 
@@ -200,8 +312,12 @@ if __name__ == "__main__":
     websocket_thread.start()
 
     # Create and run the system tray icon
-    #icon_image = create_image(64, 64, 'black', 'gray')
-    icon_image = Image.open(os.path.join(BASE_PATH, 'ControlPad-Server.ico'))
+    icon_path = os.path.join(BASE_PATH, 'ControlPad-Server.ico')
+    if os.path.exists(icon_path):
+        icon_image = Image.open(icon_path)
+    else:
+        icon_image = create_image(64, 64, 'black', 'white')
+
     menu = TrayMenu(
         TrayMenuItem('Configuration', show_config_window),
         TrayMenuItem('Restart', on_restart),

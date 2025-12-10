@@ -6,6 +6,8 @@ export interface StreamDeckPage {
   blocks: ControlBlockConfig[];
 }
 
+export type ActionButtonConfig = ControlBlockConfig;
+
 export interface ControlBlockConfig {
   id: string;
   label: string;
@@ -13,13 +15,15 @@ export interface ControlBlockConfig {
   color?: string;
   width: number;
   height: number;
-  actionType: 'command' | 'shortcut' | 'yeelight' | 'slider' | 'statusDisplay' | 'audio';
+  actionType: 'command' | 'shortcut' | 'yeelight' | 'slider' | 'statusDisplay' | 'audio' | 'wol';
+  target?: 'server' | 'client';
   command?: string;
   shortcut?: string;
   yeelightConfig?: YeelightConfig;
   sliderConfig?: SliderConfig;
   statusDisplayConfig?: StatusDisplayConfig;
   audioConfig?: AudioConfig;
+  wolConfig?: WolConfig;
 }
 
 export interface YeelightConfig {
@@ -46,4 +50,21 @@ export interface StatusDisplayConfig {
 
 export interface AudioConfig {
   action: 'stopAll';
+}
+
+export interface WolConfig {
+  mac: string;
+  method: 'etherwake' | 'network';
+  broadcastIp?: string;
+}
+
+export interface PcServerConfig {
+  ip: string;
+  port: number;
+}
+
+export interface AppConfig {
+  pages: StreamDeckPage[];
+  pcServer?: PcServerConfig;
+  auth?: { hashedPassword?: string };
 }

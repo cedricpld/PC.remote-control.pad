@@ -15,7 +15,7 @@ Le projet est maintenant divisé en deux parties distinctes :
 
 ### 2. Le Serveur PC (Windows)
 - **Rôle :** C'est un agent léger qui s'exécute sur votre PC Windows. Il écoute les instructions envoyées par le Client et exécute les actions spécifiques au PC (lancer des applications, simuler des raccourcis, contrôler le volume, etc.).
-- **Pour plus de détails :** [Voir le README du Serveur PC](./server-pc/README.md)
+- **Pour plus de détails :** [Voir le README du Serveur PC](./server/README.md)
 
 ---
 ## ✨ Fonctionnalités Principales
@@ -32,7 +32,7 @@ Le projet est maintenant divisé en deux parties distinctes :
 ## 🚀 Installation Rapide
 
 1.  **Installez le Client** sur votre Raspberry Pi (ou autre serveur Linux). Suivez les instructions [ici](./client/README.md).
-2.  **Installez le Serveur PC** sur votre machine Windows. Suivez les instructions [ici](./server-pc/README.md).
+2.  **Installez le Serveur PC** sur votre machine Windows. Suivez les instructions [ici](./server/README.md).
 3.  **Configurez l'adresse** du Serveur PC dans les paramètres de l'interface web du Client.
 
 Et voilà ! Votre système de contrôle est prêt.
