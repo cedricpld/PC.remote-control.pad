@@ -17,11 +17,14 @@ import winreg
 websocket_thread = None
 websocket_server = None
 event_loop = None
+icon_instance = None
 config = {}
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(BASE_PATH, "config.json")
 SCRIPTS_PATH = os.path.join(BASE_PATH, 'scripts')
 NIRCMD_PATH = os.path.join(SCRIPTS_PATH, 'nircmd.exe')
+
+should_restart = False
 
 # --- CONFIGURATION MANAGEMENT ---
 def load_config():
@@ -49,7 +52,6 @@ def save_config():
 def update_boot_setting():
     """Updates the Windows Registry to start the app on boot."""
     app_path = sys.executable if getattr(sys, 'frozen', False) else os.path.abspath(__file__)
-    # If running as script, use python executable + script path
     if not getattr(sys, 'frozen', False):
         app_path = f'"{sys.executable}" "{app_path}"'
     else:
@@ -111,23 +113,18 @@ def show_config_window():
     window.mainloop()
 
 # --- TRAY MENU ACTIONS ---
-def on_restart():
+def on_restart(icon, item):
+    global should_restart
     print("Action: Restarting application.")
-    on_quit()
+    should_restart = True
+    icon.stop()
 
-def on_quit(icon=None, item=None):
+def on_quit(icon, item):
     print("Action: Quitting application.")
-    global event_loop, websocket_server
-    if event_loop and websocket_server:
-        print("Stopping websocket server...")
-        event_loop.call_soon_threadsafe(websocket_server.close)
-        event_loop.call_soon_threadsafe(event_loop.stop)
-    if icon:
-        icon.stop()
-    sys.exit(0)
+    icon.stop()
 
 # --- COMMAND EXECUTION ---
-ALLOWED_COMMANDS = ["start", "curl"] # Basic whitelist, though 'start' can launch anything
+ALLOWED_COMMANDS = ["start", "curl"]
 
 def get_cpu_usage():
     try:
@@ -142,7 +139,6 @@ def get_ram_usage():
         return {"status": "error", "message": str(e)}
 
 def get_gpu_usage(query):
-    # query: 'utilization.gpu' or 'memory.used,memory.total' etc
     try:
         cmd = ['nvidia-smi', f'--query-gpu={query}', '--format=csv,noheader,nounits']
         result = subprocess.check_output(cmd, encoding='utf-8').strip()
@@ -165,18 +161,14 @@ def execute_pc_command(action):
             command = action.get("command")
             args = action.get("args", [])
 
-            # Additional checks for specific commands
             if command == "nircmd.exe":
                 if not os.path.exists(NIRCMD_PATH):
                     return {"status": "error", "message": f"nircmd.exe not found at {NIRCMD_PATH}"}
-                # Security: Only allow specific nircmd actions? For now, allow passthrough from trusted client.
                 final_command = [NIRCMD_PATH] + args
             elif command in ALLOWED_COMMANDS:
                 final_command = [command] + args
             else:
-                 # Allow raw execution if configured? For now, treat 'command' as raw shell if not special
-                 # But safer to restrict. The Node backend sends 'nircmd.exe' as command.
-                 if command.startswith("nircmd"): # Backwards compat if sent as string
+                 if command.startswith("nircmd"):
                      parts = command.split(" ")
                      final_command = [NIRCMD_PATH] + parts[1:]
                  else:
@@ -208,12 +200,10 @@ def execute_pc_command(action):
 
         elif command_type == "volume":
             value = action.get("value")
-            # nircmd setsysvolume 0-65535
             cmd = [NIRCMD_PATH, "setsysvolume", str(value)]
-            subprocess.Popen(cmd) # Fire and forget
+            subprocess.Popen(cmd)
             return {"status": "success", "message": f"Volume set to {value}"}
 
-        # Stats commands
         elif command_type == "get_cpu":
             return get_cpu_usage()
         elif command_type == "get_ram":
@@ -241,24 +231,24 @@ def execute_pc_command(action):
              return res
 
         elif command_type == "restart_server":
-            # Restart THIS python server
-            on_restart()
+            global should_restart
+            should_restart = True
+            if icon_instance:
+                icon_instance.stop()
             return {"status": "success", "message": "Restarting..."}
 
         elif command_type == "stop_server":
-            on_quit()
-            return {"status": "success", "message": "Stopping..."}
+             if icon_instance:
+                 icon_instance.stop()
+             return {"status": "success", "message": "Stopping..."}
 
         else:
             return {"status": "error", "message": f"Unknown command type '{command_type}'."}
 
         if final_command:
-            # Using shell=True only if necessary, but list is safer.
-            # However, for 'start https://...' on windows, shell=True is needed or use os.startfile
             if final_command[0] == "start":
-                 os.startfile(final_command[1]) # Better for URLs
+                 os.startfile(final_command[1])
             else:
-                 # shell=False is safer and correct when passing a list of args
                  subprocess.Popen(final_command, shell=False)
             return {"status": "success", "message": f"Action '{command_type}' executed."}
 
@@ -272,10 +262,6 @@ async def handler(websocket, path):
             print(f"Received: {message}")
             try:
                 data = json.loads(message)
-                # Ensure we handle the specific 'command' key if it comes from the old node logic
-                # The Node backend might send raw { command: "..." } or structured { type: "..." }
-                # We will standardise on { type: "...", ... }
-
                 result = execute_pc_command(data)
                 if "id" in data:
                     result["id"] = data["id"]
@@ -291,7 +277,6 @@ async def start_websocket_server():
     global websocket_server
     port = config.get("port", 8765)
     print(f"Starting websocket server on 0.0.0.0:{port}...")
-    # Bind to 0.0.0.0 to allow external connections
     server = await websockets.serve(handler, "0.0.0.0", port)
     websocket_server = server
     await server.wait_closed()
@@ -324,6 +309,30 @@ if __name__ == "__main__":
         TrayMenuItem('Quit', on_quit)
     )
     icon = TrayIcon("ControlPadServer", icon_image, "Control Pad Server", menu)
+    icon_instance = icon
     
     print("Running system tray icon.")
     icon.run()
+
+    # --- SHUTDOWN SEQUENCE ---
+    print("Stopping application...")
+
+    if event_loop and websocket_server:
+        print("Stopping websocket server...")
+        try:
+            event_loop.call_soon_threadsafe(websocket_server.close)
+            event_loop.call_soon_threadsafe(event_loop.stop)
+        except Exception as e:
+            print(f"Error stopping event loop: {e}")
+
+    if should_restart:
+        print("Re-launching...")
+        try:
+            if getattr(sys, 'frozen', False):
+                os.execl(sys.executable, sys.executable, *sys.argv[1:])
+            else:
+                os.execl(sys.executable, sys.executable, *sys.argv)
+        except Exception as e:
+            print(f"Failed to restart: {e}")
+
+    sys.exit(0)
