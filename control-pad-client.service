@@ -1,0 +1,17 @@
+[Unit]
+Description=Control Pad Client Service
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/control-pad/client
+ExecStart=/usr/bin/npm start
+Restart=on-failure
+RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=control-pad-client
+
+[Install]
+WantedBy=multi-user.target

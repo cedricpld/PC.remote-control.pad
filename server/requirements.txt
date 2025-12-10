@@ -1,0 +1,4 @@
+websockets
+pystray
+Pillow
+pyinstaller
