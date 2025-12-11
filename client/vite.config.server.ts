@@ -32,6 +32,11 @@ export default defineConfig({
         // External dependencies that should not be bundled
         "express",
         "cors",
+        "ws",
+        "wakeonlan",
+        "node-yeelight-wifi",
+        "bcrypt",
+        "axios",
       ],
       output: {
         format: "es",

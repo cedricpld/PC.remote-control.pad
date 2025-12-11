@@ -518,9 +518,9 @@ export function StreamDeck({ className }: StreamDeckProps) {
         </div>
         <div className="flex items-center gap-2">
           {/* Server Status Indicator */}
-          <div className="flex items-center gap-1.5 px-2 py-1 bg-secondary/50 rounded-md border border-border/50" title={serverStatus === 'online' ? "Serveur PC Connecté" : "Serveur PC Déconnecté"}>
+          <div className="flex items-center gap-1.5 px-2 py-1 bg-secondary/50 rounded-md border border-border/50" title={serverStatus === 'online' ? "Serveur Connecté" : "Serveur Déconnecté"}>
              <div className={cn("h-2.5 w-2.5 rounded-full", serverStatus === 'online' ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-red-500")} />
-             <span className="text-xs font-medium hidden sm:inline">{serverStatus === 'online' ? "PC En Ligne" : "PC Hors Ligne"}</span>
+             <span className="text-xs font-medium hidden sm:inline">{serverStatus === 'online' ? "Serveur En Ligne" : "Serveur Hors Ligne"}</span>
           </div>
 
           <Button variant="ghost" size="icon" onClick={toggleFullscreen} className="h-8 w-8 ml-1" title="Plein écran">

@@ -237,8 +237,41 @@ function sendToPc(payload: any, waitForResponse = false, timeoutMs = 5000): Prom
 
 // Initial connection
 readConfig().then(config => {
-    if (config?.pcServer) {
-        connectToPcServer(config.pcServer.ip, config.pcServer.port);
+    if (config) {
+        // Migration: Add target to blocks if missing
+        let modified = false;
+        if (config.pages) {
+            for (const page of config.pages) {
+                for (const block of page.blocks) {
+                    if (!block.target) {
+                        modified = true;
+                        if (block.actionType === 'yeelight' || block.actionType === 'wol') {
+                            block.target = 'client';
+                        } else if (block.actionType === 'statusDisplay') {
+                            if (block.statusDisplayConfig?.apiEndpoint?.includes('xiaomi')) {
+                                block.target = 'client';
+                            } else {
+                                block.target = 'server';
+                            }
+                        } else if (block.actionType === 'slider') {
+                             block.target = 'server';
+                        } else {
+                             // command, shortcut, audio
+                             block.target = 'server';
+                        }
+                    }
+                }
+            }
+        }
+
+        if (modified) {
+            console.log("Migrating config: Added missing target properties.");
+            writeConfig(config);
+        }
+
+        if (config.pcServer) {
+            connectToPcServer(config.pcServer.ip, config.pcServer.port);
+        }
     }
 });
 

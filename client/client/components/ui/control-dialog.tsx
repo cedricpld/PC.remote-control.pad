@@ -44,6 +44,29 @@ const iconOptions = [
   { value: "Cpu", label: "CPU", icon: Icons.Cpu },
   { value: "MemoryStick", label: "RAM", icon: Icons.MemoryStick },
   { value: "Power", label: "Power", icon: Icons.Power },
+  { value: "Thermometer", label: "Temp", icon: Icons.Thermometer },
+  { value: "Droplets", label: "Humidity", icon: Icons.Droplets },
+  { value: "Battery", label: "Battery", icon: Icons.Battery },
+  { value: "Undo2", label: "Undo", icon: Icons.Undo2 },
+  { value: "MonitorX", label: "Monitor Off", icon: Icons.MonitorX },
+  { value: "SquareDashed", label: "Select All", icon: Icons.SquareDashed },
+  { value: "Moon", label: "Sleep", icon: Icons.Moon },
+  { value: "Eclipse", label: "Deep Sleep", icon: Icons.Eclipse },
+  { value: "TrafficCone", label: "VLC", icon: Icons.TrafficCone },
+  { value: "ChevronRight", label: "Plex", icon: Icons.ChevronRight },
+  { value: "GlobeLock", label: "VPN", icon: Icons.GlobeLock },
+  { value: "ScreenShare", label: "Remote", icon: Icons.ScreenShare },
+  { value: "Ban", label: "Stop App", icon: Icons.Ban },
+  { value: "LayoutGrid", label: "Apps", icon: Icons.LayoutGrid },
+  { value: "Volume", label: "Mute", icon: Icons.Volume },
+  { value: "Sun", label: "Brightness", icon: Icons.Sun },
+  { value: "ToggleLeft", label: "Switch", icon: Icons.ToggleLeft },
+  { value: "PowerOff", label: "Power Off", icon: Icons.PowerOff },
+  { value: "Palette", label: "Color", icon: Icons.Palette },
+  { value: "Rainbow", label: "Hue", icon: Icons.Rainbow },
+  { value: "Server", label: "Server", icon: Icons.Server },
+  { value: "Database", label: "Database", icon: Icons.Database },
+  { value: "Network", label: "Network", icon: Icons.Network },
 ];
 
 const colorOptions = [
@@ -56,6 +79,9 @@ const colorOptions = [
   { value: "#ec4899", label: "Pink" },
   { value: "#6b7280", label: "Gray" },
   { value: "#fcfcfc", label: "White" },
+  { value: "#1fc7ff", label: "Cyan" },
+  { value: "#281fff", label: "Blue Dark" },
+  { value: "#ff0000", label: "Pure Red" },
 ];
 
 const DEFAULT_FORM_DATA: Partial<ControlBlockConfig> = {
@@ -227,12 +253,12 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
              <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="target" className="text-right">Exécuter sur</Label>
                 <div className="col-span-3 flex items-center gap-2">
-                   <span className={formData.target === 'client' ? "font-bold text-primary" : "text-muted-foreground"}>Raspberry (Client)</span>
+                   <span className={formData.target === 'client' ? "font-bold text-primary" : "text-muted-foreground"}>Client</span>
                    <Switch
                        checked={formData.target === 'server'}
                        onCheckedChange={(checked) => setFormData({ ...formData, target: checked ? 'server' : 'client' })}
                    />
-                   <span className={formData.target === 'server' ? "font-bold text-primary" : "text-muted-foreground"}>PC (Serveur)</span>
+                   <span className={formData.target === 'server' ? "font-bold text-primary" : "text-muted-foreground"}>Server</span>
                 </div>
              </div>
           )}

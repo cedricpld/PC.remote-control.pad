@@ -52,7 +52,7 @@ export function SettingsDialog({
             ip: serverIp,
             port: parseInt(serverPort) || 8765
         });
-        alert("Configuration sauvegardée.");
+        onOpenChange(false);
       }
   };
 
@@ -95,7 +95,7 @@ export function SettingsDialog({
           </DialogHeader>
           <div className="grid gap-6 py-4">
             <div className="space-y-4">
-              <h4 className="text-sm font-medium">Connexion PC Serveur</h4>
+              <h4 className="text-sm font-medium">Connexion Serveur</h4>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="serverIp" className="text-right">IP</Label>
                 <Input id="serverIp" value={serverIp} onChange={e => setServerIp(e.target.value)} className="col-span-3" placeholder="192.168.1.XX" />
@@ -104,11 +104,10 @@ export function SettingsDialog({
                 <Label htmlFor="serverPort" className="text-right">Port</Label>
                 <Input id="serverPort" value={serverPort} onChange={e => setServerPort(e.target.value)} className="col-span-3" placeholder="8765" />
               </div>
-              <Button onClick={handleSaveServerConfig} size="sm" className="w-full">Sauvegarder la connexion</Button>
             </div>
 
             <div className="space-y-4">
-              <h4 className="text-sm font-medium">Gestion du Client (Raspberry)</h4>
+              <h4 className="text-sm font-medium">Gestion Client</h4>
               <div className="space-y-2">
                 <Button
                   onClick={handleRestartServerClick}
@@ -156,9 +155,12 @@ export function SettingsDialog({
               </div>
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex justify-between sm:justify-between">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Fermer
+            </Button>
+            <Button onClick={handleSaveServerConfig}>
+              Sauvegarder
             </Button>
           </DialogFooter>
         </DialogContent>
