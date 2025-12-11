@@ -142,7 +142,11 @@ def get_gpu_usage(query):
     try:
         cmd = ['nvidia-smi', f'--query-gpu={query}', '--format=csv,noheader,nounits']
         result = subprocess.check_output(cmd, encoding='utf-8').strip()
-        return {"status": "success", "value": result}
+        try:
+            val = float(result)
+            return {"status": "success", "value": val}
+        except ValueError:
+            return {"status": "success", "value": result}
     except FileNotFoundError:
          return {"status": "error", "message": "nvidia-smi not found"}
     except Exception as e:
