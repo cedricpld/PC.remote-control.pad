@@ -151,8 +151,8 @@ def show_config_window():
     screen_height = window.winfo_screenheight()
 
     # Taskbar height estimation + margin
-    x = screen_width - width - 50
-    y = screen_height - height - 120
+    x = screen_width - width - 100
+    y = screen_height - height - 200
 
     window.geometry(f'{width}x{height}+{x}+{y}')
 
@@ -399,6 +399,12 @@ if __name__ == "__main__":
 
     if should_restart:
         print("Re-launching...")
+        # Release mutex to allow new instance to start (since execl might preserve handle)
+        try:
+            win32api.CloseHandle(mutex)
+        except Exception as e:
+            print(f"Error closing mutex: {e}")
+
         try:
             if getattr(sys, 'frozen', False):
                 os.execl(sys.executable, sys.executable, *sys.argv[1:])

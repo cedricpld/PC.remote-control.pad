@@ -43,6 +43,16 @@ export function StreamDeck({ className }: StreamDeckProps) {
   const [isFullscreen, setIsFullscreen] = React.useState(false);
   const [pcServerConfig, setPcServerConfig] = React.useState<PcServerConfig>({ ip: "localhost", port: 8765 });
 
+  // Safety guard for UI blocking bug
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+        if (document.body.style.pointerEvents === 'none') {
+            document.body.style.pointerEvents = '';
+        }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   React.useEffect(() => {
     const checkServerStatus = async () => {
       try {
