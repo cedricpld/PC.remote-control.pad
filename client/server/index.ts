@@ -8,7 +8,7 @@ import axios from 'axios';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { Yeelight } from 'node-yeelight-wifi';
-import { WebSocket } from 'ws';
+import WebSocket from 'ws';
 import wol from 'wakeonlan';
 
 const __filename = fileURLToPath(import.meta.url);
