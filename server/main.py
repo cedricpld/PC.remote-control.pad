@@ -12,6 +12,9 @@ import psutil
 from pystray import Icon as TrayIcon, Menu as TrayMenu, MenuItem as TrayMenuItem
 from PIL import Image, ImageDraw
 import winreg
+import win32event
+import win32api
+from winerror import ERROR_ALREADY_EXISTS
 
 # --- RESOURCE HELPER ---
 def resource_path(relative_path):
@@ -335,6 +338,14 @@ def run_server_in_thread():
 
 # --- MAIN EXECUTION ---
 if __name__ == "__main__":
+    # Single Instance Check
+    mutex = win32event.CreateMutex(None, False, "Global\\ControlPadServerMutex")
+    if win32api.GetLastError() == ERROR_ALREADY_EXISTS:
+        root = tk.Tk()
+        root.withdraw()
+        messagebox.showerror("Control Pad Server", "An instance is already running.")
+        sys.exit(0)
+
     load_config()
 
     # Start the WebSocket server in a separate thread

@@ -13,6 +13,8 @@ IF %ERRORLEVEL% NEQ 0 (
 )
 
 REM Step 2: Build the executable with PyInstaller
+ECHO Cleaning previous builds...
+rmdir /s /q build dist
 ECHO Building the executable...
 pyinstaller --onefile --windowed --icon=ControlPad-Server.ico --add-data "scripts;scripts" --add-data "ControlPad-Server.ico;." main.py --name ControlPadServer
 IF %ERRORLEVEL% NEQ 0 (
