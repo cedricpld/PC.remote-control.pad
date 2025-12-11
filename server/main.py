@@ -255,7 +255,7 @@ def execute_pc_command(action):
     except Exception as e:
         return {"status": "error", "message": f"Failed to execute command: {e}"}
 
-async def handler(websocket, path):
+async def handler(websocket):
     print(f"Client connected from {websocket.remote_address}")
     try:
         async for message in websocket:
