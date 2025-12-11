@@ -430,6 +430,7 @@ if __name__ == "__main__":
 
                 with open(bat_path, 'w') as f:
                     f.write('@echo off\n')
+                    f.write('set _MEIPASS2=\n') # Force clear PyInstaller env var
                     f.write('timeout /t 4 /nobreak > NUL\n')
                     f.write(f'start "" "{exe_path}" {args}\n')
                     f.write('(goto) 2>nul & del "%~f0"\n')
