@@ -398,6 +398,13 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"Error stopping event loop: {e}")
 
+    # Wait for thread to finish
+    if websocket_thread and websocket_thread.is_alive():
+        try:
+            websocket_thread.join(timeout=3)
+        except Exception as e:
+            print(f"Error joining thread: {e}")
+
     if should_restart:
         print("Re-launching...")
 
@@ -420,7 +427,7 @@ if __name__ == "__main__":
 
                 with open(bat_path, 'w') as f:
                     f.write('@echo off\n')
-                    f.write('timeout /t 2 /nobreak > NUL\n') # Wait 2s for cleanup
+                    f.write('timeout /t 4 /nobreak > NUL\n') # Wait 4s for cleanup
                     f.write(f'start "" "{exe_path}" {args}\n')
                     f.write('(goto) 2>nul & del "%~f0"\n') # Self-delete
                     f.write('exit\n')
