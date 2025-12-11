@@ -89,6 +89,13 @@ export function PageDialog({
     }
   }, [page]);
 
+  React.useEffect(() => {
+    if (!open) {
+      // Force cleanup of pointer-events lock
+      setTimeout(() => { document.body.style.pointerEvents = ""; }, 100);
+    }
+  }, [open]);
+
   const handleSave = () => {
     if (!formData.name) return;
 

@@ -124,6 +124,9 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
       } else {
         setFormData(DEFAULT_FORM_DATA);
       }
+    } else {
+      // Force cleanup of pointer-events lock
+      setTimeout(() => { document.body.style.pointerEvents = ""; }, 100);
     }
   }, [config, open]);
 

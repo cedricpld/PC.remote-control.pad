@@ -14,6 +14,7 @@ from PIL import Image, ImageDraw
 import winreg
 import win32event
 import win32api
+import ctypes
 from winerror import ERROR_ALREADY_EXISTS
 
 # --- RESOURCE HELPER ---
@@ -25,6 +26,15 @@ def resource_path(relative_path):
     except Exception:
         base_path = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(base_path, relative_path)
+
+def get_startup_info():
+    """Returns startup info to hide console window for subprocesses on Windows."""
+    if sys.platform == 'win32':
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        startupinfo.wShowWindow = subprocess.SW_HIDE
+        return startupinfo
+    return None
 
 # --- GLOBAL STATE ---
 websocket_thread = None
@@ -133,16 +143,16 @@ def show_config_window():
         except Exception:
             pass
 
-    # Position window (Bottom Right)
+    # Position window (Bottom Right, adjusted)
     window.update_idletasks()
     width = 350
     height = 150
     screen_width = window.winfo_screenwidth()
     screen_height = window.winfo_screenheight()
 
-    # Taskbar height estimation (approx 40-60px, stick to bottom right with margin)
-    x = screen_width - width - 20
-    y = screen_height - height - 80
+    # Taskbar height estimation + margin
+    x = screen_width - width - 50
+    y = screen_height - height - 120
 
     window.geometry(f'{width}x{height}+{x}+{y}')
 
@@ -185,7 +195,7 @@ def get_ram_usage():
 def get_gpu_usage(query):
     try:
         cmd = ['nvidia-smi', f'--query-gpu={query}', '--format=csv,noheader,nounits']
-        result = subprocess.check_output(cmd, encoding='utf-8').strip()
+        result = subprocess.check_output(cmd, encoding='utf-8', startupinfo=get_startup_info()).strip()
         try:
             val = float(result)
             return {"status": "success", "value": val}
@@ -249,7 +259,7 @@ def execute_pc_command(action):
         elif command_type == "volume":
             value = action.get("value")
             cmd = [NIRCMD_PATH, "setsysvolume", str(value)]
-            subprocess.Popen(cmd)
+            subprocess.Popen(cmd, startupinfo=get_startup_info())
             return {"status": "success", "message": f"Volume set to {value}"}
 
         elif command_type == "get_cpu":
@@ -297,7 +307,7 @@ def execute_pc_command(action):
             if final_command[0] == "start":
                  os.startfile(final_command[1])
             else:
-                 subprocess.Popen(final_command, shell=False)
+                 subprocess.Popen(final_command, shell=False, startupinfo=get_startup_info())
             return {"status": "success", "message": f"Action '{command_type}' executed."}
 
     except Exception as e:
@@ -338,6 +348,13 @@ def run_server_in_thread():
 
 # --- MAIN EXECUTION ---
 if __name__ == "__main__":
+    # Set App ID for Taskbar Icon
+    try:
+        myappid = 'cedricpaladjian.controlpad.server.1.0'
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+    except Exception:
+        pass
+
     # Single Instance Check
     mutex = win32event.CreateMutex(None, False, "Global\\ControlPadServerMutex")
     if win32api.GetLastError() == ERROR_ALREADY_EXISTS:

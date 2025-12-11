@@ -28,6 +28,7 @@ const __dirname = dirname(__filename);
 
 // --- AUTHENTICATION CONFIG ---
 const AUTH_TOKEN = "$2y$10$GOYC7PD5VZDvLaf8u29DTe52oHW7SFaTtAj2bQP28I6iFoiBkipOa";
+const failedLoginAttempts = new Map<string, { count: number, blockedUntil: number }>();
 
 const CONFIG_FILE = path.join(process.cwd(), 'config.json');
 
@@ -308,6 +309,15 @@ export function createServer() {
 
   // LOGIN
   app.post("/api/login", async (req, res) => {
+    const ip = req.ip || req.socket.remoteAddress || "unknown";
+    const now = Date.now();
+    const record = failedLoginAttempts.get(ip);
+
+    if (record && record.blockedUntil > now) {
+        const waitTime = Math.ceil((record.blockedUntil - now) / 1000);
+        return res.status(429).json({ error: `Too many attempts. Try again in ${waitTime}s.` });
+    }
+
     const { password } = req.body;
     try {
       const config = await readConfig();
@@ -315,9 +325,20 @@ export function createServer() {
         return res.status(500).json({ error: "Auth config missing." });
       }
       const isMatch = await bcrypt.compare(password, config.auth.hashedPassword);
+
       if (isMatch) {
+        failedLoginAttempts.delete(ip);
         res.status(200).json({ token: AUTH_TOKEN });
       } else {
+        const count = (record?.count || 0) + 1;
+        let blockedUntil = 0;
+        if (count >= 5) {
+            blockedUntil = now + 5 * 60 * 1000; // 5 min block
+        }
+        failedLoginAttempts.set(ip, { count, blockedUntil });
+
+        // Artificial delay
+        await new Promise(resolve => setTimeout(resolve, 2000));
         res.status(401).json({ error: "Incorrect password" });
       }
     } catch (error) {
