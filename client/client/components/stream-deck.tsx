@@ -511,10 +511,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
     <div className={cn("flex flex-col h-full", className)}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-6 border-b border-border/50 gap-4 sm:gap-0">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold">CONTROL PAD</h1>
-          <p className="text-xs sm:text-sm text-muted-foreground">
-            Contrôlez votre PC à distance avec des blocs d'action personnalisables
-          </p>
+          <h1 className="text-xl sm:text-2xl font-bold">HOME CONTROL PAD</h1>
         </div>
         <div className="flex items-center gap-2">
           {/* Server Status Indicator */}

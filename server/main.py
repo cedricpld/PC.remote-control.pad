@@ -13,16 +13,37 @@ from pystray import Icon as TrayIcon, Menu as TrayMenu, MenuItem as TrayMenuItem
 from PIL import Image, ImageDraw
 import winreg
 
+# --- RESOURCE HELPER ---
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_path, relative_path)
+
 # --- GLOBAL STATE ---
 websocket_thread = None
 websocket_server = None
 event_loop = None
 icon_instance = None
 config = {}
-BASE_PATH = os.path.dirname(os.path.abspath(__file__))
-CONFIG_FILE = os.path.join(BASE_PATH, "config.json")
-SCRIPTS_PATH = os.path.join(BASE_PATH, 'scripts')
+
+# Paths
+if sys.platform == 'win32':
+    appdata = os.getenv('APPDATA')
+    CONFIG_DIR = os.path.join(appdata, 'ControlPadServer')
+else:
+    CONFIG_DIR = os.path.join(os.path.expanduser('~'), '.config', 'ControlPadServer')
+
+if not os.path.exists(CONFIG_DIR):
+    os.makedirs(CONFIG_DIR)
+
+CONFIG_FILE = os.path.join(CONFIG_DIR, 'config.json')
+SCRIPTS_PATH = resource_path('scripts')
 NIRCMD_PATH = os.path.join(SCRIPTS_PATH, 'nircmd.exe')
+ICON_PATH = resource_path('ControlPad-Server.ico')
 
 should_restart = False
 
@@ -102,6 +123,26 @@ def show_config_window():
     window = tk.Tk()
     window.title("Server Configuration")
     
+    # Set icon
+    if os.path.exists(ICON_PATH):
+        try:
+            window.iconbitmap(ICON_PATH)
+        except Exception:
+            pass
+
+    # Position window (Bottom Right)
+    window.update_idletasks()
+    width = 350
+    height = 150
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+
+    # Taskbar height estimation (approx 40-60px, stick to bottom right with margin)
+    x = screen_width - width - 20
+    y = screen_height - height - 80
+
+    window.geometry(f'{width}x{height}+{x}+{y}')
+
     ttk.Label(window, text="Server Port:").grid(row=0, column=0, padx=10, pady=5, sticky="w")
     port_var = tk.StringVar(value=str(config.get('port', 8765)))
     ttk.Entry(window, textvariable=port_var).grid(row=0, column=1, padx=10, pady=5)
@@ -301,9 +342,8 @@ if __name__ == "__main__":
     websocket_thread.start()
 
     # Create and run the system tray icon
-    icon_path = os.path.join(BASE_PATH, 'ControlPad-Server.ico')
-    if os.path.exists(icon_path):
-        icon_image = Image.open(icon_path)
+    if os.path.exists(ICON_PATH):
+        icon_image = Image.open(ICON_PATH)
     else:
         icon_image = create_image(64, 64, 'black', 'white')
 
