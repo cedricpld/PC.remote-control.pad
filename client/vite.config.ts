@@ -1,7 +1,6 @@
 import { defineConfig, Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { pathToFileURL } from "url";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -27,11 +26,9 @@ function expressPlugin(): Plugin {
     apply: "serve", // Only apply during development (serve mode)
     async configureServer(server) {
       try {
-        // Resolve absolute path to server index and use file:// protocol for Windows compatibility
-        const serverPath = path.resolve(process.cwd(), "./server/index.ts");
-        const serverUrl = pathToFileURL(serverPath).href;
-
-        const { createServer } = await import(serverUrl);
+        // Use Vite's ssrLoadModule to load the TypeScript server file
+        // This handles transpilation and dependency resolution correctly
+        const { createServer } = await server.ssrLoadModule("/server/index.ts");
         const app = createServer();
 
         // Add Express app as middleware to Vite dev server
