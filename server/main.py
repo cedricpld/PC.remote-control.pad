@@ -393,10 +393,10 @@ if __name__ == "__main__":
     if event_loop and websocket_server:
         print("Stopping websocket server...")
         try:
+            # Just close the server, this will unblock wait_closed() and finish the thread
             event_loop.call_soon_threadsafe(websocket_server.close)
-            event_loop.call_soon_threadsafe(event_loop.stop)
         except Exception as e:
-            print(f"Error stopping event loop: {e}")
+            print(f"Error stopping websocket server: {e}")
 
     # Wait for thread to finish
     if websocket_thread and websocket_thread.is_alive():
@@ -415,10 +415,13 @@ if __name__ == "__main__":
             print(f"Error closing mutex: {e}")
 
         try:
+            # Prepare environment: Remove PyInstaller's _MEIPASS2 to avoid conflicts in new process
+            env = os.environ.copy()
+            if '_MEIPASS2' in env:
+                del env['_MEIPASS2']
+
             if getattr(sys, 'frozen', False):
                 # Frozen Mode (PyInstaller): Use a temporary batch file to restart
-                # This ensures the current process dies and releases locks on _MEI folders
-                # before the new one starts.
                 exe_path = sys.executable
                 args = " ".join(f'"{a}"' for a in sys.argv[1:])
 
@@ -427,16 +430,16 @@ if __name__ == "__main__":
 
                 with open(bat_path, 'w') as f:
                     f.write('@echo off\n')
-                    f.write('timeout /t 4 /nobreak > NUL\n') # Wait 4s for cleanup
+                    f.write('timeout /t 4 /nobreak > NUL\n')
                     f.write(f'start "" "{exe_path}" {args}\n')
-                    f.write('(goto) 2>nul & del "%~f0"\n') # Self-delete
+                    f.write('(goto) 2>nul & del "%~f0"\n')
                     f.write('exit\n')
 
-                # Launch batch file hidden
-                subprocess.Popen(bat_path, shell=True, startupinfo=get_startup_info())
+                # Launch batch file hidden with clean env
+                subprocess.Popen(bat_path, shell=True, startupinfo=get_startup_info(), env=env)
             else:
                 # Script Mode
-                subprocess.Popen([sys.executable] + sys.argv)
+                subprocess.Popen([sys.executable] + sys.argv, env=env)
         except Exception as e:
             print(f"Failed to restart: {e}")
 
