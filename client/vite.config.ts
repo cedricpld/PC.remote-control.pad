@@ -26,7 +26,9 @@ function expressPlugin(): Plugin {
     apply: "serve", // Only apply during development (serve mode)
     async configureServer(server) {
       try {
-        const { createServer } = await import("./server");
+        // Use a variable to prevent esbuild from bundling the server code into the config
+        const serverPath = "./server";
+        const { createServer } = await import(serverPath);
         const app = createServer();
 
         // Add Express app as middleware to Vite dev server
