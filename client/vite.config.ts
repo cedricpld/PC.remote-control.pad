@@ -18,6 +18,9 @@ export default defineConfig(({ mode }) => ({
       "@shared": path.resolve(__dirname, "./shared"),
     },
   },
+  ssr: {
+    external: ['ws', 'wakeonlan', 'node-yeelight-wifi', 'bcrypt', 'express', 'cors', 'axios'],
+  },
 }));
 
 function expressPlugin(): Plugin {
