@@ -1,6 +1,7 @@
 import { defineConfig, Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
+import { pathToFileURL } from "url";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -26,9 +27,11 @@ function expressPlugin(): Plugin {
     apply: "serve", // Only apply during development (serve mode)
     async configureServer(server) {
       try {
-        // Use a variable to prevent esbuild from bundling the server code into the config
-        const serverPath = "./server";
-        const { createServer } = await import(serverPath);
+        // Resolve absolute path to server index and use file:// protocol for Windows compatibility
+        const serverPath = path.resolve(process.cwd(), "./server/index.ts");
+        const serverUrl = pathToFileURL(serverPath).href;
+
+        const { createServer } = await import(serverUrl);
         const app = createServer();
 
         // Add Express app as middleware to Vite dev server
