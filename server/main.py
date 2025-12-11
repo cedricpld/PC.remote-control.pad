@@ -406,10 +406,12 @@ if __name__ == "__main__":
             print(f"Error closing mutex: {e}")
 
         try:
+            # Use Popen to start a new independent process instead of execl
+            # This avoids PyInstaller _MEI cleanup issues
             if getattr(sys, 'frozen', False):
-                os.execl(sys.executable, sys.executable, *sys.argv[1:])
+                subprocess.Popen([sys.executable] + sys.argv[1:])
             else:
-                os.execl(sys.executable, sys.executable, *sys.argv)
+                subprocess.Popen([sys.executable] + sys.argv)
         except Exception as e:
             print(f"Failed to restart: {e}")
 
