@@ -10,9 +10,18 @@ import { dirname } from 'path';
 import { Yeelight } from 'node-yeelight-wifi';
 import { createRequire } from 'module';
 
-const require = createRequire(import.meta.url);
-const WebSocket = require('ws');
-const wol = require('wakeonlan');
+let WebSocket: any;
+let wol: any;
+
+try {
+  const require = createRequire(import.meta.url);
+  WebSocket = require('ws');
+  wol = require('wakeonlan');
+} catch (error) {
+  console.warn("⚠️  Optional dependencies (ws, wakeonlan) failed to load.");
+  console.warn("    PC connection and Wake-on-LAN features will be unavailable.");
+  console.warn("    Please run 'npm install' in the client directory.");
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -156,6 +165,7 @@ function generateId() {
 }
 
 function connectToPcServer(ip: string, port: number) {
+    if (!WebSocket) return;
     if (wsClient && (wsClient.readyState === WebSocket.CONNECTING || wsClient.readyState === WebSocket.OPEN)) return;
 
     const url = `ws://${ip}:${port}`;
@@ -202,7 +212,7 @@ function connectToPcServer(ip: string, port: number) {
 }
 
 function sendToPc(payload: any, waitForResponse = false, timeoutMs = 5000): Promise<any> {
-    if (!wsClient || wsClient.readyState !== WebSocket.OPEN) {
+    if (!WebSocket || !wsClient || wsClient.readyState !== WebSocket.OPEN) {
         return Promise.reject(new Error("PC Server not connected"));
     }
     const id = generateId();
@@ -394,10 +404,14 @@ export function createServer() {
              });
         } else {
             // Wake-on-LAN (UDP broadcast)
-            wol.wake(wolConfig.mac, (err) => {
-                if (err) return res.status(500).json({ error: err.message });
-                res.json({ message: "Magic Packet sent" });
-            });
+            if (wol) {
+                wol.wake(wolConfig.mac, (err: any) => {
+                    if (err) return res.status(500).json({ error: err.message });
+                    res.json({ message: "Magic Packet sent" });
+                });
+            } else {
+                res.status(503).json({ error: "Wake-on-LAN module not loaded." });
+            }
         }
         return;
     }
