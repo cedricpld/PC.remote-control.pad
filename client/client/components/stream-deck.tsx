@@ -9,6 +9,8 @@ import { SettingsDialog } from "@/components/ui/settings-dialog";
 import { AddButton } from "@/components/ui/add-button";
 import { ControlRenderer } from "@/components/ui/control-renderer";
 import { ControlDialog } from "@/components/ui/control-dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ServerConfigDialog } from "@/components/ui/server-config-dialog";
 
 interface StreamDeckProps {
   className?: string;
@@ -33,6 +35,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [pageDialogOpen, setPageDialogOpen] = React.useState(false);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
+  const [serverConfigOpen, setServerConfigOpen] = React.useState(false);
   const [editingControl, setEditingControl] = React.useState<ControlBlockConfig | undefined>();
   const [editingPage, setEditingPage] = React.useState<StreamDeckPage | undefined>();
   const [draggedControl, setDraggedControl] = React.useState<string | null>(null);
@@ -102,9 +105,9 @@ export function StreamDeck({ className }: StreamDeckProps) {
       });
 
       if (!saveResponse.ok) throw new Error(`HTTP error! status: ${saveResponse.status}`);
-      console.log("Configuration sauvegardée sur le serveur.");
+      console.log("Config saved to server.");
     } catch (error: any) {
-      console.error("Échec de la sauvegarde :", error);
+      console.error("Save failed:", error);
     }
   }, []);
 
@@ -216,7 +219,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
         return page;
       })
     );
-    setDialogOpen(false);
+    // setDialogOpen(false); // Handled by Dialog onSave
   };
 
   const handleDeleteControl = () => {
@@ -227,7 +230,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
       }
       return page;
     }));
-    setDialogOpen(false);
+    // setDialogOpen(false); // Handled by Dialog onDelete
   };
 
   const handleAddPage = () => {
@@ -250,7 +253,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
         return newPages;
       }
     });
-    setPageDialogOpen(false);
+    // setPageDialogOpen(false); // Handled by Dialog onSave
   };
 
   const handleDeletePage = (pageId: string) => {
@@ -319,17 +322,17 @@ export function StreamDeck({ className }: StreamDeckProps) {
     let body: any = {};
     switch (config.actionType) {
       case 'command':
-        if (!config.command) return alert("Commande non configurée.");
+        if (!config.command) return alert("Command not configured.");
         apiUrl = "/api/execute-action";
         body = { command: config.command };
         break;
       case 'shortcut':
-        if (!config.shortcut) return alert("Raccourci non configuré.");
+        if (!config.shortcut) return alert("Shortcut not configured.");
         apiUrl = "/api/execute-action";
         body = { shortcut: config.shortcut };
         break;
       case 'yeelight':
-        if (!config.yeelightConfig?.ip) return alert("IP Yeelight non configurée.");
+        if (!config.yeelightConfig?.ip) return alert("Yeelight IP not configured.");
         switch (config.yeelightConfig.controlType) {
           case 'button':
             apiUrl = "/api/yeelight-toggle";
@@ -370,8 +373,8 @@ export function StreamDeck({ className }: StreamDeckProps) {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Erreur serveur');
     } catch (error: any) {
-      console.error("Erreur d'exécution :", error);
-      alert(`Erreur: ${error.message}`);
+      console.error("Execution error:", error);
+      alert(`Error: ${error.message}`);
     }
   };
 
@@ -416,53 +419,53 @@ export function StreamDeck({ className }: StreamDeckProps) {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Erreur serveur');
     } catch (error: any) {
-      console.error(`Erreur réseau slider (${config.label}):`, error);
-      alert(`Erreur slider (${config.label}) : ${error.message}`);
+      console.error(`Slider network error (${config.label}):`, error);
+      alert(`Slider error (${config.label}) : ${error.message}`);
     }
   }, []);
 
-  const handleRestartServer = async () => {
+  const handleRestartClient = async () => {
     if (clickSound) clickSound.play();
     try {
       const response = await fetch("/api/restart-server", { method: "POST" });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Erreur serveur');
-      alert("Le serveur redémarre...");
+      if (!response.ok) throw new Error(data.error || 'Server error');
+      alert("Client is restarting...");
     } catch (error: any) {
-      console.error("Erreur lors du redémarrage :", error);
-      alert(`Échec du redémarrage : ${error.message}`);
+      console.error("Restart error:", error);
+      alert(`Restart failed : ${error.message}`);
     }
   };
 
-  const handleStopServer = async () => {
+  const handleStopClient = async () => {
     if (clickSound) clickSound.play();
     try {
       const response = await fetch("/api/stop-server", { method: "POST" });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Erreur serveur');
-      alert("Le serveur s'arrête...");
+      if (!response.ok) throw new Error(data.error || 'Server error');
+      alert("Client is stopping...");
     } catch (error: any) {
-      console.error("Erreur lors de l'arrêt du serveur :", error);
-      alert(`Échec de l'arrêt du serveur : ${error.message}`);
+      console.error("Stop error:", error);
+      alert(`Stop failed : ${error.message}`);
     }
   };
 
   const handleRestartPcServer = async () => {
       try {
-          if (!confirm("Voulez-vous vraiment redémarrer le serveur PC ?")) return;
+          if (!confirm("Are you sure you want to restart the PC Server?")) return;
           const res = await fetchWithAuth("/api/restart-pc-server", { method: "POST" });
-          if (!res.ok) throw new Error("Erreur");
-          alert("Commande de redémarrage envoyée au PC.");
-      } catch (e: any) { alert("Erreur: " + e.message); }
+          if (!res.ok) throw new Error("Error");
+          alert("Restart command sent to PC.");
+      } catch (e: any) { alert("Error: " + e.message); }
   };
 
   const handleStopPcServer = async () => {
       try {
-          if (!confirm("Voulez-vous vraiment arrêter le serveur PC ?")) return;
+          if (!confirm("Are you sure you want to stop the PC Server?")) return;
           const res = await fetchWithAuth("/api/stop-pc-server", { method: "POST" });
-          if (!res.ok) throw new Error("Erreur");
-          alert("Commande d'arrêt envoyée au PC.");
-      } catch (e: any) { alert("Erreur: " + e.message); }
+          if (!res.ok) throw new Error("Error");
+          alert("Stop command sent to PC.");
+      } catch (e: any) { alert("Error: " + e.message); }
   };
 
   const handleChangePassword = async (currentPassword: string, newPassword: string) => {
@@ -504,7 +507,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
       setPcServerConfig(newConfig);
     } catch (e) {
       console.error(e);
-      alert("Erreur lors de la sauvegarde de la configuration du serveur PC");
+      alert("Error saving PC Server config");
     }
   };
 
@@ -533,21 +536,38 @@ export function StreamDeck({ className }: StreamDeckProps) {
         </div>
         <div className="flex items-center gap-2">
           {/* Server Status Indicator */}
-          <div className="flex items-center gap-1.5 px-2 py-1 bg-secondary/50 rounded-md border border-border/50" title={serverStatus === 'online' ? "Serveur Connecté" : "Serveur Déconnecté"}>
-             <div className={cn("h-2.5 w-2.5 rounded-full", serverStatus === 'online' ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-red-500")} />
-             <span className="text-xs font-medium hidden sm:inline">{serverStatus === 'online' ? "Serveur En Ligne" : "Serveur Hors Ligne"}</span>
-          </div>
+          <Popover>
+            <PopoverTrigger asChild>
+                <div className="flex items-center gap-1.5 px-2 py-1 bg-secondary/50 rounded-md border border-border/50 cursor-pointer hover:bg-secondary/80 transition-colors" title="Server Status">
+                   <div className={cn("h-2.5 w-2.5 rounded-full", serverStatus === 'online' ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-red-500")} />
+                   <span className="text-xs font-medium hidden sm:inline">{serverStatus === 'online' ? "Server Online" : "Server Offline"}</span>
+                </div>
+            </PopoverTrigger>
+            <PopoverContent className="w-56">
+                 <div className="grid gap-4">
+                    <div className="space-y-2">
+                        <h4 className="font-medium leading-none">PC Server</h4>
+                        <p className="text-sm text-muted-foreground">{serverStatus === 'online' ? 'Connected' : 'Disconnected'}</p>
+                    </div>
+                    <div className="grid gap-2">
+                        <Button variant="outline" size="sm" onClick={handleRestartPcServer}>Restart</Button>
+                        <Button variant="outline" size="sm" onClick={handleStopPcServer}>Stop</Button>
+                        <Button variant="default" size="sm" onClick={() => setServerConfigOpen(true)}>Configuration</Button>
+                    </div>
+                 </div>
+            </PopoverContent>
+          </Popover>
 
-          <Button variant="ghost" size="icon" onClick={toggleFullscreen} className="h-8 w-8 ml-1" title="Plein écran">
+          <Button variant="ghost" size="icon" onClick={toggleFullscreen} className="h-8 w-8 ml-1" title="Fullscreen">
             {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
           </Button>
 
           <Button variant={isEditing ? "default" : "outline"} size="sm" onClick={() => setIsEditing(!isEditing)} className="gap-2 text-xs sm:text-sm">
-            {isEditing ? <><Eye className="h-3 w-3 sm:h-4 sm:w-4" /> <span className="hidden sm:inline">Mode Affichage</span><span className="sm:hidden">Voir</span></> : <><Edit3 className="h-3 w-3 sm:h-4 sm:w-4" /> <span className="hidden sm:inline">Mode Édition</span><span className="sm:hidden">Éditer</span></>}
+            {isEditing ? <><Eye className="h-3 w-3 sm:h-4 sm:w-4" /> <span className="hidden sm:inline">View Mode</span><span className="sm:hidden">View</span></> : <><Edit3 className="h-3 w-3 sm:h-4 sm:w-4" /> <span className="hidden sm:inline">Edit Mode</span><span className="sm:hidden">Edit</span></>}
           </Button>
           <Button variant="outline" size="sm" className="gap-2 text-xs sm:text-sm" onClick={() => setSettingsOpen(true)}>
             <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="hidden sm:inline">Paramètres</span>
+            <span className="hidden sm:inline">Settings</span>
           </Button>
         </div>
       </div>
@@ -564,7 +584,7 @@ export function StreamDeck({ className }: StreamDeckProps) {
       <div className="flex-1 p-3 sm:p-6 overflow-auto">
         {isEditing && (
           <div className="text-center text-sm text-muted-foreground mb-4 p-2 bg-primary/10 rounded-lg border border-primary/20">
-            🎛️ Mode Édition Actif - Glissez pour réorganiser, cliquez pour modifier.
+            🎛️ Edit Mode Active - Drag to reorder, click to edit.
           </div>
         )}
         <div
@@ -596,8 +616,8 @@ export function StreamDeck({ className }: StreamDeckProps) {
           <div className="text-center py-12">
             <div className="text-muted-foreground mb-4">
               <Settings className="h-12 w-12 mx-auto mb-2 opacity-50" />
-              <p className="text-lg font-medium">Aucune action configurée</p>
-              <p className="text-sm">Passez en mode édition pour ajouter un bloc</p>
+              <p className="text-lg font-medium">No actions configured</p>
+              <p className="text-sm">Switch to Edit Mode to add a block</p>
             </div>
           </div>
         )}
@@ -619,13 +639,17 @@ export function StreamDeck({ className }: StreamDeckProps) {
       <SettingsDialog
         open={settingsOpen}
         onOpenChange={setSettingsOpen}
-        onRestartServer={handleRestartServer}
-        onStopServer={handleStopServer}
-        onRestartPcServer={handleRestartPcServer}
-        onStopPcServer={handleStopPcServer}
+        onRestartClient={handleRestartClient}
+        onStopClient={handleStopClient}
         onChangePassword={handleChangePassword}
+      />
+      <ServerConfigDialog
+        open={serverConfigOpen}
+        onOpenChange={setServerConfigOpen}
         pcServerConfig={pcServerConfig}
         onUpdatePcServerConfig={handleUpdateServerConfig}
+        onRestartPcServer={handleRestartPcServer}
+        onStopPcServer={handleStopPcServer}
       />
     </div>
   );

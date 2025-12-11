@@ -23,15 +23,15 @@ export const SimpleLoginPage: React.FC<SimpleLoginProps> = ({ onLogin, error }) 
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
             <KeyRound className="mx-auto h-12 w-12 mb-4 text-primary" />
-          <CardTitle className="text-2xl">Accès Sécurisé</CardTitle>
+          <CardTitle className="text-2xl">Secure Access</CardTitle>
           <CardDescription>
-            Veuillez entrer le mot de passe pour accéder au Control Pad.
+            Please enter the password to access Control Pad.
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="password">Mot de passe</Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -45,7 +45,7 @@ export const SimpleLoginPage: React.FC<SimpleLoginProps> = ({ onLogin, error }) 
             )}
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full">Déverrouiller</Button>
+            <Button type="submit" className="w-full">Unlock</Button>
           </CardFooter>
         </form>
       </Card>

@@ -185,11 +185,11 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
 
   const selectedIcon = iconOptions.find(opt => opt.value === formData.icon);
   const actionTypeLabel = {
-    command: "Commande",
-    shortcut: "Raccourci",
+    command: "Command",
+    shortcut: "Shortcut",
     yeelight: "Yeelight",
     slider: "Slider",
-    statusDisplay: "Afficheur Statut",
+    statusDisplay: "Status Display",
     audio: "Audio",
     wol: "Wake On LAN"
   }[formData.actionType || "command"];
@@ -198,16 +198,16 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{config ? "Modifier le bloc" : "Ajouter un bloc"}</DialogTitle>
-          <DialogDescription>Configurez les détails de votre bloc d'action.</DialogDescription>
+          <DialogTitle>{config ? "Edit Block" : "Add Block"}</DialogTitle>
+          <DialogDescription>Configure your action block details.</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto pr-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="label" className="text-right">Libellé</Label>
+            <Label htmlFor="label" className="text-right">Label</Label>
             <Input id="label" value={formData.label || ""} onChange={e => setFormData({ ...formData, label: e.target.value })} className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="icon" className="text-right">Icône</Label>
+            <Label htmlFor="icon" className="text-right">Icon</Label>
             <Select value={formData.icon} onValueChange={value => setFormData({ ...formData, icon: value })}>
               <SelectTrigger className="col-span-3">
                 {selectedIcon && <div className="flex items-center gap-2"><selectedIcon.icon className="h-4 w-4" />{selectedIcon.label}</div>}
@@ -218,7 +218,7 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
             </Select>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="color" className="text-right">Couleur</Label>
+            <Label htmlFor="color" className="text-right">Color</Label>
             <Select value={formData.color} onValueChange={value => setFormData({ ...formData, color: value })}>
               <SelectTrigger className="col-span-3">
                 <div className="flex items-center gap-2">
@@ -235,14 +235,14 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
             <Label htmlFor="actionType" className="text-right">Type</Label>
             <Select value={formData.actionType} onValueChange={(value: ControlBlockConfig['actionType']) => setFormData({ ...formData, actionType: value })}>
               <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Choisir un type">{actionTypeLabel}</SelectValue>
+                <SelectValue placeholder="Select Type">{actionTypeLabel}</SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="command">Commande</SelectItem>
-                <SelectItem value="shortcut">Raccourci</SelectItem>
+                <SelectItem value="command">Command</SelectItem>
+                <SelectItem value="shortcut">Shortcut</SelectItem>
                 <SelectItem value="yeelight">Yeelight</SelectItem>
                 <SelectItem value="slider">Slider</SelectItem>
-                <SelectItem value="statusDisplay">Afficheur Statut</SelectItem>
+                <SelectItem value="statusDisplay">Status Display</SelectItem>
                 <SelectItem value="audio">Audio</SelectItem>
                 <SelectItem value="wol">Wake On LAN</SelectItem>
               </SelectContent>
@@ -251,7 +251,7 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
 
           {(formData.actionType === 'command' || formData.actionType === 'audio') && (
              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="target" className="text-right">Exécuter sur</Label>
+                <Label htmlFor="target" className="text-right">Execute On</Label>
                 <div className="col-span-3 flex items-center gap-2">
                    <span className={formData.target === 'client' ? "font-bold text-primary" : "text-muted-foreground"}>Client</span>
                    <Switch
@@ -265,7 +265,7 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
 
           {formData.actionType === 'command' && (
             <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="command" className="text-right mt-2">Commande</Label>
+              <Label htmlFor="command" className="text-right mt-2">Command</Label>
               <Textarea id="command" value={formData.command || ""} onChange={e => setFormData({ ...formData, command: e.target.value })} className="col-span-3" rows={3} />
             </div>
           )}
@@ -273,17 +273,17 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
           {formData.actionType === 'wol' && (
             <>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="wolMac" className="text-right">Adresse MAC</Label>
+                <Label htmlFor="wolMac" className="text-right">MAC Address</Label>
                 <Input id="wolMac" value={formData.wolConfig?.mac || ""} onChange={e => setFormData({ ...formData, wolConfig: { ...formData.wolConfig!, mac: e.target.value }})} className="col-span-3" placeholder="AA:BB:CC:DD:EE:FF" />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="wolMethod" className="text-right">Méthode</Label>
+                <Label htmlFor="wolMethod" className="text-right">Method</Label>
                 <Select value={formData.wolConfig?.method || "network"} onValueChange={(value: any) => setFormData({ ...formData, wolConfig: { ...formData.wolConfig!, method: value }})}>
                   <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Choisir une méthode" />
+                    <SelectValue placeholder="Select Method" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="network">Réseau (WiFi/Broadcast)</SelectItem>
+                    <SelectItem value="network">Network (WiFi/Broadcast)</SelectItem>
                     <SelectItem value="etherwake">Ethernet (Etherwake)</SelectItem>
                   </SelectContent>
                 </Select>
@@ -293,7 +293,7 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
 
           {formData.actionType === 'shortcut' && (
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="shortcut" className="text-right">Raccourci</Label>
+              <Label htmlFor="shortcut" className="text-right">Shortcut</Label>
               <Input id="shortcut" value={formData.shortcut || ""} onChange={e => setFormData({ ...formData, shortcut: e.target.value })} className="col-span-3" />
             </div>
           )}
@@ -301,7 +301,7 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
           {formData.actionType === 'yeelight' && (
             <>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="yeelightIp" className="text-right">IP Ampoule</Label>
+                <Label htmlFor="yeelightIp" className="text-right">Bulb IP</Label>
                 <Input id="yeelightIp" value={formData.yeelightConfig?.ip || ""} onChange={e => setFormData({ ...formData, yeelightConfig: { ...formData.yeelightConfig!, ip: e.target.value }})} className="col-span-3" />
               </div>
 
@@ -312,10 +312,10 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
                   setFormData({ ...formData, yeelightConfig: { ...formData.yeelightConfig!, controlType: newControlType }});
                 }}>
                   <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Choisir un type" />
+                    <SelectValue placeholder="Select Type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="button">Bouton</SelectItem>
+                    <SelectItem value="button">Button</SelectItem>
                     <SelectItem value="slider">Slider</SelectItem>
                   </SelectContent>
                 </Select>
@@ -323,28 +323,28 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
 
               {formData.yeelightConfig?.controlType?.includes('slider') ? (
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="yeelightSliderType" className="text-right">Action Slider</Label>
+                  <Label htmlFor="yeelightSliderType" className="text-right">Slider Action</Label>
                   <Select value={formData.yeelightConfig?.controlType} onValueChange={(value) => setFormData({ ...formData, yeelightConfig: { ...formData.yeelightConfig!, controlType: value as YeelightConfig['controlType'] }})}>
                     <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Choisir un type de slider" />
+                      <SelectValue placeholder="Select Slider Type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="brightness_slider">Luminosité</SelectItem>
-                      <SelectItem value="color_temperature_slider">Température</SelectItem>
-                      <SelectItem value="hue_slider">Teinte</SelectItem>
+                      <SelectItem value="brightness_slider">Brightness</SelectItem>
+                      <SelectItem value="color_temperature_slider">Temperature</SelectItem>
+                      <SelectItem value="hue_slider">Hue</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               ) : (
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="yeelightButtonType" className="text-right">Action Bouton</Label>
+                  <Label htmlFor="yeelightButtonType" className="text-right">Button Action</Label>
                   <Select value={formData.yeelightConfig?.controlType} onValueChange={(value) => setFormData({ ...formData, yeelightConfig: { ...formData.yeelightConfig!, controlType: value as YeelightConfig['controlType'] }})}>
                     <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Choisir une action" />
+                      <SelectValue placeholder="Select Action" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="button">Toggle/On/Off</SelectItem>
-                      <SelectItem value="color_picker">Définir une couleur</SelectItem>
+                      <SelectItem value="color_picker">Set Color</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -355,7 +355,7 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
                   <Label htmlFor="yeelightAction" className="text-right">Action</Label>
                   <Select value={formData.yeelightConfig?.action} onValueChange={(value) => setFormData({ ...formData, yeelightConfig: { ...formData.yeelightConfig!, action: value as YeelightConfig['action'] }})}>
                     <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Choisir une action" />
+                      <SelectValue placeholder="Select Action" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="toggle">Toggle</SelectItem>
@@ -368,7 +368,7 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
 
               {formData.yeelightConfig?.controlType === 'color_picker' && (
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="yeelightColor" className="text-right">Couleur</Label>
+                  <Label htmlFor="yeelightColor" className="text-right">Color</Label>
                   <Input id="yeelightColor" type="color" value={formData.yeelightConfig?.color || "#ffffff"} onChange={e => setFormData({ ...formData, yeelightConfig: { ...formData.yeelightConfig!, color: e.target.value }})} className="col-span-3" />
                 </div>
               )}
@@ -380,7 +380,7 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
               <Label htmlFor="audioAction" className="text-right">Action</Label>
               <Select value={formData.audioConfig?.action} onValueChange={(value) => setFormData({ ...formData, audioConfig: { ...formData.audioConfig!, action: value as AudioConfig['action'] }})}>
                 <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Choisir une action" />
+                  <SelectValue placeholder="Select Action" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="stopAll">Stop All Sounds</SelectItem>
@@ -392,7 +392,7 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
           {formData.actionType === 'slider' && (
             <>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="sliderApi" className="text-right">Endpoint API</Label>
+                <Label htmlFor="sliderApi" className="text-right">API Endpoint</Label>
                 <Input id="sliderApi" value={formData.sliderConfig?.apiEndpoint || ""} onChange={e => setFormData({ ...formData, sliderConfig: { ...formData.sliderConfig!, apiEndpoint: e.target.value }})} className="col-span-3" />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
@@ -404,7 +404,7 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
                 <Input id="sliderMax" type="number" value={formData.sliderConfig?.max || 100} onChange={e => setFormData({ ...formData, sliderConfig: { ...formData.sliderConfig!, max: parseInt(e.target.value) || 100 }})} className="col-span-3" />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="sliderUnit" className="text-right">Unité</Label>
+                <Label htmlFor="sliderUnit" className="text-right">Unit</Label>
                 <Input id="sliderUnit" value={formData.sliderConfig?.unit || ""} onChange={e => setFormData({ ...formData, sliderConfig: { ...formData.sliderConfig!, unit: e.target.value }})} className="col-span-3" />
               </div>
             </>
@@ -413,15 +413,15 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
           {formData.actionType === 'statusDisplay' && (
             <>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="statusApi" className="text-right">Endpoint API</Label>
+                <Label htmlFor="statusApi" className="text-right">API Endpoint</Label>
                 <Input id="statusApi" value={formData.statusDisplayConfig?.apiEndpoint || ""} onChange={e => setFormData({ ...formData, statusDisplayConfig: { ...formData.statusDisplayConfig!, apiEndpoint: e.target.value }})} className="col-span-3" />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="statusUnit" className="text-right">Unité</Label>
+                <Label htmlFor="statusUnit" className="text-right">Unit</Label>
                 <Input id="statusUnit" value={formData.statusDisplayConfig?.labelUnit || ""} onChange={e => setFormData({ ...formData, statusDisplayConfig: { ...formData.statusDisplayConfig!, labelUnit: e.target.value }})} className="col-span-3" />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="statusInterval" className="text-right">Intervalle (ms)</Label>
+                <Label htmlFor="statusInterval" className="text-right">Interval (ms)</Label>
                 <Input id="statusInterval" type="number" value={formData.statusDisplayConfig?.updateIntervalMs || 2000} onChange={e => setFormData({ ...formData, statusDisplayConfig: { ...formData.statusDisplayConfig!, updateIntervalMs: parseInt(e.target.value) || 2000 }})} className="col-span-3" />
               </div>
             </>
@@ -429,11 +429,11 @@ export function ControlDialog({ open, onOpenChange, config, onSave, onDelete }: 
         </div>
         <DialogFooter className="flex justify-between w-full pt-4">
           <div>
-            {onDelete && config && <Button variant="destructive" size="sm" onClick={onDelete} className="mr-auto"><Trash2 className="h-4 w-4 mr-2" />Supprimer</Button>}
+            {onDelete && config && <Button variant="destructive" size="sm" onClick={onDelete} className="mr-auto"><Trash2 className="h-4 w-4 mr-2" />Delete</Button>}
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
-            <Button onClick={handleSave} disabled={!formData.label}>Sauvegarder</Button>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button onClick={handleSave} disabled={!formData.label}>Save</Button>
           </div>
         </DialogFooter>
       </DialogContent>
