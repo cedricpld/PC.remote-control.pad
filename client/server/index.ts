@@ -8,8 +8,11 @@ import axios from 'axios';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { Yeelight } from 'node-yeelight-wifi';
-import WebSocket from 'ws';
-import wol from 'wakeonlan';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+const WebSocket = require('ws');
+const wol = require('wakeonlan');
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
