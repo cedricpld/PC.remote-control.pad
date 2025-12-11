@@ -15,6 +15,7 @@ import winreg
 import win32event
 import win32api
 import ctypes
+import tempfile
 from winerror import ERROR_ALREADY_EXISTS
 
 # --- RESOURCE HELPER ---
@@ -399,18 +400,35 @@ if __name__ == "__main__":
 
     if should_restart:
         print("Re-launching...")
-        # Release mutex to allow new instance to start (since execl might preserve handle)
+
+        # Release mutex explicitly
         try:
             win32api.CloseHandle(mutex)
         except Exception as e:
             print(f"Error closing mutex: {e}")
 
         try:
-            # Use Popen to start a new independent process instead of execl
-            # This avoids PyInstaller _MEI cleanup issues
             if getattr(sys, 'frozen', False):
-                subprocess.Popen([sys.executable] + sys.argv[1:])
+                # Frozen Mode (PyInstaller): Use a temporary batch file to restart
+                # This ensures the current process dies and releases locks on _MEI folders
+                # before the new one starts.
+                exe_path = sys.executable
+                args = " ".join(f'"{a}"' for a in sys.argv[1:])
+
+                fd, bat_path = tempfile.mkstemp(suffix='.bat', text=True)
+                os.close(fd)
+
+                with open(bat_path, 'w') as f:
+                    f.write('@echo off\n')
+                    f.write('timeout /t 2 /nobreak > NUL\n') # Wait 2s for cleanup
+                    f.write(f'start "" "{exe_path}" {args}\n')
+                    f.write('(goto) 2>nul & del "%~f0"\n') # Self-delete
+                    f.write('exit\n')
+
+                # Launch batch file hidden
+                subprocess.Popen(bat_path, shell=True, startupinfo=get_startup_info())
             else:
+                # Script Mode
                 subprocess.Popen([sys.executable] + sys.argv)
         except Exception as e:
             print(f"Failed to restart: {e}")
