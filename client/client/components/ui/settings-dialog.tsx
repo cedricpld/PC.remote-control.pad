@@ -19,6 +19,8 @@ interface SettingsDialogProps {
   onOpenChange: (open: boolean) => void;
   onRestartServer: () => Promise<void>;
   onStopServer: () => Promise<void>;
+  onRestartPcServer: () => Promise<void>;
+  onStopPcServer: () => Promise<void>;
   onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   pcServerConfig?: PcServerConfig;
   onUpdatePcServerConfig?: (config: PcServerConfig) => Promise<void>;
@@ -29,6 +31,8 @@ export function SettingsDialog({
   onOpenChange,
   onRestartServer,
   onStopServer,
+  onRestartPcServer,
+  onStopPcServer,
   onChangePassword,
   pcServerConfig,
   onUpdatePcServerConfig,
@@ -104,6 +108,14 @@ export function SettingsDialog({
                 <Label htmlFor="serverPort" className="text-right">Port</Label>
                 <Input id="serverPort" value={serverPort} onChange={e => setServerPort(e.target.value)} className="col-span-3" placeholder="8765" />
               </div>
+              <div className="space-y-2 mt-2">
+                 <Button onClick={onRestartPcServer} className="w-full gap-2" variant="outline">
+                    <RotateCcw className="h-4 w-4" /> Redémarrer le Serveur
+                 </Button>
+                 <Button onClick={onStopPcServer} className="w-full gap-2" variant="outline">
+                    <Power className="h-4 w-4" /> Arrêter le Serveur
+                 </Button>
+              </div>
             </div>
 
             <div className="space-y-4">
@@ -118,7 +130,7 @@ export function SettingsDialog({
                   <RotateCcw
                     className={`h-4 w-4 ${isRestarting ? "animate-spin" : ""}`}
                   />
-                  {isRestarting ? "Redémarrage..." : "Redémarrer le Serveur"}
+                  {isRestarting ? "Redémarrage..." : "Redémarrer le Client"}
                 </Button>
                 <Button
                   onClick={handleStopServerClick}
@@ -129,7 +141,7 @@ export function SettingsDialog({
                   <Power
                     className={`h-4 w-4 ${isStopping ? "animate-pulse" : ""}`}
                   />
-                  {isStopping ? "Arrêt en cours..." : "Arrêter le Serveur"}
+                  {isStopping ? "Arrêt en cours..." : "Arrêter le Client"}
                 </Button>
               </div>
             </div>

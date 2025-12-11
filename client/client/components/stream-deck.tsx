@@ -447,6 +447,24 @@ export function StreamDeck({ className }: StreamDeckProps) {
     }
   };
 
+  const handleRestartPcServer = async () => {
+      try {
+          if (!confirm("Voulez-vous vraiment redémarrer le serveur PC ?")) return;
+          const res = await fetchWithAuth("/api/restart-pc-server", { method: "POST" });
+          if (!res.ok) throw new Error("Erreur");
+          alert("Commande de redémarrage envoyée au PC.");
+      } catch (e: any) { alert("Erreur: " + e.message); }
+  };
+
+  const handleStopPcServer = async () => {
+      try {
+          if (!confirm("Voulez-vous vraiment arrêter le serveur PC ?")) return;
+          const res = await fetchWithAuth("/api/stop-pc-server", { method: "POST" });
+          if (!res.ok) throw new Error("Erreur");
+          alert("Commande d'arrêt envoyée au PC.");
+      } catch (e: any) { alert("Erreur: " + e.message); }
+  };
+
   const handleChangePassword = async (currentPassword: string, newPassword: string) => {
     try {
       const response = await fetchWithAuth('/api/update-password', {
@@ -603,6 +621,8 @@ export function StreamDeck({ className }: StreamDeckProps) {
         onOpenChange={setSettingsOpen}
         onRestartServer={handleRestartServer}
         onStopServer={handleStopServer}
+        onRestartPcServer={handleRestartPcServer}
+        onStopPcServer={handleStopPcServer}
         onChangePassword={handleChangePassword}
         pcServerConfig={pcServerConfig}
         onUpdatePcServerConfig={handleUpdateServerConfig}

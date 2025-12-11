@@ -528,22 +528,6 @@ export function createServer() {
   
   // SYSTEM SERVER COMMANDS
   app.post("/api/restart-server", async (req, res) => {
-      // This restarts the PC Server service? Or the Client?
-      // User asked for "restart and shutdown server and client independently".
-      // This endpoint was for Node server.
-      // Let's keep it for Client restart?
-      // But button says "Restart Server".
-      // I should clarify.
-      // SettingsDialog has "Gestion du Serveur" (now "Gestion du Client (Raspberry)").
-      // And "Connexion PC".
-      // The current frontend button calls this endpoint.
-      // I'll make this restart the CLIENT (Node).
-      // If they want to restart PC Server, I need another endpoint.
-
-      const script = path.join(__dirname, '..', '..', 'control_pad_restart.ps1'); // Windows script!
-      // On Pi, we need shell command to restart service or process.
-      // "sudo systemctl restart control-pad-client"?
-      // or just process.exit(0) and let systemd restart it.
       res.json({ message: "Restarting Client..." });
       setTimeout(() => process.exit(0), 100);
   });
@@ -551,6 +535,22 @@ export function createServer() {
   app.post("/api/stop-server", (req, res) => {
       res.json({ message: "Stopping Client..." });
       setTimeout(() => process.exit(0), 100);
+  });
+
+  app.post("/api/restart-pc-server", async (req, res) => {
+      if (!isPcConnected) return res.status(503).json({ error: "PC Offline" });
+      try {
+          await sendToPc({ type: 'restart_server' }, false);
+          res.json({ message: "Restart command sent to PC" });
+      } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.post("/api/stop-pc-server", async (req, res) => {
+      if (!isPcConnected) return res.status(503).json({ error: "PC Offline" });
+      try {
+          await sendToPc({ type: 'stop_server' }, false);
+          res.json({ message: "Stop command sent to PC" });
+      } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
   // STATS (Proxy to PC)
