@@ -19,7 +19,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 1000,
             "labelUnit": "%"
-          }
+          },
+          "target": "server"
         },
         {
           "id": "acf17886-c135-45e3-8517-f5cd877a20cd",
@@ -34,7 +35,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 1000,
             "labelUnit": "%"
-          }
+          },
+          "target": "server"
         },
         {
           "id": "d9006582-0732-4a30-823e-3d9df489e27d",
@@ -62,7 +64,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 1000,
             "labelUnit": "%"
-          }
+          },
+          "target": "server"
         },
         {
           "id": "4ce714f9-ba1c-4128-b703-ed3b84798867",
@@ -90,7 +93,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 1000,
             "labelUnit": "%"
-          }
+          },
+          "target": "server"
         },
         {
           "id": "08db3df6-04e3-4467-b5cc-650f678f52ae",
@@ -105,7 +109,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 60000,
             "labelUnit": "°C"
-          }
+          },
+          "target": "client"
         },
         {
           "id": "f5b8fa0f-9e16-43c3-9e6b-a70ffd1e5c94",
@@ -120,7 +125,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 60000,
             "labelUnit": " %"
-          }
+          },
+          "target": "client"
         },
         {
           "id": "3ed87e40-15c0-4b5b-b561-8314264921e9",
@@ -135,7 +141,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 60000,
             "labelUnit": "%"
-          }
+          },
+          "target": "client"
         }
       ]
     },
@@ -171,7 +178,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 2000,
             "labelUnit": ""
-          }
+          },
+          "target": "server"
         },
         {
           "id": "268eae49-1c57-4dd6-abcb-be134dba3aa5",
@@ -199,7 +207,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 2000,
             "labelUnit": ""
-          }
+          },
+          "target": "server"
         },
         {
           "id": "c1621bb0-4cb6-4a38-b7c3-9aeec01e49de",
@@ -227,7 +236,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 2000,
             "labelUnit": ""
-          }
+          },
+          "target": "server"
         },
         {
           "id": "9b935a73-a8bf-4e2e-9a74-fca066f09d2e",
@@ -255,7 +265,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 2000,
             "labelUnit": ""
-          }
+          },
+          "target": "server"
         },
         {
           "id": "10306d62-3fec-4e75-9cbc-b49468fdbb10",
@@ -283,7 +294,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 2000,
             "labelUnit": ""
-          }
+          },
+          "target": "server"
         },
         {
           "id": "f0da5452-dd84-45a8-b087-054473083b8b",
@@ -311,7 +323,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 2000,
             "labelUnit": ""
-          }
+          },
+          "target": "server"
         },
         {
           "id": "43f9e623-b655-4217-93ae-604130c5cb3d",
@@ -340,7 +353,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 2000,
             "labelUnit": ""
-          }
+          },
+          "target": "server"
         },
         {
           "id": "5e1bc345-a261-48e2-9db5-e773038fb819",
@@ -369,7 +383,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 2000,
             "labelUnit": ""
-          }
+          },
+          "target": "server"
         },
         {
           "id": "78ab053b-e957-464e-a343-212238f621e4",
@@ -398,7 +413,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 2000,
             "labelUnit": ""
-          }
+          },
+          "target": "server"
         },
         {
           "id": "33074e40-d8d4-4adb-b9d9-6d2f14cdfcb8",
@@ -410,7 +426,8 @@
           "actionType": "audio",
           "audioConfig": {
             "action": "stopAll"
-          }
+          },
+          "target": "server"
         }
       ]
     },
@@ -446,7 +463,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 2000,
             "labelUnit": ""
-          }
+          },
+          "target": "server"
         },
         {
           "id": "a0776947-0d1a-405a-957c-15fe7684b2eb",
@@ -474,7 +492,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 2000,
             "labelUnit": ""
-          }
+          },
+          "target": "server"
         },
         {
           "id": "f1bb26b9-3999-4356-bc03-284c67596e35",
@@ -502,7 +521,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 2000,
             "labelUnit": ""
-          }
+          },
+          "target": "server"
         },
         {
           "id": "a0922007-de08-4c18-a5e7-6ad8ca1f8a19",
@@ -530,7 +550,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 2000,
             "labelUnit": ""
-          }
+          },
+          "target": "server"
         },
         {
           "id": "2a2e451a-90da-4a49-9d91-55b67b302f9b",
@@ -558,7 +579,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 2000,
             "labelUnit": ""
-          }
+          },
+          "target": "server"
         },
         {
           "id": "345d7263-8496-4887-9d3c-0e9755227508",
@@ -586,7 +608,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 2000,
             "labelUnit": ""
-          }
+          },
+          "target": "server"
         },
         {
           "id": "189afeab-2ecc-4b5c-9961-26663d957b3b",
@@ -614,7 +637,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 2000,
             "labelUnit": ""
-          }
+          },
+          "target": "server"
         },
         {
           "id": "6d8c7e85-ff7b-45b7-b345-bbe99787706a",
@@ -642,7 +666,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 2000,
             "labelUnit": ""
-          }
+          },
+          "target": "server"
         }
       ]
     },
@@ -678,7 +703,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 2000,
             "labelUnit": ""
-          }
+          },
+          "target": "server"
         },
         {
           "id": "31c1768a-8976-4425-8b84-f56e3b877a14",
@@ -706,7 +732,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 2000,
             "labelUnit": ""
-          }
+          },
+          "target": "server"
         },
         {
           "id": "88418860-eaf0-452a-9f26-1bec22d1b63f",
@@ -734,7 +761,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 2000,
             "labelUnit": ""
-          }
+          },
+          "target": "server"
         },
         {
           "id": "663d939f-fce8-4c46-917c-4afa7740b613",
@@ -762,7 +790,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 2000,
             "labelUnit": ""
-          }
+          },
+          "target": "server"
         },
         {
           "id": "slider-volume",
@@ -790,7 +819,8 @@
             "dataType": "cpu",
             "updateIntervalMs": 2000,
             "labelUnit": ""
-          }
+          },
+          "target": "server"
         }
       ]
     },
@@ -820,7 +850,8 @@
             "max": 100,
             "initialValue": 50,
             "unit": "%"
-          }
+          },
+          "target": "client"
         },
         {
           "id": "fc9b9b5e-e960-4a23-ba7d-80ba25150065",
@@ -835,7 +866,8 @@
             "action": "toggle",
             "controlType": "button",
             "color": "#ffffff"
-          }
+          },
+          "target": "client"
         },
         {
           "id": "94557173-0b3b-4261-a637-381fb80e74d0",
@@ -850,7 +882,8 @@
             "action": "on",
             "controlType": "button",
             "color": "#ffffff"
-          }
+          },
+          "target": "client"
         },
         {
           "id": "15c6919c-9726-42b0-a017-412116fbb1d6",
@@ -865,7 +898,8 @@
             "action": "off",
             "controlType": "button",
             "color": "#ffffff"
-          }
+          },
+          "target": "client"
         },
         {
           "id": "9d5ea062-db40-4ee7-a66a-a0f352fd9635",
@@ -887,7 +921,8 @@
             "max": 6500,
             "initialValue": 4000,
             "unit": "K"
-          }
+          },
+          "target": "client"
         },
         {
           "id": "b8d197bd-e672-4c28-9990-95e5bcdc0f48",
@@ -902,7 +937,8 @@
             "action": "toggle",
             "controlType": "color_picker",
             "color": "#ff0000"
-          }
+          },
+          "target": "client"
         },
         {
           "id": "33adc4e5-4a05-4eef-855e-e088e88d9341",
@@ -924,12 +960,17 @@
             "max": 359,
             "initialValue": 180,
             "unit": "°"
-          }
+          },
+          "target": "client"
         }
       ]
     }
   ],
   "auth": {
     "hashedPassword": "$2b$12$bFKVy2Aty6RO08iUA5LrNu0PHVB31V09d5kjd.r9zTDDHQeg2wDom"
+  },
+  "pcServer": {
+    "ip": "192.168.1.207",
+    "port": 8765
   }
 }

@@ -407,41 +407,56 @@ if __name__ == "__main__":
 
     if should_restart:
         print("Re-launching...")
-
+        
         # Release mutex explicitly
         try:
             win32api.CloseHandle(mutex)
         except Exception as e:
             print(f"Error closing mutex: {e}")
-
+        
         try:
-            # Prepare environment: Remove PyInstaller's _MEIPASS2 to avoid conflicts in new process
-            env = os.environ.copy()
-            if '_MEIPASS2' in env:
-                del env['_MEIPASS2']
-
             if getattr(sys, 'frozen', False):
-                # Frozen Mode (PyInstaller): Use a temporary batch file to restart
+                # Mode .exe (PyInstaller)
                 exe_path = sys.executable
-                args = " ".join(f'"{a}"' for a in sys.argv[1:])
-
+                args = sys.argv[1:]
+                
+                # Créer un environnement propre avec PYINSTALLER_RESET_ENVIRONMENT
+                env = os.environ.copy()
+                env['PYINSTALLER_RESET_ENVIRONMENT'] = '1'
+                
+                # Supprimer les variables PyInstaller pour forcer une nouvelle instance
+                for key in list(env.keys()):
+                    if key.startswith('_MEIPASS') or key.startswith('_PYI'):
+                        del env[key]
+                
+                # Créer un fichier batch pour attendre la fermeture complète
                 fd, bat_path = tempfile.mkstemp(suffix='.bat', text=True)
                 os.close(fd)
-
+                
                 with open(bat_path, 'w') as f:
                     f.write('@echo off\n')
-                    f.write('set _MEIPASS2=\n') # Force clear PyInstaller env var
-                    f.write('timeout /t 4 /nobreak > NUL\n')
-                    f.write(f'start "" "{exe_path}" {args}\n')
-                    f.write('(goto) 2>nul & del "%~f0"\n')
-                    f.write('exit\n')
-
-                # Launch batch file hidden with clean env
-                subprocess.Popen(bat_path, shell=True, startupinfo=get_startup_info(), env=env)
+                    f.write('timeout /t 2 /nobreak > NUL\n')
+                    
+                    # Construire la commande avec arguments
+                    cmd = f'start "" "{exe_path}"'
+                    if args:
+                        cmd += ' ' + ' '.join(f'"{a}"' for a in args)
+                    f.write(f'{cmd}\n')
+                    f.write('del "%~f0"\n')
+                
+                # Lancer le batch avec l'environnement propre
+                subprocess.Popen(
+                    bat_path,
+                    shell=True,
+                    env=env,
+                    startupinfo=get_startup_info()
+                )
             else:
-                # Script Mode
-                subprocess.Popen([sys.executable] + sys.argv, env=env)
+                # Mode script Python
+                subprocess.Popen([sys.executable] + sys.argv)
+                
         except Exception as e:
             print(f"Failed to restart: {e}")
+        
+        sys.exit(0)
 
-    sys.exit(0)
