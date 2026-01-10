@@ -357,14 +357,14 @@
           "target": "server"
         },
         {
-          "id": "5e1bc345-a261-48e2-9db5-e773038fb819",
-          "label": "STOP AUDIO",
-          "icon": "Volume2",
-          "color": "#ef4444",
+          "id": "78ab053b-e957-464e-a343-212238f621e4",
+          "label": "AUDIO_EXT",
+          "icon": "Monitor",
+          "color": "#3b82f6",
           "width": 1,
           "height": 1,
           "actionType": "command",
-          "command": "STOP_AUDIO",
+          "command": "PLAY_AUDIO G:\\Autres ordinateurs\\Mon ordinateur\\MEGA\\ARTFX\\Projets\\Demoreel\\musique\\RADIOHEAD\\Radiohead - There There.mp3",
           "shortcut": "",
           "yeelightConfig": {
             "ip": "",
@@ -387,14 +387,14 @@
           "target": "server"
         },
         {
-          "id": "78ab053b-e957-464e-a343-212238f621e4",
-          "label": "AUDIO_EXT",
-          "icon": "Monitor",
-          "color": "#3b82f6",
+          "id": "5e1bc345-a261-48e2-9db5-e773038fb819",
+          "label": "STOP AUDIO",
+          "icon": "Volume2",
+          "color": "#ef4444",
           "width": 1,
           "height": 1,
           "actionType": "command",
-          "command": "PLAY_AUDIO G:\\Autres ordinateurs\\Mon ordinateur\\MEGA\\ARTFX\\Projets\\Demoreel\\musique\\RADIOHEAD\\Radiohead - There There.mp3",
+          "command": "STOP_AUDIO",
           "shortcut": "",
           "yeelightConfig": {
             "ip": "",
@@ -967,10 +967,10 @@
     }
   ],
   "auth": {
-    "hashedPassword": "$2b$12$bFKVy2Aty6RO08iUA5LrNu0PHVB31V09d5kjd.r9zTDDHQeg2wDom"
+    "hashedPassword": "$2b$12$WYLnllYS7W2RLdWZoP7s5OZUQWuYsgpxa3/HXUd434g6.MHbfkrCy"
   },
   "pcServer": {
-    "ip": "192.168.1.207",
+    "ip": "192.168.1.198",
     "port": 8765
   }
 }
