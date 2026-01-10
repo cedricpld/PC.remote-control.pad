@@ -12,7 +12,8 @@ COPY package.json package-lock.json ./
 
 # Install dependencies
 # We use npm ci for a clean, deterministic install
-RUN npm ci
+# We use --legacy-peer-deps to bypass a conflict between @react-three/drei and @react-three/fiber
+RUN npm ci --legacy-peer-deps
 
 # Copy source code
 COPY . .
