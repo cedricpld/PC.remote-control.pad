@@ -95,7 +95,7 @@
         {
           "id": "08db3df6-04e3-4467-b5cc-650f678f52ae",
           "label": "Home Temperature",
-          "icon": "Home",
+          "icon": "Thermometer",
           "color": "#f97316",
           "width": 3,
           "height": 1,
@@ -103,14 +103,14 @@
           "statusDisplayConfig": {
             "apiEndpoint": "/api/get-xiaomi-temperature",
             "dataType": "cpu",
-            "updateIntervalMs": 20000,
+            "updateIntervalMs": 60000,
             "labelUnit": "°C"
           }
         },
         {
           "id": "f5b8fa0f-9e16-43c3-9e6b-a70ffd1e5c94",
           "label": "Home Humidity",
-          "icon": "Home",
+          "icon": "Droplets",
           "color": "#3b82f6",
           "width": 3,
           "height": 1,
@@ -118,14 +118,14 @@
           "statusDisplayConfig": {
             "apiEndpoint": "/api/get-xiaomi-humidity",
             "dataType": "cpu",
-            "updateIntervalMs": 20000,
-            "labelUnit": "%"
+            "updateIntervalMs": 60000,
+            "labelUnit": " %"
           }
         },
         {
           "id": "3ed87e40-15c0-4b5b-b561-8314264921e9",
           "label": "Sensor Battery",
-          "icon": "Cpu",
+          "icon": "Battery",
           "color": "#3b82f6",
           "width": 3,
           "height": 1,
@@ -133,7 +133,7 @@
           "statusDisplayConfig": {
             "apiEndpoint": "/api/get-xiaomi-battery",
             "dataType": "cpu",
-            "updateIntervalMs": 20000,
+            "updateIntervalMs": 60000,
             "labelUnit": "%"
           }
         }
@@ -803,7 +803,7 @@
         {
           "id": "2a497e67-56f6-4209-b8cd-974124962280",
           "label": "Brightness",
-          "icon": "Lightbulb",
+          "icon": "Sun",
           "color": "#fcfcfc",
           "width": 3,
           "height": 1,
@@ -825,7 +825,7 @@
         {
           "id": "fc9b9b5e-e960-4a23-ba7d-80ba25150065",
           "label": "Switch",
-          "icon": "Lightbulb",
+          "icon": "ToggleLeft",
           "color": "#3b82f6",
           "width": 1,
           "height": 1,
@@ -840,7 +840,7 @@
         {
           "id": "94557173-0b3b-4261-a637-381fb80e74d0",
           "label": "On",
-          "icon": "Play",
+          "icon": "Power",
           "color": "#22c55e",
           "width": 1,
           "height": 1,
@@ -855,7 +855,7 @@
         {
           "id": "15c6919c-9726-42b0-a017-412116fbb1d6",
           "label": "Off",
-          "icon": "Square",
+          "icon": "PowerOff",
           "color": "#ef4444",
           "width": 1,
           "height": 1,
@@ -870,7 +870,7 @@
         {
           "id": "9d5ea062-db40-4ee7-a66a-a0f352fd9635",
           "label": "Temperature",
-          "icon": "Lightbulb",
+          "icon": "Thermometer",
           "color": "#f97316",
           "width": 3,
           "height": 1,
@@ -892,7 +892,7 @@
         {
           "id": "b8d197bd-e672-4c28-9990-95e5bcdc0f48",
           "label": "Color",
-          "icon": "Settings",
+          "icon": "Palette",
           "color": "#ec4899",
           "width": 1,
           "height": 1,
@@ -901,13 +901,13 @@
             "ip": "192.168.1.166",
             "action": "toggle",
             "controlType": "color_picker",
-            "color": "#00ffbf"
+            "color": "#80ffd4"
           }
         },
         {
           "id": "33adc4e5-4a05-4eef-855e-e088e88d9341",
           "label": "Hue",
-          "icon": "Lightbulb",
+          "icon": "Rainbow",
           "color": "#8b5cf6",
           "width": 3,
           "height": 1,
