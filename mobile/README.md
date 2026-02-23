@@ -1,76 +1,50 @@
-# Control Pad Mobile
+# Control Pad Mobile (Android Native)
 
-A modern, Glassmorphic React Native application for Control Pad.
-Built with Expo, TypeScript, and React Native Reanimated.
+This is the native Android client for the Control Pad system, built with **Kotlin** and **Jetpack Compose**.
 
 ## Features
 
-- **Ergonomic Mobile UI**: Adaptive layout optimized for touch screens.
-- **Glassmorphism Design**: Modern UI with blur effects and dark/light mode.
-- **Full Control**: Manage Yeelight, System Volume, Audio, Shortcuts, and more.
-- **Customization**: Drag & Drop interface to reorder buttons.
-- **Server Management**: Connect to any Control Pad server instance.
+- **Native Performance:** Written in pure Kotlin for optimal speed and reliability on Android.
+- **Glassmorphism UI:** Modern interface using Jetpack Compose with custom glass-effect components.
+- **Full Control:** Supports Yeelight, Shortcuts, Audio commands, and System monitoring.
+- **Persistence:** Remembers your server IP and Auth Token.
+- **Dark Mode:** Optimized for OLED screens.
 
 ## Prerequisites
 
-- Node.js (v18+)
-- npm or yarn
-- Expo CLI (`npm install -g expo-cli`)
-- **For Android Development:** Android Studio installed and configured (SDK, Emulator).
-- **For iOS Development (Mac only):** Xcode installed.
+- **Android Studio** (Koala or newer recommended).
+- JDK 17 (bundled with Android Studio).
+- An Android device or Emulator (API 26+).
 
-## Installation
+## Setup & Build Instructions
 
-1. Navigate to the mobile directory:
-   ```bash
-   cd mobile
-   ```
+1.  **Open Project:**
+    *   Launch Android Studio.
+    *   Select **File > Open...**
+    *   Navigate to the `mobile/` directory of this repository and click **OK**.
+    *   *Wait for Gradle Sync to finish (this may take a few minutes).*
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+2.  **Run on Device:**
+    *   Connect your Android phone via USB (ensure Developer Options > USB Debugging is ON).
+    *   OR create an Android Virtual Device (AVD) in Device Manager.
+    *   Select your device in the toolbar dropdown.
+    *   Click the green **Play** button (Run 'app').
 
-## Running the App
+3.  **Troubleshooting:**
+    *   *Gradle Sync Failed?* Check your internet connection or JDK version in Settings > Build, Execution, Deployment > Build Tools > Gradle.
+    *   *Connection Refused?* Ensure your phone is on the same Wi-Fi network as your PC server. Check the IP address in `LoginScreen`.
 
-### 1. Development Mode (Expo Go)
-Quickly test on your phone without installing Android Studio.
+## Project Structure
 
-1. Start the server:
-   ```bash
-   npx expo start
-   ```
-2. Scan the QR code with the **Expo Go** app (Android/iOS).
+*   `app/src/main/java/com/controlpad/mobile/`
+    *   `data/`: API models, Retrofit service, and DataStore repository.
+    *   `ui/theme/`: Colors, Typography, and Theme definition.
+    *   `ui/components/`: Reusable UI widgets (`GlassBox`, `ControlBlockItem`).
+    *   `ui/screens/`: Feature screens (`LoginScreen`, `HomeScreen`).
+    *   `MainActivity.kt`: Entry point and Navigation host.
 
-### 2. Local Build (Android Studio) - Recommended
-Builds the native APK directly on your machine.
+## Development
 
-1. Generate native android/ios folders:
-   ```bash
-   npx expo prebuild
-   ```
-
-2. Build and run on a connected device or emulator:
-   ```bash
-   npx expo run:android
-   ```
-   *Note: This will compile the Java/Kotlin code and install the debug APK.*
-
-### 3. Build APK for Release (EAS)
-If you prefer to use Expo's cloud build service to get a standalone APK:
-
-1. Install EAS CLI:
-   ```bash
-   npm install -g eas-cli
-   eas login
-   ```
-
-2. Configure and Build:
-   ```bash
-   eas build -p android --profile preview
-   ```
-
-## Troubleshooting
-
-- **"Failed to resolve plugin":** Ensure `expo-router` is removed from `app.json` (fixed in latest version).
-- **Network Error:** Ensure your phone is on the same Wi-Fi as your PC. Check firewall settings.
+- This project uses **Jetpack Compose** for UI (no XML layouts).
+- Networking is handled by **Retrofit** and **OkHttp**.
+- Data persistence uses **DataStore** (Preferences).
