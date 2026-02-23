@@ -16,6 +16,8 @@ Built with Expo, TypeScript, and React Native Reanimated.
 - Node.js (v18+)
 - npm or yarn
 - Expo CLI (`npm install -g expo-cli`)
+- **For Android Development:** Android Studio installed and configured (SDK, Emulator).
+- **For iOS Development (Mac only):** Xcode installed.
 
 ## Installation
 
@@ -31,55 +33,44 @@ Built with Expo, TypeScript, and React Native Reanimated.
 
 ## Running the App
 
-### Development Mode
+### 1. Development Mode (Expo Go)
+Quickly test on your phone without installing Android Studio.
 
-Start the Expo development server:
+1. Start the server:
+   ```bash
+   npx expo start
+   ```
+2. Scan the QR code with the **Expo Go** app (Android/iOS).
 
-```bash
-npx expo start
-```
+### 2. Local Build (Android Studio) - Recommended
+Builds the native APK directly on your machine.
 
-- Scan the QR code with the **Expo Go** app on your Android/iOS device.
-- Or press `a` to run on Android Emulator / `i` for iOS Simulator.
+1. Generate native android/ios folders:
+   ```bash
+   npx expo prebuild
+   ```
 
-### Building for Android (APK)
+2. Build and run on a connected device or emulator:
+   ```bash
+   npx expo run:android
+   ```
+   *Note: This will compile the Java/Kotlin code and install the debug APK.*
 
-To build a standalone APK for your Android device:
+### 3. Build APK for Release (EAS)
+If you prefer to use Expo's cloud build service to get a standalone APK:
 
 1. Install EAS CLI:
    ```bash
    npm install -g eas-cli
-   ```
-
-2. Login to your Expo account (free):
-   ```bash
    eas login
    ```
 
-3. Configure the build:
-   ```bash
-   eas build:configure
-   ```
-
-4. Run the build command:
+2. Configure and Build:
    ```bash
    eas build -p android --profile preview
    ```
 
-   This will generate an APK that you can download and install on your phone.
+## Troubleshooting
 
-## Project Structure
-
-- `src/components/ui`: Reusable Glassmorphic components (Buttons, Inputs, Dialogs).
-- `src/components/control`: Widget components for different action types.
-- `src/components/layout`: Layout components like the Sortable Grid.
-- `src/screens`: Main application screens (Login, Home, Settings).
-- `src/context`: State management (Auth, Theme).
-- `src/utils`: API and helpers.
-
-## Configuration
-
-The app connects to your Control Pad Node.js server.
-- Ensure your phone is on the same Wi-Fi network as the server.
-- Enter the IP address and Port (default 3000) on the Login screen.
-- Use the password defined in your server config.
+- **"Failed to resolve plugin":** Ensure `expo-router` is removed from `app.json` (fixed in latest version).
+- **Network Error:** Ensure your phone is on the same Wi-Fi as your PC. Check firewall settings.
