@@ -4,11 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.*
+import kotlinx.coroutines.flow.first
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,8 +29,9 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
     var config by remember { mutableStateOf<AppConfig?>(null) }
     var currentPageIndex by remember { mutableStateOf(0) }
-    var loading by remember { mutableStateOf(true) }
     var showPageManager by remember { mutableStateOf(false) }
+    var isEditMode by remember { mutableStateOf(false) }
+    var loading by remember { mutableStateOf(true) }
 
     // Config Loading
     LaunchedEffect(Unit) {
@@ -62,23 +62,12 @@ fun HomeScreen(
             repository.serverUrl.collect { url ->
                 if (url == null) return@collect
                 val api = NetworkModule.getApiService(url, repository)
-                val payload = mutableMapOf<String, Any?>("target" to (block.target ?: "server"))
-
-                // Map block props to payload
-                if (block.actionType == "command") payload["command"] = block.command
-                if (block.actionType == "shortcut") payload["shortcut"] = block.shortcut
-                if (block.actionType == "yeelight") {
-                    // Logic for specific endpoints or generic execute
-                    // Using dedicated endpoints for clarity if needed, or generic execute wrapper
-                    if (block.yeelightConfig != null) {
-                         // Call specific yeelight endpoint manually or via execute-action wrapper
-                         api.postGeneric(url + "/api/yeelight-toggle", mapOf("action" to "toggle", "yeelightIp" to block.yeelightConfig.ip))
-                         return@collect
-                    }
-                }
-
                 try {
-                    api.executeAction(payload)
+                    if (block.actionType == "yeelight" && block.yeelightConfig != null) {
+                        api.postGeneric(url + "/api/yeelight-toggle", mapOf("action" to "toggle", "yeelightIp" to block.yeelightConfig.ip))
+                    } else {
+                        api.executeAction(block)
+                    }
                 } catch (e: Exception) {
                     // Toast error
                 }
@@ -86,19 +75,51 @@ fun HomeScreen(
         }
     }
 
+    var showSettingsDialog by remember { mutableStateOf(false) }
+    var isPcOnline by remember { mutableStateOf<Boolean?>(null) }
+
+    // PC Status polling
+    LaunchedEffect(Unit) {
+        while(true) {
+            val url = repository.serverUrl.first()
+            if (url != null) {
+                try {
+                    val res = NetworkModule.getApiService(url, repository).getGeneric(url + "/api/server-status")
+                    if (res.isSuccessful) isPcOnline = res.body()?.get("status") == "online"
+                    else isPcOnline = false
+                } catch (e: Exception) {
+                    isPcOnline = false
+                }
+            }
+            kotlinx.coroutines.delay(5000)
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(currentPage?.name ?: "Control Pad") },
-                actions = {
-                    IconButton(onClick = { showPageManager = true }) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit Pages")
+                title = { 
+                    Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                        Text(currentPage?.name ?: "Control Pad")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Box(modifier = Modifier.size(8.dp).background(if (isPcOnline == true) Color.Green else Color.Red, shape = androidx.compose.foundation.shape.CircleShape))
                     }
-                    IconButton(onClick = {
-                        scope.launch { repository.clearToken() }
-                        navController.navigate("login")
-                    }) {
-                        Icon(Icons.Default.Settings, contentDescription = "Settings")
+                },
+                actions = {
+                    IconButton(onClick = { isEditMode = !isEditMode }) {
+                        Icon(
+                            if (isEditMode) Lucide.X else Lucide.Pencil,
+                            contentDescription = if (isEditMode) "Exit Edit Mode" else "Enter Edit Mode"
+                        )
+                    }
+                    if (isEditMode) {
+                        IconButton(onClick = { showPageManager = true }) {
+                            Icon(Lucide.LayoutGrid, contentDescription = "Edit Pages")
+                        }
+                    } else {
+                        IconButton(onClick = { showSettingsDialog = true }) {
+                            Icon(Lucide.Settings, contentDescription = "Settings")
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.smallTopAppBarColors(
@@ -107,10 +128,12 @@ fun HomeScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                navController.navigate("edit_block/$currentPageIndex/new")
-            }) {
-                Icon(Icons.Default.Add, contentDescription = "Add Block")
+            if (isEditMode) {
+                FloatingActionButton(onClick = {
+                    navController.navigate("edit_block/$currentPageIndex/new")
+                }) {
+                    Icon(Lucide.Plus, contentDescription = "Add Block")
+                }
             }
         }
     ) { padding ->
@@ -131,6 +154,14 @@ fun HomeScreen(
                             currentPageIndex = (newConfig.pages.size - 1).coerceAtLeast(0)
                         }
                     }
+                )
+            }
+
+            if (showSettingsDialog) {
+                ServerSettingsDialog(
+                    repository = repository,
+                    onDismiss = { showSettingsDialog = false },
+                    onLogout = { navController.navigate("login") }
                 )
             }
 
@@ -162,9 +193,50 @@ fun HomeScreen(
                             ControlBlockItem(
                                 block = block,
                                 repository = repository,
-                                onClick = { executeBlock(block) },
+                                isEditMode = isEditMode,
+                                onClick = { 
+                                    if (isEditMode) {
+                                        navController.navigate("edit_block/$currentPageIndex/${block.id}")
+                                    } else {
+                                        executeBlock(block) 
+                                    }
+                                },
                                 onLongClick = {
-                                    navController.navigate("edit_block/$currentPageIndex/${block.id}")
+                                    // Removed logic, as tap to edit is better in edit mode
+                                },
+                                onMoveUp = {
+                                    val blocks = currentPage?.blocks?.toMutableList() ?: return@ControlBlockItem
+                                    val i = blocks.indexOf(block)
+                                    if (i > 0) {
+                                        blocks[i] = blocks[i - 1].also { blocks[i - 1] = blocks[i] }
+                                        val newConfig = config?.copy(
+                                            pages = config!!.pages.map { p ->
+                                                if (p.id == currentPage?.id) p.copy(blocks = blocks) else p
+                                            }
+                                        )
+                                        config = newConfig
+                                        scope.launch {
+                                            val url = repository.serverUrl.first() ?: return@launch
+                                            NetworkModule.getApiService(url, repository).saveConfig(newConfig!!)
+                                        }
+                                    }
+                                },
+                                onMoveDown = {
+                                    val blocks = currentPage?.blocks?.toMutableList() ?: return@ControlBlockItem
+                                    val i = blocks.indexOf(block)
+                                    if (i < blocks.size - 1) {
+                                        blocks[i] = blocks[i + 1].also { blocks[i + 1] = blocks[i] }
+                                        val newConfig = config?.copy(
+                                            pages = config!!.pages.map { p ->
+                                                if (p.id == currentPage?.id) p.copy(blocks = blocks) else p
+                                            }
+                                        )
+                                        config = newConfig
+                                        scope.launch {
+                                            val url = repository.serverUrl.first() ?: return@launch
+                                            NetworkModule.getApiService(url, repository).saveConfig(newConfig!!)
+                                        }
+                                    }
                                 }
                             )
                         }

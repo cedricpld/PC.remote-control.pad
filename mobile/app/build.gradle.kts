@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "com.controlpad.mobile"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.controlpad.mobile"
         minSdk = 26
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -27,17 +27,17 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.3"
+        kotlinCompilerExtensionVersion = "1.5.8"
     }
     packaging {
         resources {
@@ -61,6 +61,7 @@ dependencies {
 
     // Icons
     implementation("androidx.compose.material:material-icons-extended")
+    implementation("com.composables:icons-lucide:1.1.0")
 
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.5.3")
@@ -73,10 +74,6 @@ dependencies {
     // Persistence (DataStore or Room - User wants persistence. DataStore is simpler for key/value config)
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
-    // Drag and Drop (Reorderable List)
-    // Note: Standard LazyColumn drag and drop is complex, using a library or custom logic is needed.
-    // For simplicity without external untrusted libs, we will implement drag logic or use simple reordering via dialogs first.
-    // Or we can use `org.burnoutcrew.composereorderable` if available on mavenCentral. Let's try to implement basic drag logic or stick to edit dialogs for now if complex.
-    // Actually user wants drag & drop. Let's use `sh.calvin.reorderable:reorderable:1.0.1` or similar if standard.
-    // I'll stick to basic implementations for now to avoid dependency hell.
+    // Drag and Drop
+    implementation("sh.calvin.reorderable:reorderable:1.0.1")
 }

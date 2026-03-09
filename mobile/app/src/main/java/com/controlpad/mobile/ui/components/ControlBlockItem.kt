@@ -5,11 +5,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,34 +20,53 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.controlpad.mobile.data.ControlBlock
 import com.controlpad.mobile.data.SettingsRepository
-
-// Map string icon names to Material Icons
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.*
 fun getIconByName(name: String?): ImageVector {
-    return when (name?.lowercase()) {
-        "monitor" -> Icons.Default.Monitor
-        "cpu" -> Icons.Default.Memory
-        "activity" -> Icons.Default.ShowChart
-        "volume2" -> Icons.Default.VolumeUp
-        "mic" -> Icons.Default.Mic
-        "micoff" -> Icons.Default.MicOff
-        "video" -> Icons.Default.Videocam
-        "videooff" -> Icons.Default.VideocamOff
-        "power" -> Icons.Default.PowerSettingsNew
-        "command" -> Icons.Default.Terminal
-        "keyboard" -> Icons.Default.Keyboard
-        "sun" -> Icons.Default.WbSunny
-        "moon" -> Icons.Default.Nightlight
-        "lightbulb" -> Icons.Default.Lightbulb
-        "battery" -> Icons.Default.BatteryFull
-        "wifi" -> Icons.Default.Wifi
-        "music" -> Icons.Default.MusicNote
-        "play" -> Icons.Default.PlayArrow
-        "pause" -> Icons.Default.Pause
-        "skipforward" -> Icons.Default.SkipNext
-        "skipback" -> Icons.Default.SkipPrevious
-        "settings" -> Icons.Default.Settings
-        "home" -> Icons.Default.Home
-        else -> Icons.Default.Apps // Fallback
+    return when (name) {
+        "Monitor" -> Lucide.Monitor
+        "Gamepad2" -> Lucide.Gamepad2
+        "Volume2" -> Lucide.Volume2
+        "Mic" -> Lucide.Mic
+        "Camera" -> Lucide.Camera
+        "Lightbulb" -> Lucide.Lightbulb
+        "Wifi" -> Lucide.Wifi
+        "Settings" -> Lucide.Settings
+        "Play" -> Lucide.Play
+        "Pause" -> Lucide.Pause
+        "Square" -> Lucide.Square
+        "SkipForward" -> Lucide.SkipForward
+        "SkipBack" -> Lucide.SkipBack
+        "Home" -> Lucide.House
+        "Folder" -> Lucide.Folder
+        "Terminal" -> Lucide.Terminal
+        "Cpu" -> Lucide.Cpu
+        "MemoryStick" -> Lucide.MemoryStick
+        "Power" -> Lucide.Power
+        "Thermometer" -> Lucide.Thermometer
+        "Droplets" -> Lucide.Droplets
+        "Battery" -> Lucide.Battery
+        "Undo2" -> Lucide.Undo2
+        "MonitorX" -> Lucide.MonitorX
+        "SquareDashed" -> Lucide.SquareDashedMousePointer
+        "Moon" -> Lucide.Moon
+        "Eclipse" -> Lucide.Eclipse
+        "TrafficCone" -> Lucide.TrafficCone
+        "ChevronRight" -> Lucide.ChevronRight
+        "GlobeLock" -> Lucide.GlobeLock
+        "ScreenShare" -> Lucide.ScreenShare
+        "Ban" -> Lucide.Ban
+        "LayoutGrid" -> Lucide.LayoutGrid
+        "Volume" -> Lucide.Volume
+        "Sun" -> Lucide.Sun
+        "ToggleLeft" -> Lucide.ToggleLeft
+        "PowerOff" -> Lucide.PowerOff
+        "Palette" -> Lucide.Palette
+        "Rainbow" -> Lucide.Rainbow
+        "Server" -> Lucide.Server
+        "Database" -> Lucide.Database
+        "Network" -> Lucide.Network
+        else -> Lucide.LayoutGrid // Fallback
     }
 }
 
@@ -57,40 +75,40 @@ fun getIconByName(name: String?): ImageVector {
 fun ControlBlockItem(
     block: ControlBlock,
     repository: SettingsRepository,
+    isEditMode: Boolean = false,
     onClick: () -> Unit,
     onLongClick: () -> Unit = {},
+    onMoveUp: (() -> Unit)? = null,
+    onMoveDown: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     // Determine color
+    val defaultColor = MaterialTheme.colorScheme.primary
     val blockColor = try {
         if (!block.color.isNullOrEmpty()) Color(android.graphics.Color.parseColor(block.color))
-        else MaterialTheme.colorScheme.primary
+        else defaultColor
     } catch (e: Exception) {
-        MaterialTheme.colorScheme.primary
+        defaultColor
     }
 
-    when (block.actionType) {
-        "slider" -> {
-             // For sliders, long click on the container to edit
-             // SliderBlock handles its own internal interaction, so we might wrap it
-             Box(modifier = modifier.combinedClickable(onClick = {}, onLongClick = onLongClick)) {
-                 SliderBlock(block = block, repository = repository)
-             }
-        }
-        "statusDisplay" -> {
-             Box(modifier = modifier.combinedClickable(onClick = {}, onLongClick = onLongClick)) {
-                 StatusBlock(block = block, repository = repository)
-             }
-        }
-        else -> {
-             // Standard Button (Command, Shortcut, Yeelight toggle, Audio, WOL)
+    Box(modifier = modifier) {
+        if (block.actionType == "slider" || (block.actionType == "yeelight" && block.yeelightConfig?.controlType?.contains("slider") == true)) {
+            Box(modifier = Modifier.combinedClickable(onClick = { if (!isEditMode) onClick() }, onLongClick = onLongClick)) {
+                SliderBlock(block = block, repository = repository)
+            }
+        } else if (block.actionType == "statusDisplay") {
+            Box(modifier = Modifier.combinedClickable(onClick = { if (!isEditMode) onClick() }, onLongClick = onLongClick)) {
+                StatusBlock(block = block, repository = repository)
+            }
+        } else {
+            // Standard Button (Command, Shortcut, Yeelight toggle, Audio, WOL)
             GlassBox(
-                modifier = modifier
+                modifier = Modifier
                     .padding(4.dp)
                     .height(80.dp)
                     .fillMaxWidth()
                     .combinedClickable(
-                        onClick = onClick,
+                        onClick = { if (!isEditMode) onClick() },
                         onLongClick = onLongClick
                     ),
                 backgroundColor = blockColor.copy(alpha = 0.8f)
@@ -124,6 +142,23 @@ fun ControlBlockItem(
                         )
                     }
                 }
+            }
+        }
+        if (isEditMode) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(Color.Black.copy(alpha = 0.3f))
+                    .combinedClickable(onClick = onClick)
+            ) {
+                 Row(modifier = Modifier.align(Alignment.CenterEnd).padding(end = 16.dp)) {
+                    IconButton(onClick = { onMoveUp?.invoke() }) {
+                        Icon(Lucide.ArrowUp, contentDescription = "Up", tint = Color.White)
+                    }
+                    IconButton(onClick = { onMoveDown?.invoke() }) {
+                        Icon(Lucide.ArrowDown, contentDescription = "Down", tint = Color.White)
+                    }
+                 }
             }
         }
     }

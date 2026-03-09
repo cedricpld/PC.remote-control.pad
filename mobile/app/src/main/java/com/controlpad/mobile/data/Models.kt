@@ -2,7 +2,13 @@ package com.controlpad.mobile.data
 
 data class AppConfig(
     val pages: List<Page> = emptyList(),
-    val pcServer: PcServerConfig? = null
+    val pcServer: PcServerConfig? = null,
+    val auth: AuthConfig? = null,
+    val xiaomiUrl: String? = null
+)
+
+data class AuthConfig(
+    val hashedPassword: String? = null
 )
 
 data class Page(
@@ -22,32 +28,37 @@ data class ControlBlock(
     val height: Int = 1,
     val actionType: String, // command, shortcut, yeelight, slider, statusDisplay, audio, wol
     val target: String? = "server",
-    val command: String? = null,
-    val shortcut: String? = null,
-    val yeelightConfig: YeelightConfig? = null,
-    val sliderConfig: SliderConfig? = null,
-    val statusDisplayConfig: StatusDisplayConfig? = null,
-    val wolConfig: WolConfig? = null
+    val command: String? = "",
+    val shortcut: String? = "",
+    val yeelightConfig: YeelightConfig? = YeelightConfig("", "toggle", ""),
+    val sliderConfig: SliderConfig? = SliderConfig("", 0f, 100f, 50f, ""),
+    val statusDisplayConfig: StatusDisplayConfig? = StatusDisplayConfig("", 2000, ""),
+    val wolConfig: WolConfig? = WolConfig(""),
+    val audioConfig: AudioConfig? = AudioConfig("")
+)
+
+data class AudioConfig(
+    val action: String? = null
 )
 
 data class YeelightConfig(
-    val ip: String,
-    val action: String? = null, // toggle, on, off
-    val controlType: String? = null
+    val ip: String = "",
+    val action: String? = "toggle", // toggle, on, off
+    val controlType: String? = ""
 )
 
 data class SliderConfig(
-    val apiEndpoint: String,
-    val min: Float,
-    val max: Float,
-    val initialValue: Float,
-    val unit: String
+    val apiEndpoint: String = "",
+    val min: Float = 0f,
+    val max: Float = 100f,
+    val initialValue: Float = 50f,
+    val unit: String = ""
 )
 
 data class StatusDisplayConfig(
-    val apiEndpoint: String,
+    val apiEndpoint: String = "",
     val updateIntervalMs: Long = 2000,
-    val labelUnit: String
+    val labelUnit: String = ""
 )
 
 data class WolConfig(

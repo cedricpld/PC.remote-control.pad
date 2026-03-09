@@ -12,6 +12,9 @@ import com.controlpad.mobile.data.Page
 import com.controlpad.mobile.data.SettingsRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,7 +62,7 @@ fun ManagePagesDialog(
                                 }
                             }
                         ) {
-                            Icon(androidx.compose.material.icons.Icons.Default.Delete, contentDescription = "Delete Page")
+                            Icon(Icons.Default.Delete, contentDescription = "Delete Page")
                         }
                     }
                     Divider()
@@ -91,7 +94,7 @@ fun ManagePagesDialog(
                             }
                         }
                     ) {
-                        Icon(androidx.compose.material.icons.Icons.Default.Add, contentDescription = "Add Page")
+                        Icon(Icons.Default.Add, contentDescription = "Add Page")
                     }
                 }
 

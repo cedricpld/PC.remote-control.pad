@@ -16,7 +16,7 @@ interface ApiService {
     suspend fun saveConfig(@Body config: AppConfig): Response<Any>
 
     @POST("/api/execute-action")
-    suspend fun executeAction(@Body payload: Map<String, Any?>): Response<Any>
+    suspend fun executeAction(@Body block: ControlBlock): Response<Any>
 
     // Generic
     @GET

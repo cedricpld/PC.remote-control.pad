@@ -15,6 +15,7 @@ import com.controlpad.mobile.data.SettingsRepository
 import kotlinx.coroutines.launch
 import com.controlpad.mobile.data.NetworkModule
 import com.controlpad.mobile.data.LoginRequest
+import kotlinx.coroutines.flow.first
 
 @Composable
 fun LoginScreen(
@@ -30,10 +31,18 @@ fun LoginScreen(
 
     // Pre-fill from repository if available (effect)
     LaunchedEffect(Unit) {
-        repository.savedIp.collect { saved -> if (!saved.isNullOrEmpty()) ip = saved }
-    }
-    LaunchedEffect(Unit) {
-        repository.savedPort.collect { saved -> if (!saved.isNullOrEmpty()) port = saved }
+        val savedToken = repository.authToken.first()
+        val savedIpVal = repository.savedIp.first()
+        val savedPortVal = repository.savedPort.first()
+        
+        if (!savedIpVal.isNullOrEmpty()) ip = savedIpVal
+        if (!savedPortVal.isNullOrEmpty()) port = savedPortVal
+        
+        if (!savedToken.isNullOrEmpty() && !savedIpVal.isNullOrEmpty() && !savedPortVal.isNullOrEmpty()) {
+            navController.navigate("home") {
+                popUpTo("login") { inclusive = true }
+            }
+        }
     }
 
     Column(
