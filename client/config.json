@@ -970,7 +970,7 @@
     "hashedPassword": "$2b$12$WYLnllYS7W2RLdWZoP7s5OZUQWuYsgpxa3/HXUd434g6.MHbfkrCy"
   },
   "pcServer": {
-    "ip": "192.168.1.198",
+    "ip": "192.168.1.197",
     "port": 8765
   }
 }
