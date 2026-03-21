@@ -459,7 +459,9 @@ export function createServer() {
         } else {
             // Wake-on-LAN (UDP broadcast)
             if (wol) {
-                wol.wake(wolConfig.mac, (err: any) => {
+                // 'wakeonlan' module exports the function directly (often named 'send' internally)
+                // Usage: wol(mac, [opts], callback)
+                wol(wolConfig.mac, (err: any) => {
                     if (err) return res.status(500).json({ error: err.message });
                     res.json({ message: "Magic Packet sent" });
                 });

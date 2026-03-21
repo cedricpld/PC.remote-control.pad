@@ -1,0 +1,12 @@
+services:
+  control-pad-client:
+    build: .
+    image: control-pad-client:latest
+    container_name: control-pad-client
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./config.json:/app/config.json
+    environment:
+      - PORT=3467
+      - NODE_ENV=production
